@@ -1,0 +1,71 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: k9-punsjbolle
+  namespace: k9saksbehandling
+  labels:
+    team: k9saksbehandling
+spec:
+  image: {{ image }}
+  port: 8080
+  azure:
+    application:
+      enabled: true
+      tenant: {{ azureTenant }}
+  kafka:
+    pool: {{kafkaPool}}
+  accessPolicy:
+    outbound:
+      external:
+      {{#each externalHosts as |host|}}
+         - host: {{host}}
+      {{/each}}
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_12
+        diskAutoresize: true
+        tier: {{ database.tier }}
+        diskSize: {{ database.diskSize }}
+        highAvailability: {{ database.highAvailability }}
+        databases:
+          - name: k9-punsjbolle
+            envVarPrefix: DATABASE
+  liveness:
+    path: isalive
+    initialDelay: 20
+    timeout: 1
+    periodSeconds: 5
+    failureThreshold: 10
+  readiness:
+    path: isready
+    initialDelay: 20
+    timeout: 1
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+  ingresses:
+  {{#each ingresses as |url|}}
+     - {{url}}
+  {{/each}}
+  replicas:
+    min: {{minReplicas}}
+    max: {{maxReplicas}}
+    cpuThresholdPercentage: 90
+  prometheus:
+    enabled: true
+    path: /metrics
+  secureLogs:
+    enabled: true
+  env:
+  {{#each env}}
+    - name: {{@key}}
+      value: "{{this}}"
+  {{/each}}
+    - name: KAFKA_RAPID_TOPIC
+      value: omsorgspenger.k9-rapid-v2
+    - name: KAFKA_CONSUMER_GROUP_ID
+      value: k9-punsjbolle
