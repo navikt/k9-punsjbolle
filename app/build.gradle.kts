@@ -14,6 +14,7 @@ val hikariVersion = "4.0.3"
 val kotliqueryVersion = "1.3.1"
 val postgresVersion = "42.2.19"
 val embeddedPostgres = "1.2.10"
+val k9FormatVersion = "5.1.38"
 
 val mainClass = "no.nav.punsjbolle.ApplicationKt"
 
@@ -38,7 +39,8 @@ dependencies {
     implementation("no.nav.helse:dusseldorf-ktor-metrics:$dusseldorfVersion")
     implementation("no.nav.helse:dusseldorf-ktor-auth:$dusseldorfVersion")
     implementation("no.nav.helse:dusseldorf-oauth2-client:$dusseldorfVersion")
-    implementation ("org.skyscreamer:jsonassert:$jsonassertVersion")
+    implementation("org.skyscreamer:jsonassert:$jsonassertVersion")
+    implementation("no.nav.k9:soknad:$k9FormatVersion")
 
     // Database
     implementation("com.zaxxer:HikariCP:$hikariVersion")

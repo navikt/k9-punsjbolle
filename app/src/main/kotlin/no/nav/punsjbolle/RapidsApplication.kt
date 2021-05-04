@@ -2,11 +2,10 @@ package no.nav.punsjbolle
 
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.k9.rapid.river.RapidsStateListener
-import no.nav.punsjbolle.ApplicationContext
-import no.nav.punsjbolle.innsending.SøknadInnsendingRiver
+import no.nav.punsjbolle.innsending.PunsjetSøknadRiver
 
 internal fun RapidsConnection.registerApplicationContext(applicationContext: ApplicationContext) {
-    SøknadInnsendingRiver(rapidsConnection = this)
+    PunsjetSøknadRiver(rapidsConnection = this)
 
     register(object : RapidsConnection.StatusListener {
         override fun onStartup(rapidsConnection: RapidsConnection) {
