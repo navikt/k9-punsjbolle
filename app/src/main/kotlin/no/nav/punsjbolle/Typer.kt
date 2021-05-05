@@ -1,6 +1,9 @@
 package no.nav.punsjbolle
 
+import io.ktor.application.*
+import io.ktor.features.*
 import no.nav.k9.søknad.ytelse.Ytelse
+import java.util.*
 
 internal data class Identitetsnummer private constructor(private val value: String) {
     init { require(value.matches(Regex)) { "Ugyldig identitetsnummer" } }
@@ -35,6 +38,17 @@ internal data class JournalpostId private constructor(private val value: String)
     internal companion object {
         private val Regex = "\\d{5,40}".toRegex()
         internal fun String.somJournalpostId() = JournalpostId(this)
+    }
+}
+
+internal data class CorrelationId private constructor(private val value: String) {
+    init { require(value.matches(Regex)) { "$value er en ugyldig correlation id" } }
+    override fun toString() = value
+    internal companion object {
+        private val Regex = "[a-zA-Z0-9_.\\-æøåÆØÅ]{5,200}".toRegex()
+        internal fun genererCorrelationId() = CorrelationId("omsorgsdager-${UUID.randomUUID()}")
+        internal fun String.somCorrelationId() = CorrelationId(this)
+        internal fun ApplicationCall.correlationId() = requireNotNull(callId).somCorrelationId()
     }
 }
 

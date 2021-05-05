@@ -1,4 +1,4 @@
-package no.nav.punsjbolle.innsending
+package no.nav.punsjbolle.søknad
 
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode

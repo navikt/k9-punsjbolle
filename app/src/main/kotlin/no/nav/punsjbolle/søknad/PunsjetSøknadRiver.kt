@@ -1,4 +1,4 @@
-package no.nav.punsjbolle.innsending
+package no.nav.punsjbolle.søknad
 
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -33,6 +33,8 @@ internal class PunsjetSøknadRiver(rapidsConnection: RapidsConnection) : Behovss
 
     override fun handlePacket(id: String, packet: JsonMessage): Boolean {
         val søknad = PunsjetSøknadMelding.hentBehov(packet)
+
+        logger.info("Legger til behov for å hente aktørId på de involverte partene.")
 
         packet.leggTilBehov(PunsjetSøknadMelding.behovNavn, HentAktørIderMelding.behov(
             behovInput = søknad.identitetsnummer

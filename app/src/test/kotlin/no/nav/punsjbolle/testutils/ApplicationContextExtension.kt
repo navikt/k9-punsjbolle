@@ -1,7 +1,10 @@
 package no.nav.punsjbolle.testutils
 
 import com.github.tomakehurst.wiremock.WireMockServer
+import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2TokenUrl
 import no.nav.punsjbolle.ApplicationContext
+import no.nav.punsjbolle.testutils.wiremock.k9SakBaseUrl
+import no.nav.punsjbolle.testutils.wiremock.safBaseUrl
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ParameterContext
@@ -20,7 +23,14 @@ internal class ApplicationContextExtension : ParameterResolver {
             "DATABASE_PORT" to "${mockedEnvironment.embeddedPostgres.port}",
             "DATABASE_DATABASE" to "postgres",
             "DATABASE_USERNAME" to "postgres",
-            "DATABASE_PASSWORD" to "postgres"
+            "DATABASE_PASSWORD" to "postgres",
+            "AZURE_APP_CLIENT_ID" to "k9-punsjbolle",
+            "AZURE_APP_CLIENT_SECRET" to "foo",
+            "AZURE_APP_TOKEN_ENDPOINT" to mockedEnvironment.wireMockServer.getAzureV2TokenUrl(),
+            "K9_SAK_BASE_URL" to mockedEnvironment.wireMockServer.k9SakBaseUrl(),
+            "K9_SAK_SCOPES" to "k9-sak/.default",
+            "SAF_BASE_URL" to mockedEnvironment.wireMockServer.safBaseUrl(),
+            "SAF_SCOPES" to "saf/.default"
         )
 
         init {

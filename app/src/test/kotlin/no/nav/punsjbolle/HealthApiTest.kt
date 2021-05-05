@@ -1,6 +1,6 @@
 package no.nav.punsjbolle
 
-import io.ktor.http.ContentType
+import  io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.withCharset
@@ -21,6 +21,7 @@ internal class HealthApiTest(
             handleRequest(HttpMethod.Get, "/health").apply {
                 assertEquals(HttpStatusCode.OK, response.status())
                 assertEquals(ContentType.Application.Json.withCharset(Charsets.UTF_8), response.contentType())
+                println(response.content)
             }
         }
     }

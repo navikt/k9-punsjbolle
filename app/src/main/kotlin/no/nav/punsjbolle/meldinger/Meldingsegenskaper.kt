@@ -27,3 +27,8 @@ internal interface LeggTilLøsning<Løsning> {
 
 internal fun JsonMessage.leggTilLøsningPar(pair: Pair<String, Map<String,*>>) =
     leggTilLøsning(behov = pair.first, løsning = pair.second)
+
+
+internal interface BehovMedLøsning<BehovInput, Løsning> {
+    fun behovMedLøsning(behovInput: BehovInput, løsning: Løsning) : Pair<Behov, Map<String,*>>
+}
