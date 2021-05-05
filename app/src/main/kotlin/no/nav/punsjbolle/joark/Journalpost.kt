@@ -6,8 +6,8 @@ import java.time.LocalDateTime
 
 internal data class Journalpost(
     internal val journalpostId: JournalpostId,
-    private val type: String,
-    private val status: String,
+    private val journalposttype: String,
+    private val journalpoststatus: String,
     internal val kanalReferanse: String?,
     internal val brevkode: String?,
     internal val forsendelseTidspunkt: LocalDateTime,
@@ -18,7 +18,7 @@ internal data class Journalpost(
     }
 
     internal fun skalKnyttesTilSak() : Boolean {
-        return sak == null && status == "MOTTATT"
+        return sak == null && journalpoststatus == "MOTTATT" && journalposttype == "I"
     }
 
     internal data class Sak (
