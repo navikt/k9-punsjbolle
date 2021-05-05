@@ -12,11 +12,8 @@ import no.nav.punsjbolle.joark.SafClient
 import no.nav.punsjbolle.k9sak.K9SakClient
 import java.net.URI
 
-import javax.sql.DataSource
-
 internal class ApplicationContext(
     internal val env: Environment,
-    internal val dataSource: DataSource,
     internal val healthChecks: Set<HealthCheck>,
     internal val accessTokenClient: AccessTokenClient,
     internal val k9SakClient: K9SakClient,
@@ -33,16 +30,13 @@ internal class ApplicationContext(
         var accessTokenClient: AccessTokenClient? = null,
         var k9SakClient: K9SakClient? = null,
         var safClient: SafClient? = null,
-        var dataSource: DataSource? = null,
-        var onStart: (applicationContext: ApplicationContext) -> Unit = {
-            it.dataSource.migrate()
-        },
+        var onStart: (applicationContext: ApplicationContext) -> Unit = {},
         var onStop: (applicationContext: ApplicationContext) -> Unit = {}) {
+
         internal fun build(): ApplicationContext {
             val benyttetEnv = env ?: System.getenv()
-            val benyttetDataSource = dataSource ?: DataSourceBuilder(benyttetEnv).build()
 
-            val benyttetAccessTokenClient = accessTokenClient?: ClientSecretAccessTokenClient(
+            val benyttetAccessTokenClient = accessTokenClient ?: ClientSecretAccessTokenClient(
                 clientId = benyttetEnv.hentRequiredEnv("AZURE_APP_CLIENT_ID"),
                 clientSecret = benyttetEnv.hentRequiredEnv("AZURE_APP_CLIENT_SECRET"),
                 tokenEndpoint = URI(benyttetEnv.hentRequiredEnv("AZURE_APP_TOKEN_ENDPOINT")) // TODO: Sette fra WellKnown?
@@ -63,7 +57,6 @@ internal class ApplicationContext(
             return ApplicationContext(
                 env = benyttetEnv,
                 accessTokenClient = benyttetAccessTokenClient,
-                dataSource = benyttetDataSource,
                 k9SakClient = benyttetK9SakClient,
                 safClient = benyttetSafClient,
                 healthChecks = setOf(benyttetK9SakClient, benyttetSafClient),

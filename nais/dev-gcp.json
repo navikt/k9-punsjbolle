@@ -6,11 +6,6 @@
   "ingresses": [
     "https://k9-punsjbolle.dev.intern.nav.no"
   ],
-  "database": {
-    "tier": "db-custom-1-3840",
-    "diskSize": "20",
-    "highAvailability": "false"
-  },
   "externalHosts": [
     "omsorgspenger-proxy.dev-fss-pub.nais.io"
   ],

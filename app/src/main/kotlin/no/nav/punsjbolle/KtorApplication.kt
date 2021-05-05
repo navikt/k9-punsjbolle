@@ -10,10 +10,7 @@ internal fun Application.punsjbolle(
     applicationContext: ApplicationContext = ApplicationContext.Builder().build()) {
 
     install(ContentNegotiation) {
-        jackson {
-            // TODO
-            //configured()
-        }
+        jackson {}
     }
 
     val healthService = HealthService(
