@@ -1,5 +1,6 @@
 package no.nav.punsjbolle.søknad
 
+import kotlinx.coroutines.runBlocking
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
@@ -50,10 +51,10 @@ internal class PunsjetSøknadBehandlingRiver(
         )
 
         val (k9Saksnummer, k9SaksnummerKilde) = when (søknad.saksnummer) {
-            null -> k9SakClient.hentSaksnummer(
+            null -> runBlocking { k9SakClient.hentSaksnummer(
                 grunnlag = hentK9SaksnummerGrunnlag,
                 correlationId = correlationId
-            ) to HentK9SaksnummerMelding.K9SaksnummerKilde.SlåttOppMotK9Sak
+            ) to HentK9SaksnummerMelding.K9SaksnummerKilde.SlåttOppMotK9Sak }
             else -> søknad.saksnummer to HentK9SaksnummerMelding.K9SaksnummerKilde.ManueltValgtIPunsj
         }
         logger.info("Håndteres på K9Saksnummer=[$k9Saksnummer], Kilde=[${k9SaksnummerKilde.name}]")
@@ -63,10 +64,10 @@ internal class PunsjetSøknadBehandlingRiver(
             løsning = k9Saksnummer to k9SaksnummerKilde
         ))
 
-        val journalposter = safClient.hentJournalposter(
+        val journalposter = runBlocking { safClient.hentJournalposter(
             journalpostIder = søknad.journalpostIder,
             correlationId = correlationId
-        )
+        )}
 
         val journalpostIderSomSkalKnyttesTilSak = journalpostIderSomSkalKnyttesTilSak(
             journalposter = journalposter,
@@ -75,14 +76,14 @@ internal class PunsjetSøknadBehandlingRiver(
 
         // TODO: Knytt til sak
 
-        k9SakClient.sendInnSøknad(
+        runBlocking { k9SakClient.sendInnSøknad(
             søknad = søknad,
             saksnummer = k9Saksnummer,
             correlationId = correlationId,
             journalpost = journalposter.tidligstMottattJournalpost().also {
                 logger.info("Sendes til K9Sak med JournalpostId=[${it.journalpostId}]")
             }
-        )
+        )}
 
         packet.leggTilLøsningPar(PunsjetSøknadMelding.løsning(k9Saksnummer))
 

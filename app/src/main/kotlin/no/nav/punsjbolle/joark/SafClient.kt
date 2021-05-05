@@ -19,7 +19,7 @@ internal class SafClient(
     scopes = scopes,
     pingUrl = URI("$baseUrl/isReady")) {
 
-    internal fun hentJournalposter(
+    internal suspend fun hentJournalposter(
         journalpostIder: Set<JournalpostId>,
         correlationId: CorrelationId) : Set<Journalpost> {
         // TODO: Legge til integrasjon mot SAF for å hente info
