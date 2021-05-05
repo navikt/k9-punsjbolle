@@ -63,7 +63,10 @@ internal class PunsjetSøknadBehandlingRiver(
             løsning = k9Saksnummer to k9SaksnummerKilde
         ))
 
-        val journalposter = safClient.hentJournalposter(søknad.journalpostIder)
+        val journalposter = safClient.hentJournalposter(
+            journalpostIder = søknad.journalpostIder,
+            correlationId = correlationId
+        )
 
         val journalpostIderSomSkalKnyttesTilSak = journalpostIderSomSkalKnyttesTilSak(
             journalposter = journalposter,
