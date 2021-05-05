@@ -17,7 +17,7 @@ internal class ApplicationContextExtension : ParameterResolver {
         private val env = mapOf(
             "AZURE_APP_CLIENT_ID" to "k9-punsjbolle",
             "AZURE_APP_CLIENT_SECRET" to "foo",
-            "AZURE_APP_TOKEN_ENDPOINT" to mockedEnvironment.wireMockServer.getAzureV2TokenUrl(),
+            "AZURE_OPENID_CONFIG_TOKEN_ENDPOINT" to mockedEnvironment.wireMockServer.getAzureV2TokenUrl(),
             "K9_SAK_BASE_URL" to mockedEnvironment.wireMockServer.k9SakBaseUrl(),
             "K9_SAK_SCOPES" to "k9-sak/.default",
             "SAF_BASE_URL" to mockedEnvironment.wireMockServer.safBaseUrl(),
