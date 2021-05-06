@@ -21,7 +21,6 @@ internal class HealthApiTest(
             handleRequest(HttpMethod.Get, "/health").apply {
                 assertEquals(HttpStatusCode.OK, response.status())
                 assertEquals(ContentType.Application.Json.withCharset(Charsets.UTF_8), response.contentType())
-                println(response.content)
             }
         }
     }

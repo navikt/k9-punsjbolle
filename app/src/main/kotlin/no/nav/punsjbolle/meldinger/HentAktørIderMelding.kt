@@ -17,7 +17,7 @@ internal object HentAktørIderMelding :
     override fun behov(behovInput: Set<Identitetsnummer>): Behov {
         return Behov(behovNavn, mapOf(
             "måFinneAllePersoner" to true,
-            "identitetsnummer" to behovInput,
+            "identitetsnummer" to behovInput.map { "$it" },
             "attributter" to setOf(AktørId)
         ))
     }

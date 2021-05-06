@@ -46,8 +46,7 @@ internal class PunsjetSøknadJournalføringRiver(
             søker = aktørIder.getValue(søknad.søker),
             pleietrengende = søknad.pleietrengende?.let { aktørIder.getValue(it) },
             annenPart = søknad.annenPart?.let { aktørIder.getValue(it) },
-            fraOgMed = søknad.fraOgMed,
-            tilOgMed = søknad.tilOgMed
+            periode = søknad.periode
         )
 
         val (k9Saksnummer, k9SaksnummerKilde) = when (søknad.saksnummer) {

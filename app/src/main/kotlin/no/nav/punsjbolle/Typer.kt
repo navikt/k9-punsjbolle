@@ -2,7 +2,7 @@ package no.nav.punsjbolle
 
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.k9.rapid.behov.Behovsformat
-import no.nav.k9.søknad.ytelse.Ytelse
+import java.time.LocalDate
 
 internal data class Identitetsnummer private constructor(private val value: String) {
     init { require(value.matches(Regex)) { "Ugyldig identitetsnummer" } }
@@ -50,6 +50,20 @@ internal data class CorrelationId private constructor(private val value: String)
     }
 }
 
+internal data class Periode(internal val fom: LocalDate, internal val tom: LocalDate?) {
+    internal constructor(iso8601: String) : this(
+        fom = LocalDate.parse(iso8601.split("/")[0]),
+        tom = when (iso8601.split("/")[1] == "..") {
+            true -> null
+            else -> LocalDate.parse(iso8601.split("/")[1])
+        }
+    )
+    override fun toString() = when (tom) {
+        null -> "$fom/.."
+        else -> "$fom/$tom"
+    }
+}
+
 internal enum class Søknadstype(internal val k9SakDto: String) {
     PleiepengerSyktBarn("PSB"),
     OmsorgspengerUtbetaling("OMP"),
@@ -57,12 +71,9 @@ internal enum class Søknadstype(internal val k9SakDto: String) {
     OmsorgspengerMidlertidigAlene("OMS_MA");
 
     internal companion object {
-        internal fun fraK9FormatYtelse(ytelse: Ytelse) = when (ytelse) {
-            is no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn -> PleiepengerSyktBarn
-            is no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling -> OmsorgspengerUtbetaling
-            is no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerKroniskSyktBarn -> OmsorgspengerKroniskSyktBarn
-            is no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerMidlertidigAlene -> OmsorgspengerMidlertidigAlene
-            else -> throw IllegalStateException("Ukjent ytelsestype ${ytelse.javaClass}")
+        internal fun fraK9FormatYtelsetype(ytelsetype: String) = when (ytelsetype) {
+            "PLEIEPENGER_SYKT_BARN" -> PleiepengerSyktBarn
+            else -> throw IllegalStateException("Ukjent ytelsestype $ytelsetype")
         }
     }
 }

@@ -52,7 +52,7 @@ internal object SendSøknadTilK9SakMelding :
     override fun behov(behovInput: SendSøknadTilK9SakGrunnlag): Behov {
         return Behov(behovNavn, mapOf(
             "saksnummer" to "${behovInput.saksnummer}",
-            "jornalpostId" to "${behovInput.journalpostId}",
+            "journalpostId" to "${behovInput.journalpostId}",
             "mottatt" to "${behovInput.mottatt}",
             "referanse" to behovInput.referanse,
             "brevkode" to behovInput.brevkode

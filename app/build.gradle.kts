@@ -34,9 +34,6 @@ dependencies {
     implementation("no.nav.helse:dusseldorf-oauth2-client:$dusseldorfVersion")
     implementation("org.skyscreamer:jsonassert:$jsonassertVersion")
 
-    // K9
-    implementation("no.nav.k9:soknad:$k9FormatVersion")
-
     // Test
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
     testImplementation("no.nav.helse:dusseldorf-test-support:$dusseldorfVersion")

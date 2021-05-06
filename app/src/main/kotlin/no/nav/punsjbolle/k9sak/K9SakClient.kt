@@ -5,6 +5,7 @@ import io.ktor.http.*
 import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.httpPost
 import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.jsonBody
 import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.readTextOrThrow
+import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.stringBody
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.punsjbolle.AzureAwareClient
 import no.nav.punsjbolle.CorrelationId
@@ -14,6 +15,7 @@ import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
 import no.nav.punsjbolle.meldinger.SendSøknadTilK9SakMelding
 import no.nav.punsjbolle.søknad.PunsjetSøknadMelding
 import org.intellij.lang.annotations.Language
+import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URI
 import java.util.*
@@ -44,8 +46,8 @@ internal class K9SakClient(
                 "pleietrengendeAktørId": ${grunnlag.pleietrengende?.let { "$it" }},
                 "relatertPersonAktørId": "${grunnlag.annenPart?.let { "$it" }}",
                 "periode": {
-                    "fom": "${grunnlag.fraOgMed}",
-                    "tom": ${grunnlag.tilOgMed?.let { "$it" }}
+                    "fom": "${grunnlag.periode.fom}",
+                    "tom": ${grunnlag.periode.tom?.let { "$it" }}
                 }
             }
         """.trimIndent()
@@ -93,7 +95,7 @@ internal class K9SakClient(
             it.header(CorrelationIdHeaderKey, "$correlationId")
             it.header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
             it.accept(ContentType.Application.Json)
-            it.jsonBody(dto)
+            it.jsonArrayBody(dto)
         }.readTextOrThrow()
 
         require(httpStatusCode.isSuccess()) {
@@ -105,5 +107,7 @@ internal class K9SakClient(
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsjbolle"
         private const val CorrelationIdHeaderKey = "Nav-Callid"
+        private fun HttpRequestBuilder.jsonArrayBody(json: String) =
+            stringBody(string = JSONArray(json).toString(), contentType = ContentType.Application.Json)
     }
 }

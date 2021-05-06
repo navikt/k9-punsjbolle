@@ -4,8 +4,8 @@ import no.nav.k9.rapid.behov.Behov
 import no.nav.punsjbolle.AktørId
 import no.nav.punsjbolle.BehovMedLøsning
 import no.nav.punsjbolle.K9Saksnummer
+import no.nav.punsjbolle.Periode
 import no.nav.punsjbolle.Søknadstype
-import java.time.LocalDate
 
 internal object HentK9SaksnummerMelding :
     BehovMedLøsning<HentK9SaksnummerMelding.HentK9SaksnummerGrunnlag, Pair<K9Saksnummer, HentK9SaksnummerMelding.K9SaksnummerKilde>> {
@@ -17,8 +17,7 @@ internal object HentK9SaksnummerMelding :
         internal val søker: AktørId,
         internal val pleietrengende: AktørId?,
         internal val annenPart: AktørId?,
-        internal val fraOgMed: LocalDate,
-        internal val tilOgMed: LocalDate?
+        internal val periode: Periode
     )
 
     internal enum class K9SaksnummerKilde {
@@ -34,8 +33,8 @@ internal object HentK9SaksnummerMelding :
                 "annenPart" to behovInput.annenPart?.let { "$it" }
             ),
             "periode" to mapOf(
-                "fom" to "${behovInput.fraOgMed}",
-                "tom" to behovInput.tilOgMed?.let { "$it" }
+                "fom" to "${behovInput.periode.fom}",
+                "tom" to behovInput.periode.tom?.let { "$it" }
             ),
             "søknadstype" to behovInput.søknadstype.name
         )) to mapOf(
