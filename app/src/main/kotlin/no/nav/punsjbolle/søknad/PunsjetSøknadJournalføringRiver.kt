@@ -79,6 +79,7 @@ internal class PunsjetSøknadJournalføringRiver(
             journalposter.somSendSøknadTilK9SakGrunnlag(k9Saksnummer)
         )
 
+        logger.info("Legger til behov for journalføring og innsending.")
         packet.leggTilBehov(PunsjetSøknadMelding.behovNavn,
             journalføringBehov, innsendingBehov
         )
