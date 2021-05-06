@@ -14,8 +14,8 @@ import no.nav.punsjbolle.k9sak.K9SakClient
 import no.nav.punsjbolle.meldinger.FerdigstillJournalføringForK9Melding
 import no.nav.punsjbolle.meldinger.HentAktørIderMelding
 import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
-import no.nav.punsjbolle.meldinger.SendSøknadTilK9SakMelding
-import no.nav.punsjbolle.meldinger.SendSøknadTilK9SakMelding.SendSøknadTilK9SakGrunnlag.Companion.somSendSøknadTilK9SakGrunnlag
+import no.nav.punsjbolle.meldinger.SendPunsjetSøknadTilK9SakMelding
+import no.nav.punsjbolle.meldinger.SendPunsjetSøknadTilK9SakMelding.SendPunsjetSøknadTilK9SakGrunnlag.Companion.somSendSøknadTilK9SakGrunnlag
 import org.slf4j.LoggerFactory
 
 internal class PunsjetSøknadJournalføringRiver(
@@ -75,7 +75,7 @@ internal class PunsjetSøknadJournalføringRiver(
             ))
         )
 
-        val innsendingBehov = SendSøknadTilK9SakMelding.behov(
+        val innsendingBehov = SendPunsjetSøknadTilK9SakMelding.behov(
             journalposter.somSendSøknadTilK9SakGrunnlag(k9Saksnummer)
         )
 

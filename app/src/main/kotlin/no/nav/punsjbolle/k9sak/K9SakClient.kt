@@ -12,7 +12,7 @@ import no.nav.punsjbolle.CorrelationId
 import no.nav.punsjbolle.K9Saksnummer
 import no.nav.punsjbolle.K9Saksnummer.Companion.somK9Saksnummer
 import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
-import no.nav.punsjbolle.meldinger.SendSøknadTilK9SakMelding
+import no.nav.punsjbolle.meldinger.SendPunsjetSøknadTilK9SakMelding
 import no.nav.punsjbolle.søknad.PunsjetSøknadMelding
 import org.intellij.lang.annotations.Language
 import org.json.JSONArray
@@ -69,7 +69,7 @@ internal class K9SakClient(
 
     internal suspend fun sendInnSøknad(
         søknad: PunsjetSøknadMelding.PunsjetSøknad,
-        grunnlag: SendSøknadTilK9SakMelding.SendSøknadTilK9SakGrunnlag,
+        grunnlag: SendPunsjetSøknadTilK9SakMelding.SendPunsjetSøknadTilK9SakGrunnlag,
         correlationId: CorrelationId) {
 
         // https://github.com/navikt/k9-sak/blob/6678d3432980fc1dd40684b82a517ba3f43371d3/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/JournalpostMottakDto.java#L31

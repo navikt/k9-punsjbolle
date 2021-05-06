@@ -23,7 +23,7 @@ internal object PunsjetSøknadMelding :
         internal val identitetsnummer = setOfNotNull(søker, pleietrengende, annenPart)
         init {
             require(identitetsnummer.isNotEmpty()) { "Søknaden må gjelde minst en person." }
-            require(journalpostIder.isNotEmpty()) { "Søknaden må være knyttet til minst en journalpost."}
+            require(journalpostIder.isNotEmpty()) { "Søknaden må være knyttet til minst en journalpostId."}
         }
     }
 

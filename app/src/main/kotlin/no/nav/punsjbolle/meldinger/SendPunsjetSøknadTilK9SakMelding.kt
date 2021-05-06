@@ -14,11 +14,11 @@ import no.nav.punsjbolle.joark.Journalpost.Companion.tidligstMottattJournalpost
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 
-internal object SendSøknadTilK9SakMelding :
-    HentBehov<SendSøknadTilK9SakMelding.SendSøknadTilK9SakGrunnlag>,
-    LeggTilBehov<SendSøknadTilK9SakMelding.SendSøknadTilK9SakGrunnlag> {
+internal object SendPunsjetSøknadTilK9SakMelding :
+    HentBehov<SendPunsjetSøknadTilK9SakMelding.SendPunsjetSøknadTilK9SakGrunnlag>,
+    LeggTilBehov<SendPunsjetSøknadTilK9SakMelding.SendPunsjetSøknadTilK9SakGrunnlag> {
 
-    internal data class SendSøknadTilK9SakGrunnlag(
+    internal data class SendPunsjetSøknadTilK9SakGrunnlag(
         internal val saksnummer: K9Saksnummer,
         internal val journalpostId: JournalpostId,
         internal val mottatt: LocalDateTime,
@@ -27,7 +27,7 @@ internal object SendSøknadTilK9SakMelding :
 
         internal companion object {
             internal fun Set<Journalpost>.somSendSøknadTilK9SakGrunnlag(saksnummer: K9Saksnummer) = this.tidligstMottattJournalpost().let { journalpost ->
-                SendSøknadTilK9SakGrunnlag(
+                SendPunsjetSøknadTilK9SakGrunnlag(
                     saksnummer = saksnummer,
                     journalpostId = journalpost.journalpostId,
                     mottatt = journalpost.forsendelseTidspunkt,
@@ -37,7 +37,7 @@ internal object SendSøknadTilK9SakMelding :
             }
 
             private const val Punsjbolle = "Punsjbolle"
-            private val logger = LoggerFactory.getLogger(SendSøknadTilK9SakGrunnlag::class.java)
+            private val logger = LoggerFactory.getLogger(SendPunsjetSøknadTilK9SakGrunnlag::class.java)
             private fun Journalpost.brevkode() = when (brevkode) {
                 null -> Punsjbolle.also { logger.warn("JournalpostId=[$journalpostId] mangler brevkode, defaulter til Brevkode=[$it]") }
                 else -> brevkode
@@ -49,7 +49,7 @@ internal object SendSøknadTilK9SakMelding :
         }
     }
 
-    override fun behov(behovInput: SendSøknadTilK9SakGrunnlag): Behov {
+    override fun behov(behovInput: SendPunsjetSøknadTilK9SakGrunnlag): Behov {
         return Behov(behovNavn, mapOf(
             "saksnummer" to "${behovInput.saksnummer}",
             "journalpostId" to "${behovInput.journalpostId}",
@@ -59,7 +59,7 @@ internal object SendSøknadTilK9SakMelding :
         ))
     }
 
-    internal val behovNavn = "SendSøknadTilK9Sak"
+    internal val behovNavn = "SendPunsjetSøknadTilK9Sak"
 
     override fun validateBehov(packet: JsonMessage) {
         packet.interestedIn(
@@ -71,8 +71,8 @@ internal object SendSøknadTilK9SakMelding :
         )
     }
 
-    override fun hentBehov(packet: JsonMessage): SendSøknadTilK9SakGrunnlag {
-        return SendSøknadTilK9SakGrunnlag(
+    override fun hentBehov(packet: JsonMessage): SendPunsjetSøknadTilK9SakGrunnlag {
+        return SendPunsjetSøknadTilK9SakGrunnlag(
             saksnummer = packet[SaksnummerKey].asText().somK9Saksnummer(),
             journalpostId = packet[JournalpostIdKey].asText().somJournalpostId(),
             mottatt = packet[MottattKey].asLocalDateTime(),

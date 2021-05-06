@@ -6,6 +6,7 @@ import no.nav.k9.rapid.behov.Behov
 import no.nav.k9.rapid.behov.Behovssekvens
 import no.nav.punsjbolle.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.punsjbolle.testutils.ApplicationContextExtension
+import no.nav.punsjbolle.testutils.printSisteMelding
 import no.nav.punsjbolle.testutils.rapid.mockFerdigstillJournalføringForK9
 import no.nav.punsjbolle.testutils.rapid.mockHentAktørIder
 import no.nav.punsjbolle.testutils.sisteMeldingHarLøsningPå
@@ -34,6 +35,8 @@ internal class PunsjetPleiepengerSyktBarnTest(
         rapid.mockFerdigstillJournalføringForK9()
 
         rapid.sisteMeldingHarLøsningPå("PunsjetSøknad")
+
+        rapid.printSisteMelding()
     }
 
     private fun beh(søker: Identitetsnummer, barn: Identitetsnummer) = Behovssekvens(

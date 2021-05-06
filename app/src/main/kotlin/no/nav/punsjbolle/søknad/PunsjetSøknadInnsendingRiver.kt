@@ -8,7 +8,7 @@ import no.nav.k9.rapid.river.*
 import no.nav.punsjbolle.CorrelationId.Companion.correlationId
 import no.nav.punsjbolle.k9sak.K9SakClient
 import no.nav.punsjbolle.meldinger.FerdigstillJournalføringForK9Melding
-import no.nav.punsjbolle.meldinger.SendSøknadTilK9SakMelding
+import no.nav.punsjbolle.meldinger.SendPunsjetSøknadTilK9SakMelding
 import org.slf4j.LoggerFactory
 
 internal class PunsjetSøknadInnsendingRiver(
@@ -20,9 +20,9 @@ internal class PunsjetSøknadInnsendingRiver(
     init {
         River(rapidsConnection).apply {
             validate {
-                it.skalLøseBehov(SendSøknadTilK9SakMelding.behovNavn)
+                it.skalLøseBehov(SendPunsjetSøknadTilK9SakMelding.behovNavn)
                 it.harLøsningPåBehov(FerdigstillJournalføringForK9Melding.behovNavn)
-                SendSøknadTilK9SakMelding.validateBehov(it)
+                SendPunsjetSøknadTilK9SakMelding.validateBehov(it)
                 PunsjetSøknadMelding.validateBehov(it)
             }
         }.register(this)
@@ -31,7 +31,7 @@ internal class PunsjetSøknadInnsendingRiver(
     override fun handlePacket(id: String, packet: JsonMessage): Boolean {
         val correlationId = packet.correlationId()
         val søknad = PunsjetSøknadMelding.hentBehov(packet)
-        val grunnlag = SendSøknadTilK9SakMelding.hentBehov(packet)
+        val grunnlag = SendPunsjetSøknadTilK9SakMelding.hentBehov(packet)
 
         runBlocking { k9SakClient.sendInnSøknad(
             søknad = søknad,
@@ -39,7 +39,7 @@ internal class PunsjetSøknadInnsendingRiver(
             correlationId = correlationId
         )}
 
-        packet.leggTilLøsning(behov = SendSøknadTilK9SakMelding.behovNavn) // TODO: SendPunsjet?2
+        packet.leggTilLøsning(behov = SendPunsjetSøknadTilK9SakMelding.behovNavn) // TODO: SendPunsjet?2
         packet.leggTilLøsning(behov = PunsjetSøknadMelding.behovNavn)
 
         return true
