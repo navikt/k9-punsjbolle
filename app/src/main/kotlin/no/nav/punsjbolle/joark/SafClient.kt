@@ -37,5 +37,21 @@ internal class SafClient(
 
     private companion object {
         private val logger = LoggerFactory.getLogger(SafClient::class.java)
+        private fun hentJournalpostQuery(journalpostId: JournalpostId) = """
+            query {
+              journalpost(journalpostId: "$journalpostId") {
+                tema
+                journalposttype
+                journalstatus
+                eksternReferanseId
+                sak {
+                    fagsakId
+                    fagsaksystem
+                }
+                dokumenter {
+                    brevkode
+                }
+            }
+        """.trimIndent()
     }
 }

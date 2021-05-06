@@ -32,7 +32,6 @@ internal class K9SakClient(
     private val HentSaksnummerUrl = URI("$baseUrl/fordel/fagsak/opprett")
     private val SendInnSøknadUrl = URI("$baseUrl/fordel/journalposter")
 
-
     internal suspend fun hentSaksnummer(
         grunnlag: HentK9SaksnummerMelding.HentK9SaksnummerGrunnlag,
         correlationId: CorrelationId) : K9Saksnummer {
