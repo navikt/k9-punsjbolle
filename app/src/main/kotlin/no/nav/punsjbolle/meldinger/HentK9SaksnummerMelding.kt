@@ -7,7 +7,8 @@ import no.nav.punsjbolle.K9Saksnummer
 import no.nav.punsjbolle.Søknadstype
 import java.time.LocalDate
 
-internal object HentK9SaksnummerMelding : BehovMedLøsning<HentK9SaksnummerMelding.HentK9SaksnummerGrunnlag, Pair<K9Saksnummer, HentK9SaksnummerMelding.K9SaksnummerKilde>> {
+internal object HentK9SaksnummerMelding :
+    BehovMedLøsning<HentK9SaksnummerMelding.HentK9SaksnummerGrunnlag, Pair<K9Saksnummer, HentK9SaksnummerMelding.K9SaksnummerKilde>> {
 
     private const val BehovNavn = "HentK9Saksnummer"
 

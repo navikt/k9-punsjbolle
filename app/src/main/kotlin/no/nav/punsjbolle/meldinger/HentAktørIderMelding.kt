@@ -10,9 +10,12 @@ import no.nav.punsjbolle.Identitetsnummer
 import no.nav.punsjbolle.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.punsjbolle.LeggTilBehov
 
-internal object HentAktørIderMelding : LeggTilBehov<Set<Identitetsnummer>>, HentLøsning<Map<Identitetsnummer, AktørId>> {
+internal object HentAktørIderMelding :
+    LeggTilBehov<Set<Identitetsnummer>>,
+    HentLøsning<Map<Identitetsnummer, AktørId>> {
+
     override fun behov(behovInput: Set<Identitetsnummer>): Behov {
-        return Behov(løsningNavn, mapOf(
+        return Behov(behovNavn, mapOf(
             "måFinneAllePersoner" to true,
             "identitetsnummer" to behovInput,
             "attributter" to setOf(AktørId)
@@ -31,7 +34,7 @@ internal object HentAktørIderMelding : LeggTilBehov<Set<Identitetsnummer>>, Hen
             .toMap()
     }
 
-    override val løsningNavn = "HentPersonopplysninger"
-    private val PersonopplysningerKey = "@løsninger.$løsningNavn.personopplysninger"
+    val behovNavn = "HentPersonopplysninger"
+    private val PersonopplysningerKey = "@løsninger.$behovNavn.personopplysninger"
     private const val AktørId = "aktørId"
 }

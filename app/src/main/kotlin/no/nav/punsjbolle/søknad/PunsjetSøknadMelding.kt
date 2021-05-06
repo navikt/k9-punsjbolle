@@ -14,7 +14,8 @@ import no.nav.punsjbolle.K9Saksnummer.Companion.somK9Saksnummer
 import java.time.LocalDate
 import java.time.ZoneId
 
-internal object PunsjetSøknadMelding : HentBehov<PunsjetSøknadMelding.PunsjetSøknad>, LeggTilLøsning<K9Saksnummer> {
+internal object PunsjetSøknadMelding :
+    HentBehov<PunsjetSøknadMelding.PunsjetSøknad> {
 
     internal data class PunsjetSøknad(
         internal val versjon: String,
@@ -81,12 +82,7 @@ internal object PunsjetSøknadMelding : HentBehov<PunsjetSøknadMelding.PunsjetS
         return k9FormatYtelse to k9FormatSøknad
     }
 
-
-    override fun løsning(løsning: K9Saksnummer): Pair<String, Map<String, *>> {
-        return behovNavn to mapOf("saksnummer" to "$løsning")
-    }
-
-    override val behovNavn = "PunsjetSøknad"
+    internal val behovNavn = "PunsjetSøknad"
     private val VersjonKey = "@behov.$behovNavn.versjon"
     private val SaksnummerKey = "@behov.$behovNavn.saksnummer"
     private val SøknadKey = "@behov.$behovNavn.søknad"
@@ -94,5 +90,4 @@ internal object PunsjetSøknadMelding : HentBehov<PunsjetSøknadMelding.PunsjetS
     private val JournalpostIderKey = "@behov.$behovNavn.journalpostIder"
     private val Oslo = ZoneId.of("Europe/Oslo")
     override val mdcPaths = mapOf("soknad_id" to SøknadIdKey, "k9_saksnummer" to SaksnummerKey)
-
 }

@@ -18,7 +18,7 @@ internal class PunsjetSøknadRiver(rapidsConnection: RapidsConnection) : Behovss
         River(rapidsConnection).apply {
             validate {
                 it.skalLøseBehov(PunsjetSøknadMelding.behovNavn)
-                it.utenLøsningPåBehov(HentAktørIderMelding.løsningNavn)
+                it.utenLøsningPåBehov(HentAktørIderMelding.behovNavn)
                 PunsjetSøknadMelding.validateBehov(it)
             }
         }.register(this)

@@ -4,32 +4,32 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
-import no.nav.k9.rapid.behov.Behovsformat
 import no.nav.k9.rapid.river.*
-import no.nav.punsjbolle.CorrelationId.Companion.somCorrelationId
+import no.nav.punsjbolle.CorrelationId.Companion.correlationId
 import no.nav.punsjbolle.JournalpostId
 import no.nav.punsjbolle.K9Saksnummer
 import no.nav.punsjbolle.joark.SafClient
 import no.nav.punsjbolle.joark.Journalpost
-import no.nav.punsjbolle.joark.Journalpost.Companion.tidligstMottattJournalpost
 import no.nav.punsjbolle.k9sak.K9SakClient
-import no.nav.punsjbolle.leggTilLøsningPar
+import no.nav.punsjbolle.meldinger.FerdigstillJournalføringForK9Melding
 import no.nav.punsjbolle.meldinger.HentAktørIderMelding
 import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
+import no.nav.punsjbolle.meldinger.SendSøknadTilK9SakMelding
+import no.nav.punsjbolle.meldinger.SendSøknadTilK9SakMelding.SendSøknadTilK9SakGrunnlag.Companion.somSendSøknadTilK9SakGrunnlag
 import org.slf4j.LoggerFactory
 
-internal class PunsjetSøknadBehandlingRiver(
+internal class PunsjetSøknadJournalføringRiver(
     rapidsConnection: RapidsConnection,
     private val k9SakClient: K9SakClient,
     private val safClient: SafClient) : BehovssekvensPacketListener(
-    logger = LoggerFactory.getLogger(PunsjetSøknadBehandlingRiver::class.java),
+    logger = LoggerFactory.getLogger(PunsjetSøknadJournalføringRiver::class.java),
     mdcPaths = PunsjetSøknadMelding.mdcPaths) {
 
     init {
         River(rapidsConnection).apply {
             validate {
                 it.skalLøseBehov(PunsjetSøknadMelding.behovNavn)
-                it.harLøsningPåBehov(HentAktørIderMelding.løsningNavn)
+                it.harLøsningPåBehov(HentAktørIderMelding.behovNavn)
                 PunsjetSøknadMelding.validateBehov(it)
                 HentAktørIderMelding.validateLøsning(it)
             }
@@ -39,7 +39,7 @@ internal class PunsjetSøknadBehandlingRiver(
     override fun handlePacket(id: String, packet: JsonMessage): Boolean {
         val søknad = PunsjetSøknadMelding.hentBehov(packet)
         val aktørIder = HentAktørIderMelding.hentLøsning(packet)
-        val correlationId = packet[Behovsformat.CorrelationId].asText().somCorrelationId()
+        val correlationId = packet.correlationId()
 
         val hentK9SaksnummerGrunnlag = HentK9SaksnummerMelding.HentK9SaksnummerGrunnlag(
             søknadstype = søknad.søknadstype,
@@ -69,23 +69,20 @@ internal class PunsjetSøknadBehandlingRiver(
             correlationId = correlationId
         )}
 
-        val journalpostIderSomSkalKnyttesTilSak = journalpostIderSomSkalKnyttesTilSak(
-            journalposter = journalposter,
-            saksnummer = k9Saksnummer
+        val journalføringBehov = FerdigstillJournalføringForK9Melding.behov(
+            Triple(søknad.søker, k9Saksnummer, journalpostIderSomSkalKnyttesTilSak(
+                journalposter = journalposter,
+                saksnummer = k9Saksnummer
+            ))
         )
 
-        // TODO: Knytt til sak
+        val innsendingBehov = SendSøknadTilK9SakMelding.behov(
+            journalposter.somSendSøknadTilK9SakGrunnlag(k9Saksnummer)
+        )
 
-        runBlocking { k9SakClient.sendInnSøknad(
-            søknad = søknad,
-            saksnummer = k9Saksnummer,
-            correlationId = correlationId,
-            journalpost = journalposter.tidligstMottattJournalpost().also {
-                logger.info("Sendes til K9Sak med JournalpostId=[${it.journalpostId}]")
-            }
-        )}
-
-        packet.leggTilLøsningPar(PunsjetSøknadMelding.løsning(k9Saksnummer))
+        packet.leggTilBehov(PunsjetSøknadMelding.behovNavn,
+            journalføringBehov, innsendingBehov
+        )
 
         return true
     }

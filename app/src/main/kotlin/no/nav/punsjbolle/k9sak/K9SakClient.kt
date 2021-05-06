@@ -10,12 +10,11 @@ import no.nav.punsjbolle.AzureAwareClient
 import no.nav.punsjbolle.CorrelationId
 import no.nav.punsjbolle.K9Saksnummer
 import no.nav.punsjbolle.K9Saksnummer.Companion.somK9Saksnummer
-import no.nav.punsjbolle.joark.Journalpost
 import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
+import no.nav.punsjbolle.meldinger.SendSøknadTilK9SakMelding
 import no.nav.punsjbolle.søknad.PunsjetSøknadMelding
 import org.intellij.lang.annotations.Language
 import org.json.JSONObject
-import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.*
 
@@ -41,11 +40,11 @@ internal class K9SakClient(
         val dto = """
             {
                 "ytelseType": "${grunnlag.søknadstype.k9SakDto}",
-                "aktørId": "$grunnlag.søker",
+                "aktørId": "${grunnlag.søker}",
                 "pleietrengendeAktørId": ${grunnlag.pleietrengende?.let { "$it" }},
                 "relatertPersonAktørId": "${grunnlag.annenPart?.let { "$it" }}",
                 "periode": {
-                    "fom": "$grunnlag.fraOgMed",
+                    "fom": "${grunnlag.fraOgMed}",
                     "tom": ${grunnlag.tilOgMed?.let { "$it" }}
                 }
             }
@@ -68,24 +67,23 @@ internal class K9SakClient(
 
     internal suspend fun sendInnSøknad(
         søknad: PunsjetSøknadMelding.PunsjetSøknad,
-        saksnummer: K9Saksnummer,
-        journalpost: Journalpost,
+        grunnlag: SendSøknadTilK9SakMelding.SendSøknadTilK9SakGrunnlag,
         correlationId: CorrelationId) {
 
         // https://github.com/navikt/k9-sak/blob/6678d3432980fc1dd40684b82a517ba3f43371d3/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/JournalpostMottakDto.java#L31
         @Language("JSON")
         val dto = """
             [{
-                "saksnummer": "$saksnummer",
-                "journalpostId": "${journalpost.journalpostId}",
+                "saksnummer": "${grunnlag.saksnummer}",
+                "journalpostId": "${grunnlag.journalpostId}",
                 "ytelseType": {
                     "kode": "${søknad.søknadstype.k9SakDto}",
                     "kodeverk": "FAGSAK_YTELSE"
                 },
-                "kanalReferanse": "${journalpost.kanalReferanse()}",
-                "type": "${journalpost.brevkode()}",
-                "forsendelseMottattTidspunkt": "${journalpost.forsendelseTidspunkt}",
-                "forsendelseMottatt": "${journalpost.forsendelseTidspunkt.toLocalDate()}",
+                "kanalReferanse": "${grunnlag.referanse}",
+                "type": "${grunnlag.brevkode}",
+                "forsendelseMottattTidspunkt": "${grunnlag.mottatt}",
+                "forsendelseMottatt": "${grunnlag.mottatt.toLocalDate()}",
                 "payload": "${Base64.getUrlEncoder().encodeToString(søknad.søknadJson.toString().toByteArray())}"
             }]
         """.trimIndent()
@@ -107,16 +105,5 @@ internal class K9SakClient(
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsjbolle"
         private const val CorrelationIdHeaderKey = "Nav-Callid"
-
-        private const val Punsjbolle = "Punsjbolle"
-        private val logger = LoggerFactory.getLogger(K9SakClient::class.java)
-        private fun Journalpost.brevkode() = when (brevkode) {
-            null -> Punsjbolle.also { logger.warn("JournalpostId=[$journalpostId] mangler brevkode, defaulter til Brevkode=[$it]") }
-            else -> brevkode
-        }
-        private fun Journalpost.kanalReferanse() = when (kanalReferanse) {
-            null -> "$Punsjbolle-$journalpostId".also { logger.warn("JournalpostId=[$journalpostId] mangler kanalReferanse, setter KanalReferanse=[$it]") }
-            else -> kanalReferanse
-        }
     }
 }

@@ -29,8 +29,8 @@ internal class SafClient(
             journalpoststatus = "MOTTATT",
             journalposttype = "I",
             kanalReferanse = "${UUID.randomUUID()}",
-            brevkode = "MinBrevkode",
-            forsendelseTidspunkt = LocalDateTime.now(),
+            brevkode = "NAV 09-11.05",
+            forsendelseTidspunkt = LocalDateTime.now().minusMinutes(1),
             sak = null
         )}.toSet()
     }
