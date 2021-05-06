@@ -27,9 +27,7 @@ internal class PunsjetPleiepengerSyktBarnTest(
         val søker = "111111111111".somIdentitetsnummer()
         val barn = "222222222222".somIdentitetsnummer()
 
-        val pleiepengesøknad = beh(søker = søker, barn = barn)
-
-        rapid.sendTestMessage(pleiepengesøknad)
+        rapid.sendTestMessage(pleiepengesøknad(søker = søker, barn = barn))
 
         rapid.mockHentAktørIder(setOf(søker, barn))
         rapid.mockFerdigstillJournalføringForK9()
@@ -39,7 +37,7 @@ internal class PunsjetPleiepengerSyktBarnTest(
         rapid.printSisteMelding()
     }
 
-    private fun beh(søker: Identitetsnummer, barn: Identitetsnummer) = Behovssekvens(
+    private fun pleiepengesøknad(søker: Identitetsnummer, barn: Identitetsnummer) = Behovssekvens(
         id = ULID().nextULID(),
         correlationId = "${UUID.randomUUID()}",
         behov = arrayOf(Behov(

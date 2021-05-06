@@ -49,8 +49,12 @@ private fun ObjectNode.periode() : Periode {
     val søknadsperioder = (get("ytelse").get("søknadsperiode")?.let { (it as ArrayNode).map { Periode(it.asText()) } }) ?: emptyList()
     val endringsperioder = (get("ytelse").get("endringsperiode")?.let { (it as ArrayNode).map { Periode(it.asText()) } }) ?: emptyList()
     val perioder = søknadsperioder.plus(endringsperioder)
+    val tilOgMedDatoer = perioder.map { it.tom }
     return Periode(
-        fom = perioder.minByOrNull { it.fom }!!.fom,
-        tom = perioder.filter { it.tom != null }.maxByOrNull { it.tom!! }?.tom
+        fom = perioder.map { it.fom }.minByOrNull { it }!!,
+        tom = when (null in tilOgMedDatoer) {
+            true -> null
+            else -> tilOgMedDatoer.filterNotNull().maxByOrNull { it }
+        }
     )
 }
