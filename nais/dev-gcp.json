@@ -3,6 +3,7 @@
   "minReplicas": "2",
   "maxReplicas": "4",
   "azureTenant": "trygdeetaten.no",
+  "kafkaPool": "nav-dev",
   "ingresses": [
     "https://k9-punsjbolle.dev.intern.nav.no"
   ],
