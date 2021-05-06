@@ -51,7 +51,7 @@ private fun ObjectNode.periode() : Periode {
     val perioder = søknadsperioder.plus(endringsperioder)
     val tilOgMedDatoer = perioder.map { it.tom }
     return Periode(
-        fom = perioder.map { it.fom }.minByOrNull { it }!!,
+        fom = requireNotNull(perioder.map { it.fom }.minByOrNull { it }) { "Ingen periode satt." },
         tom = when (null in tilOgMedDatoer) {
             true -> null
             else -> tilOgMedDatoer.filterNotNull().maxByOrNull { it }

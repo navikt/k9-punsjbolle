@@ -1,18 +1,17 @@
 package no.nav.punsjbolle
 
-import de.huxhorn.sulky.ulid.ULID
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import no.nav.k9.rapid.behov.Behov
-import no.nav.k9.rapid.behov.Behovssekvens
 import no.nav.punsjbolle.Identitetsnummer.Companion.somIdentitetsnummer
+import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
+import no.nav.punsjbolle.PunsjetPleiepengerSyktBarnMappingTest.Companion.pleiepengerSyktBarnSøknad
 import no.nav.punsjbolle.testutils.ApplicationContextExtension
 import no.nav.punsjbolle.testutils.printSisteMelding
 import no.nav.punsjbolle.testutils.rapid.mockFerdigstillJournalføringForK9
 import no.nav.punsjbolle.testutils.rapid.mockHentAktørIder
 import no.nav.punsjbolle.testutils.sisteMeldingHarLøsningPå
+import no.nav.punsjbolle.testutils.søknad.PunsjetSøknadVerktøy.punsjetSøknad
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import java.util.*
 
 @ExtendWith(ApplicationContextExtension::class)
 internal class PunsjetPleiepengerSyktBarnTest(
@@ -27,7 +26,13 @@ internal class PunsjetPleiepengerSyktBarnTest(
         val søker = "111111111111".somIdentitetsnummer()
         val barn = "222222222222".somIdentitetsnummer()
 
-        rapid.sendTestMessage(pleiepengesøknad(søker = søker, barn = barn))
+        rapid.sendTestMessage(punsjetSøknad(pleiepengerSyktBarnSøknad(
+                barn = barn,
+                søker = søker,
+                journalpostIder = setOf("1112131415".somJournalpostId()),
+                søknadsperioder = setOf(Periode("2018-12-30/2019-10-20")),
+                endringsperioder = null
+        )))
 
         rapid.mockHentAktørIder(setOf(søker, barn))
         rapid.mockFerdigstillJournalføringForK9()
@@ -36,33 +41,4 @@ internal class PunsjetPleiepengerSyktBarnTest(
 
         rapid.printSisteMelding()
     }
-
-    private fun pleiepengesøknad(søker: Identitetsnummer, barn: Identitetsnummer) = Behovssekvens(
-        id = ULID().nextULID(),
-        correlationId = "${UUID.randomUUID()}",
-        behov = arrayOf(Behov(
-            navn = "PunsjetSøknad",
-            input = mapOf(
-                "versjon" to "1.0.0",
-                "søknad" to mapOf(
-                    "søknadId" to "${UUID.randomUUID()}",
-                    "søker" to mapOf(
-                        "norskIdentitetsnummer" to "$søker"
-                    ),
-                    "journalposter" to listOf(mapOf(
-                        "journalpostId" to "1112131415"
-                    )),
-                    "ytelse" to mapOf(
-                        "type" to "PLEIEPENGER_SYKT_BARN",
-                        "barn" to mapOf(
-                            "norskIdentitetsnummer" to "$barn"
-                        ),
-                        "søknadsperiode" to listOf(
-                            "2018-12-30/2019-10-20"
-                        )
-                    )
-                )
-            )
-        ))
-    ).keyValue.second
 }
