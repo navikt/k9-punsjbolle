@@ -2,9 +2,9 @@ apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
   name: k9-punsjbolle
-  namespace: k9saksbehandling
+  namespace: omsorgspenger
   labels:
-    team: k9saksbehandling
+    team: omsorgspenger
 spec:
   image: {{ image }}
   port: 8080
