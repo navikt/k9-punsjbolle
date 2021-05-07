@@ -33,7 +33,7 @@ internal class PunsjetPleiepengerSyktBarnMappingTest {
 
         @Language("JSON")
         val forventetJson = """
-          {"ytelse":{"type":"PLEIEPENGER_SYKT_BARN","barn":{"norskIdentitetsnumemr":"33333333333"},"søknadsperiode":["2021-01-01/2050-12-15","2022-04-04/.."]},"journalposter":[{"journalpostId":"22222222222"}],"søknadId":"1e7652a9-d834-42a1-997b-b29b93c58b33","søker":{"norskIdentitetsnummer":"11111111111"}}
+          {"ytelse":{"type":"PLEIEPENGER_SYKT_BARN","barn":{"norskIdentitetsnummer":"33333333333"},"søknadsperiode":["2021-01-01/2050-12-15","2022-04-04/.."]},"journalposter":[{"journalpostId":"22222222222"}],"søknadId":"1e7652a9-d834-42a1-997b-b29b93c58b33","søker":{"norskIdentitetsnummer":"11111111111"}}
         """.trimIndent()
 
         JSONAssert.assertEquals(forventetJson, søknadJson.toString(), true)
@@ -49,7 +49,7 @@ internal class PunsjetPleiepengerSyktBarnMappingTest {
                 periode = Periode("2021-01-01/.."),
                 søker = søker,
                 annenPart = null,
-                pleietrengende = null,
+                pleietrengende = barn,
                 søknadJson = jacksonSøknad
         )
 
@@ -114,7 +114,7 @@ internal class PunsjetPleiepengerSyktBarnMappingTest {
 
         @Language("JSON")
         val forventetJson = """
-          {"ytelse":{"type":"PLEIEPENGER_SYKT_BARN","barn":{"norskIdentitetsnumemr":"33333333333"}},"journalposter":[{"journalpostId":"22222222222"}],"søknadId":"1e7652a9-d834-42a1-997b-b29b93c58b34","søker":{"norskIdentitetsnummer":"11111111111"}}
+          {"ytelse":{"type":"PLEIEPENGER_SYKT_BARN","barn":{"norskIdentitetsnummer":"33333333333"}},"journalposter":[{"journalpostId":"22222222222"}],"søknadId":"1e7652a9-d834-42a1-997b-b29b93c58b34","søker":{"norskIdentitetsnummer":"11111111111"}}
         """.trimIndent()
 
         JSONAssert.assertEquals(forventetJson, søknadJson.toString(), true)
@@ -148,7 +148,7 @@ internal class PunsjetPleiepengerSyktBarnMappingTest {
             }
             barn?.also {
                 ytelse.put("barn", mapOf(
-                    "norskIdentitetsnumemr" to "$barn"
+                    "norskIdentitetsnummer" to "$barn"
                 ))
             }
 
