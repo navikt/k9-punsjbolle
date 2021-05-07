@@ -15,7 +15,7 @@ private fun WireMockServer.mockPingUrl(): WireMockServer {
 // TODO: Utbedre mock
 private fun WireMockServer.mockHentSaksnummer(): WireMockServer {
     WireMock.stubFor(
-        WireMock.post(WireMock.urlPathMatching(".*$path/fordel/fagsak/opprett"))
+        WireMock.post(WireMock.urlPathMatching(".*$path/api/fordel/fagsak/opprett"))
             .willReturn(WireMock.aResponse().withStatus(200).withHeader("Content-Type", "application/json").withBody("""
                 {"saksnummer": "SAK123"}
             """.trimIndent())))
@@ -25,7 +25,7 @@ private fun WireMockServer.mockHentSaksnummer(): WireMockServer {
 // TODO: Utbedre mock
 private fun WireMockServer.mockSendInnSøknad(): WireMockServer {
     WireMock.stubFor(
-        WireMock.post(WireMock.urlPathMatching(".*$path/fordel/journalposter"))
+        WireMock.post(WireMock.urlPathMatching(".*$path/api/fordel/journalposter"))
             .willReturn(WireMock.aResponse().withStatus(204)))
     return this
 }

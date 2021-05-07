@@ -30,8 +30,8 @@ internal class K9SakClient(
     scopes = scopes,
     pingUrl = URI("$baseUrl/internal/health/isReady")) {
 
-    private val HentSaksnummerUrl = URI("$baseUrl/fordel/fagsak/opprett")
-    private val SendInnSøknadUrl = URI("$baseUrl/fordel/journalposter")
+    private val HentSaksnummerUrl = URI("$baseUrl/api/fordel/fagsak/opprett")
+    private val SendInnSøknadUrl = URI("$baseUrl/api/fordel/journalposter")
 
     internal suspend fun hentSaksnummer(
         grunnlag: HentK9SaksnummerMelding.HentK9SaksnummerGrunnlag,
