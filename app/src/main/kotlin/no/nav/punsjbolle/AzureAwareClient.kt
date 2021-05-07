@@ -1,6 +1,7 @@
 package no.nav.punsjbolle
 
 import com.nimbusds.jwt.SignedJWT
+import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.httpGet
@@ -48,7 +49,9 @@ internal abstract class AzureAwareClient(
         onFailure = { UnHealthy("AccessTokenCheck", "Feil: ${it.message}") }
     )
 
-    open suspend fun pingCheck() : Result = pingUrl.httpGet().second.fold(
+    open suspend fun pingCheck() : Result = pingUrl.httpGet {
+        it.header(HttpHeaders.Authorization, authorizationHeader())
+    }.second.fold(
         onSuccess = { when (it.status.isSuccess()) {
             true -> Healthy("PingCheck", "OK: ${it.readText()}")
             false -> UnHealthy("PingCheck", "Feil: ${it.status}")
