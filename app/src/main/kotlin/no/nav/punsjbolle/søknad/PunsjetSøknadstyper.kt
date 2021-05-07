@@ -2,10 +2,13 @@ package no.nav.punsjbolle.søknad
 
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.punsjbolle.Identitetsnummer
 import no.nav.punsjbolle.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
 import no.nav.punsjbolle.K9Saksnummer
 import no.nav.punsjbolle.Periode
+import no.nav.punsjbolle.Periode.Companion.somPeriode
+import no.nav.punsjbolle.Periode.Companion.ÅpenPeriode
 import no.nav.punsjbolle.Søknadstype
 
 internal fun ObjectNode.somPunsjetSøknad(
@@ -16,28 +19,54 @@ internal fun ObjectNode.somPunsjetSøknad(
     val søknadstype = Søknadstype.fraK9FormatYtelsetype(ytelse.get("type").asText())
 
     return when (søknadstype) {
-        Søknadstype.PleiepengerSyktBarn -> fraPleiepengerSyktBarn(
+        Søknadstype.PleiepengerSyktBarn -> map(
+            søknadstype = søknadstype,
             versjon = versjon,
-            saksnummer = saksnummer
+            saksnummer = saksnummer,
+            pleietrengende = barn(),
+            periode = pleiepengerSyktBarnPeriode()
         )
-        else -> throw IllegalStateException("Mangler mapping av ${søknadstype.name}")
+        Søknadstype.OmsorgspengerUtbetaling -> map(
+            søknadstype = søknadstype,
+            versjon = versjon,
+            saksnummer = saksnummer,
+            periode = omsorgspengerUtbetalingPeriode()
+        )
+        Søknadstype.OmsorgspengerKroniskSyktBarn -> map(
+            søknadstype = søknadstype,
+            versjon = versjon,
+            saksnummer = saksnummer,
+            pleietrengende = barn(),
+            periode = ÅpenPeriode
+        )
+        Søknadstype.OmsorgspengerMidlertidigAlene -> map(
+            søknadstype = søknadstype,
+            versjon = versjon,
+            saksnummer = saksnummer,
+            annenPart = annenForelder(),
+            periode = omsorgspengerMidlertidigAlenePeriode()
+        )
     }
 }
 
-private fun ObjectNode.fraPleiepengerSyktBarn(
+private fun ObjectNode.map(
     versjon: String,
-    saksnummer: K9Saksnummer?) : PunsjetSøknadMelding.PunsjetSøknad {
+    saksnummer: K9Saksnummer?,
+    periode: Periode,
+    søknadstype: Søknadstype,
+    pleietrengende: Identitetsnummer? = null,
+    annenPart: Identitetsnummer? = null) : PunsjetSøknadMelding.PunsjetSøknad {
     return PunsjetSøknadMelding.PunsjetSøknad(
         versjon = versjon,
         saksnummer = saksnummer,
         søknadId = søknadsId(),
         journalpostIder = journalpostIder(),
-        søknadstype = Søknadstype.PleiepengerSyktBarn,
+        søknadstype = søknadstype,
         søker = søker(),
-        pleietrengende = barn(),
-        annenPart = null,
+        pleietrengende = pleietrengende,
+        annenPart = annenPart,
         søknadJson = this,
-        periode = periode()
+        periode = periode
     )
 }
 
@@ -45,13 +74,31 @@ private fun ObjectNode.søknadsId() = get("søknadId").asText()
 private fun ObjectNode.journalpostIder() = (get("journalposter") as ArrayNode).map { it as ObjectNode }.map { it.get("journalpostId").asText().somJournalpostId() }.toSet()
 private fun ObjectNode.søker() = get("søker").get("norskIdentitetsnummer").asText().somIdentitetsnummer()
 private fun ObjectNode.barn() = get("ytelse").get("barn")?.get("norskIdentitetsnummer")?.asText()?.somIdentitetsnummer()
-private fun ObjectNode.periode() : Periode {
-    val søknadsperioder = (get("ytelse").get("søknadsperiode")?.let { (it as ArrayNode).map { Periode(it.asText()) } }) ?: emptyList()
-    val endringsperioder = (get("ytelse").get("endringsperiode")?.let { (it as ArrayNode).map { Periode(it.asText()) } }) ?: emptyList()
-    val perioder = søknadsperioder.plus(endringsperioder)
-    val tilOgMedDatoer = perioder.map { it.tom }
+private fun ObjectNode.annenForelder() = get("ytelse").get("annenForelder").get("norskIdentitetsnummer").asText().somIdentitetsnummer()
+
+private fun ObjectNode.arrayPerioder(navn: String) =
+    (get("ytelse").get(navn)?.let { (it as ArrayNode).map { iso8601 -> iso8601.asText().somPeriode() } }) ?: emptyList()
+private fun ObjectNode.objectPerioder(navn: String) =
+    (get("ytelse").get(navn)?.let { array -> (array as ArrayNode).map { it as ObjectNode }.map { obj -> obj.get("periode").asText().somPeriode() } }) ?: emptyList()
+
+private fun ObjectNode.pleiepengerSyktBarnPeriode() =
+    arrayPerioder("søknadsperiode").plus(arrayPerioder("endringsperiode")).somEnPeriode()
+
+private fun ObjectNode.omsorgspengerUtbetalingPeriode() =
+    objectPerioder("fraværsperioder").somEnPeriode()
+
+private fun ObjectNode.omsorgspengerMidlertidigAlenePeriode() =
+    get("ytelse").get("annenForelder").get("periode")?.asText()?.somPeriode() ?: ÅpenPeriode
+
+private fun List<Periode>.somEnPeriode() : Periode {
+    val fraOgMedDatoer = map { it.fom }
+    val tilOgMedDatoer = map { it.tom }
+
     return Periode(
-        fom = requireNotNull(perioder.map { it.fom }.minByOrNull { it }) { "Ingen periode satt." },
+        fom = when (null in fraOgMedDatoer) {
+            true -> null
+            else -> fraOgMedDatoer.filterNotNull().minByOrNull { it }
+        },
         tom = when (null in tilOgMedDatoer) {
             true -> null
             else -> tilOgMedDatoer.filterNotNull().maxByOrNull { it }

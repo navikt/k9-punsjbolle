@@ -4,12 +4,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.punsjbolle.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
+import no.nav.punsjbolle.Periode.Companion.somPeriode
+import no.nav.punsjbolle.Periode.Companion.ÅpenPeriode
 import no.nav.punsjbolle.søknad.PunsjetSøknadMelding
 import no.nav.punsjbolle.søknad.somPunsjetSøknad
 import org.intellij.lang.annotations.Language
 import org.json.JSONObject
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.skyscreamer.jsonassert.JSONAssert
 import java.util.*
 import kotlin.test.assertEquals
@@ -20,7 +21,7 @@ internal class PunsjetPleiepengerSyktBarnMappingTest {
     fun `Ny søknad`() {
         val søknadId = "1e7652a9-d834-42a1-997b-b29b93c58b33"
         val journalpostIder = setOf(journalpostId)
-        val søknadsperioder = setOf(Periode("2021-01-01/2050-12-15"), Periode("2022-04-04/.."))
+        val søknadsperioder = setOf("2021-01-01/2050-12-15".somPeriode(), "2022-04-04/..".somPeriode())
 
         val søknadJson = pleiepengerSyktBarnSøknad(
                 søknadId = søknadId,
@@ -46,7 +47,7 @@ internal class PunsjetPleiepengerSyktBarnMappingTest {
                 saksnummer = null,
                 søknadstype = Søknadstype.PleiepengerSyktBarn,
                 journalpostIder = journalpostIder,
-                periode = Periode("2021-01-01/.."),
+                periode = "2021-01-01/..".somPeriode(),
                 søker = søker,
                 annenPart = null,
                 pleietrengende = barn,
@@ -60,7 +61,7 @@ internal class PunsjetPleiepengerSyktBarnMappingTest {
     fun `Endringssøknad uten barn`() {
         val søknadId = "1e7652a9-d834-42a1-997b-b29b93c58b32"
         val journalpostIder = setOf(journalpostId)
-        val endringsperioder = setOf(Periode("2021-01-01/.."))
+        val endringsperioder = setOf("2021-01-01/..".somPeriode())
 
         val søknadJson = pleiepengerSyktBarnSøknad(
                 søknadId = søknadId,
@@ -94,8 +95,6 @@ internal class PunsjetPleiepengerSyktBarnMappingTest {
         )
 
         assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null))
-
-
     }
 
     @Test
@@ -119,9 +118,22 @@ internal class PunsjetPleiepengerSyktBarnMappingTest {
 
         JSONAssert.assertEquals(forventetJson, søknadJson.toString(), true)
 
-        assertThrows<IllegalArgumentException> {
-            søknadJson.jackson().somPunsjetSøknad("1.0.0", null)
-        }
+        val jacksonSøknad = søknadJson.jackson()
+
+        val forventetPunsjetSøknad = PunsjetSøknadMelding.PunsjetSøknad(
+                versjon = "1.0.0",
+                søknadId = søknadId,
+                saksnummer = null,
+                søknadstype = Søknadstype.PleiepengerSyktBarn,
+                journalpostIder = journalpostIder,
+                periode = ÅpenPeriode,
+                søker = søker,
+                annenPart = null,
+                pleietrengende = barn,
+                søknadJson = jacksonSøknad
+        )
+
+        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null))
     }
 
     internal companion object {

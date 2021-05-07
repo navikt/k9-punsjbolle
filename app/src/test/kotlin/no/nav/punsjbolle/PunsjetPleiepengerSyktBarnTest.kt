@@ -3,6 +3,7 @@ package no.nav.punsjbolle
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.punsjbolle.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
+import no.nav.punsjbolle.Periode.Companion.somPeriode
 import no.nav.punsjbolle.PunsjetPleiepengerSyktBarnMappingTest.Companion.pleiepengerSyktBarnSøknad
 import no.nav.punsjbolle.testutils.ApplicationContextExtension
 import no.nav.punsjbolle.testutils.printSisteMelding
@@ -30,7 +31,7 @@ internal class PunsjetPleiepengerSyktBarnTest(
                 barn = barn,
                 søker = søker,
                 journalpostIder = setOf("1112131415".somJournalpostId()),
-                søknadsperioder = setOf(Periode("2018-12-30/2019-10-20")),
+                søknadsperioder = setOf("2018-12-30/2019-10-20".somPeriode()),
                 endringsperioder = null
         )))
 

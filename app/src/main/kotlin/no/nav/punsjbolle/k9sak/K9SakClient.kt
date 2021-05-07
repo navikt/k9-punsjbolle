@@ -46,7 +46,7 @@ internal class K9SakClient(
                 "pleietrengendeAktørId": ${grunnlag.pleietrengende?.let { "$it" }},
                 "relatertPersonAktørId": "${grunnlag.annenPart?.let { "$it" }}",
                 "periode": {
-                    "fom": "${grunnlag.periode.fom}",
+                    "fom": "${grunnlag.periode.fom?.let { "$it" }}",
                     "tom": ${grunnlag.periode.tom?.let { "$it" }}
                 }
             }

@@ -50,29 +50,47 @@ internal data class CorrelationId private constructor(private val value: String)
     }
 }
 
-internal data class Periode(internal val fom: LocalDate, internal val tom: LocalDate?) {
-    internal constructor(iso8601: String) : this(
-        fom = LocalDate.parse(iso8601.split("/")[0]),
-        tom = when (iso8601.split("/")[1] == "..") {
-            true -> null
-            else -> LocalDate.parse(iso8601.split("/")[1])
+internal data class Periode(internal val fom: LocalDate?, internal val tom: LocalDate?) {
+    override fun toString() = "${fom.iso8601()}/${tom.iso8601()}"
+
+    internal companion object {
+        private const val Åpen = ".."
+
+        private fun LocalDate?.iso8601() = when (this) {
+            null -> Åpen
+            else -> "$this"
         }
-    )
-    override fun toString() = when (tom) {
-        null -> "$fom/.."
-        else -> "$fom/$tom"
+
+        internal val ÅpenPeriode = Periode(null,null)
+        internal fun String.somPeriode() : Periode {
+            val split = split("/")
+            require(split.size == 2) { "Ugylig periode $this."}
+            return Periode(
+                fom = when (split[0]) {
+                    Åpen -> null
+                    else -> LocalDate.parse(split[0])
+                },
+                tom = when (split[1]) {
+                    Åpen -> null
+                    else -> LocalDate.parse(split[1])
+                }
+            )
+        }
     }
 }
 
 internal enum class Søknadstype(internal val k9SakDto: String) {
     PleiepengerSyktBarn("PSB"),
     OmsorgspengerUtbetaling("OMP"),
-    OmsorgspengerKroniskSyktBarn("OMP_KA"),
+    OmsorgspengerKroniskSyktBarn("OMP_KS"),
     OmsorgspengerMidlertidigAlene("OMS_MA");
 
     internal companion object {
         internal fun fraK9FormatYtelsetype(ytelsetype: String) = when (ytelsetype) {
             "PLEIEPENGER_SYKT_BARN" -> PleiepengerSyktBarn
+            "OMP_UT" -> OmsorgspengerUtbetaling
+            "OMP_UTV_KS" -> OmsorgspengerKroniskSyktBarn
+            "OMP_UTV_MA" -> OmsorgspengerMidlertidigAlene
             else -> throw IllegalStateException("Ukjent ytelsestype $ytelsetype")
         }
     }
