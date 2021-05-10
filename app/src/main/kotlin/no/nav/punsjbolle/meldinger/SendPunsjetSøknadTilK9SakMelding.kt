@@ -43,7 +43,7 @@ internal object SendPunsjetSøknadTilK9SakMelding :
                 else -> brevkode
             }
             private fun Journalpost.referanse() = when (eksternReferanse) {
-                null -> "$Punsjbolle-$journalpostId".also { logger.warn("JournalpostId=[$journalpostId] mangler kanalReferanse, setter Referanse=[$it]") }
+                null -> "$Punsjbolle-$journalpostId".also { logger.warn("JournalpostId=[$journalpostId] mangler eksternReferanse, setter Referanse=[$it]") }
                 else -> eksternReferanse
             }
         }

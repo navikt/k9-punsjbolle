@@ -28,7 +28,7 @@ internal class SafClient(
     navn = "SafClient",
     accessTokenClient = accessTokenClient,
     scopes = scopes,
-    pingUrl = URI("$baseUrl/isReady")) { 
+    pingUrl = URI("$baseUrl/isReady")) {
 
     private val GraphQlEndpoint = "$baseUrl/graphql"
 
@@ -37,6 +37,17 @@ internal class SafClient(
         correlationId: CorrelationId): Set<Journalpost> {
         logger.info("Henter journalposter for JounralpostIder=$journalpostIder")
 
+        return journalpostIder.map { journalpostId -> Journalpost(
+            journalpostId = journalpostId,
+            journalpoststatus = "MOTTATT",
+            journalposttype = "I",
+            brevkode = "NAV 09-11.05",
+            opprettet = LocalDateTime.now().minusMinutes(1),
+            sak = null,
+            eksternReferanse = null
+        )}.toSet()
+
+        /*
         return coroutineScope {
             val deferred = mutableSetOf<Deferred<Journalpost>>()
             journalpostIder.forEach { journalpostId ->
@@ -48,7 +59,7 @@ internal class SafClient(
                 })
             }
             deferred.awaitAll().toSet()
-        }
+        }*/
     }
 
 
