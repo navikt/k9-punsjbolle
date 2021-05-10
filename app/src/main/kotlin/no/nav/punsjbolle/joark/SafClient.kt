@@ -28,7 +28,7 @@ internal class SafClient(
     navn = "SafClient",
     accessTokenClient = accessTokenClient,
     scopes = scopes,
-    pingUrl = URI("$baseUrl/isReady")) { // TODO: Fix
+    pingUrl = URI("$baseUrl/isReady")) { 
 
     private val GraphQlEndpoint = "$baseUrl/graphql"
 
