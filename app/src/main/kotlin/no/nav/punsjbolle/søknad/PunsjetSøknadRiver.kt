@@ -28,7 +28,7 @@ internal class PunsjetSøknadRiver(rapidsConnection: RapidsConnection) : Behovss
         val søknad = PunsjetSøknadMelding.hentBehov(packet)
         val erStøttetVersjon = søknad.versjon in StøttedeVersjoner
         logger.info("Søknadstype=[${søknad.søknadstype.name}], Versjon=[${søknad.versjon}], ErStøttetVersjon=[$erStøttetVersjon]")
-        return erStøttetVersjon
+        return true // TODO: returner rett verdi
     }
 
     override fun handlePacket(id: String, packet: JsonMessage): Boolean {
