@@ -30,7 +30,7 @@ internal object SendPunsjetSøknadTilK9SakMelding :
                 SendPunsjetSøknadTilK9SakGrunnlag(
                     saksnummer = saksnummer,
                     journalpostId = journalpost.journalpostId,
-                    mottatt = journalpost.forsendelseTidspunkt,
+                    mottatt = journalpost.opprettet,
                     referanse = journalpost.referanse(),
                     brevkode = journalpost.brevkode()
                 )
@@ -42,9 +42,9 @@ internal object SendPunsjetSøknadTilK9SakMelding :
                 null -> Punsjbolle.also { logger.warn("JournalpostId=[$journalpostId] mangler brevkode, defaulter til Brevkode=[$it]") }
                 else -> brevkode
             }
-            private fun Journalpost.referanse() = when (kanalReferanse) {
+            private fun Journalpost.referanse() = when (eksternReferanse) {
                 null -> "$Punsjbolle-$journalpostId".also { logger.warn("JournalpostId=[$journalpostId] mangler kanalReferanse, setter Referanse=[$it]") }
-                else -> kanalReferanse
+                else -> eksternReferanse
             }
         }
     }
