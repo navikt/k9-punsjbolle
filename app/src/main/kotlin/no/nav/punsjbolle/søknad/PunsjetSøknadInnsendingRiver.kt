@@ -39,7 +39,7 @@ internal class PunsjetSøknadInnsendingRiver(
             correlationId = correlationId
         )}
 
-        packet.leggTilLøsning(behov = SendPunsjetSøknadTilK9SakMelding.behovNavn) // TODO: SendPunsjet?2
+        packet.leggTilLøsning(behov = SendPunsjetSøknadTilK9SakMelding.behovNavn)
         packet.leggTilLøsning(behov = PunsjetSøknadMelding.behovNavn)
 
         return true

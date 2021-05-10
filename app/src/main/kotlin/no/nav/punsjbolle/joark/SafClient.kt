@@ -35,7 +35,7 @@ internal class SafClient(
     internal suspend fun hentJournalposter(
         journalpostIder: Set<JournalpostId>,
         correlationId: CorrelationId): Set<Journalpost> {
-        logger.info("Henter journalposter for JounralpostIder=$journalpostIder")
+        logger.info("Henter journalposter for JournalpostIder=$journalpostIder")
 
         return journalpostIder.map { journalpostId -> Journalpost(
             journalpostId = journalpostId,
@@ -106,8 +106,8 @@ internal class SafClient(
                 datoOpprettet,
                 eksternReferanseId,
                 sak {
-                    fagsakId
-                    fagsaksystem,
+                    fagsakId,
+                    fagsaksystem
                 },
                 dokumenter {
                     brevkode
