@@ -17,7 +17,6 @@ import no.nav.punsjbolle.søknad.PunsjetSøknadMelding
 import org.intellij.lang.annotations.Language
 import org.json.JSONArray
 import org.json.JSONObject
-import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.*
 
@@ -91,9 +90,6 @@ internal class K9SakClient(
             }]
         """.trimIndent()
 
-        secureLogger.info("Skal Sende til K9Sak. URL=[$SendInnSøknadUrl], DTO=[${JSONArray(dto)}]")
-
-        /*
         val (httpStatusCode, response) = SendInnSøknadUrl.httpPost {
             it.header(HttpHeaders.Authorization, authorizationHeader())
             it.header(CorrelationIdHeaderKey, "$correlationId")
@@ -105,11 +101,9 @@ internal class K9SakClient(
         require(httpStatusCode.isSuccess()) {
             "Feil fra K9Sak. URL=[$SendInnSøknadUrl], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
         }
-         */
     }
 
     private companion object {
-        private val secureLogger = LoggerFactory.getLogger("tjenestekall")
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsjbolle"
         private const val CorrelationIdHeaderKey = "Nav-Callid"
