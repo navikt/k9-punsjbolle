@@ -37,17 +37,6 @@ internal class SafClient(
         correlationId: CorrelationId): Set<Journalpost> {
         logger.info("Henter journalposter for JournalpostIder=$journalpostIder")
 
-        return journalpostIder.map { journalpostId -> Journalpost(
-            journalpostId = journalpostId,
-            journalpoststatus = "MOTTATT",
-            journalposttype = "I",
-            brevkode = "NAV 09-11.05",
-            opprettet = LocalDateTime.now().minusMinutes(1),
-            sak = null,
-            eksternReferanse = null
-        )}.toSet()
-
-        /*
         return coroutineScope {
             val deferred = mutableSetOf<Deferred<Journalpost>>()
             journalpostIder.forEach { journalpostId ->
@@ -59,9 +48,8 @@ internal class SafClient(
                 })
             }
             deferred.awaitAll().toSet()
-        }*/
+        }
     }
-
 
     private suspend fun hentJournalpost(
         journalpostId: JournalpostId,
@@ -99,8 +87,8 @@ internal class SafClient(
         private const val CorrelationIdHeaderKey = "Nav-Callid"
 
         private fun hentJournalpostGraphQlRequestBody(journalpostId: JournalpostId) = """
-            query {
-              journalpost(journalpostId: "$journalpostId") {
+        query {
+            journalpost(journalpostId: "$journalpostId") {
                 journalposttype,
                 journalstatus,
                 datoOpprettet,
@@ -113,6 +101,7 @@ internal class SafClient(
                     brevkode
                 }
             }
+        }
         """.trimIndent().replace("\n", "").replace("  ", "").let { query ->
             JSONObject().apply {
                 put("query", query)
