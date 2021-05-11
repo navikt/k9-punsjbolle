@@ -39,6 +39,8 @@ internal class PunsjetSøknadInnsendingRiver(
             correlationId = correlationId
         )}
 
+        logger.info("Søknad sendt OK til K9Sak")
+
         packet.leggTilLøsning(behov = SendPunsjetSøknadTilK9SakMelding.behovNavn)
         packet.leggTilLøsning(behov = PunsjetSøknadMelding.behovNavn)
 
