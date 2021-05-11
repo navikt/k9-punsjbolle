@@ -41,7 +41,7 @@ internal class K9SakClient(
         @Language("JSON")
         val dto = """
             {
-                "ytelseType": "${grunnlag.søknadstype.k9SakDto}",
+                "ytelseType": "${grunnlag.søknadstype.k9YtelseType}",
                 "aktørId": "${grunnlag.søker}",
                 "pleietrengendeAktørId": ${grunnlag.pleietrengende?.let { "$it" }},
                 "relatertPersonAktørId": ${grunnlag.annenPart?.let { "$it" }},
@@ -79,11 +79,11 @@ internal class K9SakClient(
                 "saksnummer": "${grunnlag.saksnummer}",
                 "journalpostId": "${grunnlag.journalpostId}",
                 "ytelseType": {
-                    "kode": "${søknad.søknadstype.k9SakDto}",
+                    "kode": "${søknad.søknadstype.k9YtelseType}",
                     "kodeverk": "FAGSAK_YTELSE"
                 },
                 "kanalReferanse": "${grunnlag.referanse}",
-                "type": "${grunnlag.brevkode}",
+                "type": "${søknad.søknadstype.k9Type}",
                 "forsendelseMottattTidspunkt": "${grunnlag.mottatt}",
                 "forsendelseMottatt": "${grunnlag.mottatt.toLocalDate()}",
                 "payload": "${Base64.getUrlEncoder().encodeToString(søknad.søknadJson.toString().toByteArray())}"
