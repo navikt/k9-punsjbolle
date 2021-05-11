@@ -37,7 +37,7 @@ internal class SafClient(
         correlationId: CorrelationId): Set<Journalpost> {
         logger.info("Henter journalposter for JournalpostIder=$journalpostIder")
 
-        return coroutineScope {
+        val journalposter = coroutineScope {
             val deferred = mutableSetOf<Deferred<Journalpost>>()
             journalpostIder.forEach { journalpostId ->
                 deferred.add(async {
@@ -49,6 +49,14 @@ internal class SafClient(
             }
             deferred.awaitAll().toSet()
         }
+
+        journalposter.map { it.journalpostId }.toSet().also { journalpostIderFunnet ->
+            require(journalpostIderFunnet == journalpostIder) {
+                "Mangler en eller fler journalposter. Etterspurt=[$journalpostIder], Funnet=[$journalpostIderFunnet]"
+            }
+        }
+
+        return journalposter
     }
 
     private suspend fun hentJournalpost(
