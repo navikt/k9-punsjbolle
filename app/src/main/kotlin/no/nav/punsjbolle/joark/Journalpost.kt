@@ -27,7 +27,7 @@ internal data class Journalpost(
     )
 
     internal companion object {
-        internal fun Set<Journalpost>.tidligstMottattJournalpost() =
+        internal fun Set<Journalpost>.tidligstOpprettetJournalpost() =
             minByOrNull { it.opprettet }!!
     }
 }

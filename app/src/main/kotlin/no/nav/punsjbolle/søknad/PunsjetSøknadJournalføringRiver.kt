@@ -68,6 +68,8 @@ internal class PunsjetSøknadJournalføringRiver(
             correlationId = correlationId
         )}
 
+        logger.info("Brevkoder={${journalposter.map { it.brevkode }}}")
+
         val journalføringBehov = FerdigstillJournalføringForK9Melding.behov(
             Triple(søknad.søker, k9Saksnummer, journalpostIderSomSkalKnyttesTilSak(
                 journalposter = journalposter,
@@ -76,7 +78,10 @@ internal class PunsjetSøknadJournalføringRiver(
         )
 
         val innsendingBehov = SendPunsjetSøknadTilK9SakMelding.behov(
-            journalposter.somSendSøknadTilK9SakGrunnlag(k9Saksnummer)
+            journalposter.somSendSøknadTilK9SakGrunnlag(
+                saksnummer = k9Saksnummer,
+                behovssekvensId = id
+            )
         )
 
         logger.info("Legger til behov for journalføring og innsending.")

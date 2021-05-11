@@ -10,8 +10,7 @@ import no.nav.punsjbolle.K9Saksnummer
 import no.nav.punsjbolle.K9Saksnummer.Companion.somK9Saksnummer
 import no.nav.punsjbolle.LeggTilBehov
 import no.nav.punsjbolle.joark.Journalpost
-import no.nav.punsjbolle.joark.Journalpost.Companion.tidligstMottattJournalpost
-import org.slf4j.LoggerFactory
+import no.nav.punsjbolle.joark.Journalpost.Companion.tidligstOpprettetJournalpost
 import java.time.LocalDateTime
 
 internal object SendPunsjetSøknadTilK9SakMelding :
@@ -25,20 +24,15 @@ internal object SendPunsjetSøknadTilK9SakMelding :
         internal val referanse: String) {
 
         internal companion object {
-            internal fun Set<Journalpost>.somSendSøknadTilK9SakGrunnlag(saksnummer: K9Saksnummer) = this.tidligstMottattJournalpost().let { journalpost ->
+            internal fun Set<Journalpost>.somSendSøknadTilK9SakGrunnlag(
+                saksnummer: K9Saksnummer,
+                behovssekvensId: String) = this.tidligstOpprettetJournalpost().let { journalpost ->
                 SendPunsjetSøknadTilK9SakGrunnlag(
                     saksnummer = saksnummer,
                     journalpostId = journalpost.journalpostId,
                     mottatt = journalpost.opprettet,
-                    referanse = journalpost.referanse()
+                    referanse = journalpost.eksternReferanse ?: behovssekvensId
                 )
-            }
-
-            private const val Punsjbolle = "Punsjbolle"
-            private val logger = LoggerFactory.getLogger(SendPunsjetSøknadTilK9SakGrunnlag::class.java)
-            private fun Journalpost.referanse() = when (eksternReferanse) {
-                null -> "$Punsjbolle-$journalpostId".also { logger.warn("JournalpostId=[$journalpostId] mangler eksternReferanse, setter Referanse=[$it]") }
-                else -> eksternReferanse
             }
         }
     }
