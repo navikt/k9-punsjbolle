@@ -88,15 +88,15 @@ internal class PunsjetSøknadJournalføringRiver(
     }
 
     private fun journalpostIderSomSkalKnyttesTilSak(journalposter: Set<Journalpost>, saksnummer: K9Saksnummer) : Set<JournalpostId> {
-        val erKnyttetTilSak = journalposter.filter { it.erKnyttetTil(saksnummer) }.also { if (it.isNotEmpty()) {
-            logger.info("Allerede knyttet til sak. K9Saksnummer=[$saksnummer], JournalpostIder=${journalposter.map { it.journalpostId }}")
-        }}
-
         val skalKnyttesTilSak = journalposter.filter { it.skalKnyttesTilSak() }.also { if (it.isNotEmpty()) {
-            logger.info("Skal knyttes til sak. K9Saksnummer=[$saksnummer], JournalpostIder=${journalposter.map { it.journalpostId }}")
+            logger.info("Skal knyttes til sak. K9Saksnummer=[$saksnummer], JournalpostIder=${journalposter.map { journalpost -> journalpost.journalpostId }}")
         }}
 
-        journalposter.minus(erKnyttetTilSak).minus(skalKnyttesTilSak).also { if (it.isNotEmpty()) {
+        val erKnyttetTilSak = journalposter.filter { it.erKnyttetTil(saksnummer) }.also { if (it.isNotEmpty()) {
+            logger.info("Allerede knyttet til sak. K9Saksnummer=[$saksnummer], JournalpostIder=${journalposter.map { journalpost ->  journalpost.journalpostId }}")
+        }}
+
+        journalposter.minus(skalKnyttesTilSak).minus(erKnyttetTilSak).also { if (it.isNotEmpty()) {
             throw IllegalStateException("Inneholder journalposter som ikke støttes. Journalposter=$it")
         }}
 

@@ -18,7 +18,7 @@ internal data class Journalpost(
     }
 
     internal fun skalKnyttesTilSak() : Boolean {
-        return sak == null && journalpoststatus == "MOTTATT" && journalposttype == "I"
+        return journalpoststatus == "MOTTATT" && journalposttype == "I"
     }
 
     internal data class Sak (
