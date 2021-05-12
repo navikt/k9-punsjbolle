@@ -13,7 +13,8 @@ internal fun RapidsConnection.registerApplicationContext(applicationContext: App
     PunsjetSøknadJournalføringRiver(
         rapidsConnection = this,
         k9SakClient = applicationContext.k9SakClient,
-        safClient = applicationContext.safClient
+        safClient = applicationContext.safClient,
+        rutingService = applicationContext.rutingService
     )
     PunsjetSøknadInnsendingRiver(
         rapidsConnection = this,
