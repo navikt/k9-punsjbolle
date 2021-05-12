@@ -23,13 +23,10 @@ internal class PunsjetSøknadTilInfotrygd(
             correlationId = packet.correlationId()
         )}.journalpostIderSomDetSkalOpprettesGosysJournalføringsoppgaverFor()
 
+        packet.leggTilLøsning(behov = PunsjetSøknadMelding.behovNavn)
         packet.leggTilBehovEtter(aktueltBehov = PunsjetSøknadMelding.behovNavn, OpprettGosysJournalføringsoppgaverMelding.behov(
             søknad to journalpostIder
         ))
-        packet.leggTilLøsning(behov = PunsjetSøknadMelding.behovNavn)
-
-
-        // TODO: Nais-config for infotrygd
 
         return true
     }

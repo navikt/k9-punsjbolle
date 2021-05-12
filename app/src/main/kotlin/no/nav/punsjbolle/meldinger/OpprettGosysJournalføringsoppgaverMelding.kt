@@ -22,7 +22,6 @@ internal object OpprettGosysJournalføringsoppgaverMelding : LeggTilBehov<Pair<P
             )
         )
     }
-
-    // TODO: Test
+    
     internal fun Søknadstype.somJournalpostType() = "${name}Søknad"
 }
