@@ -1,6 +1,5 @@
 package no.nav.punsjbolle.ruting
 
-import no.nav.punsjbolle.AktørId
 import no.nav.punsjbolle.CorrelationId
 import no.nav.punsjbolle.Identitetsnummer
 import no.nav.punsjbolle.infotrygd.InfotrygdClient
@@ -12,25 +11,25 @@ internal class RutingService(
     private val infotrygdClient: InfotrygdClient) {
 
     internal suspend fun destinasjon(
-        søker: Pair<Identitetsnummer, AktørId>,
+        søker: Identitetsnummer,
         fraOgMed: LocalDate,
-        pleietrengende: Pair<Identitetsnummer, AktørId>? = null,
-        annenPart: Pair<Identitetsnummer, AktørId>? = null,
+        pleietrengende: Identitetsnummer? = null,
+        annenPart: Identitetsnummer? = null,
         correlationId: CorrelationId) : Destinasjon {
 
         val k9SakGrunnlag = k9SakClient.harLøpendeSakSomInvolverer(
-            søker = søker.second,
+            søker = søker,
             fraOgMed = fraOgMed,
-            pleietrengende = pleietrengende?.second,
-            annenPart = annenPart?.second,
+            pleietrengende = pleietrengende,
+            annenPart = annenPart,
             correlationId = correlationId
         )
 
         val infotrygdGrunnlag = infotrygdClient.harLøpendeSakSomInvolverer(
-            søker = søker.first,
+            søker = søker,
             fraOgMed = fraOgMed,
-            pleietrengende = pleietrengende?.first,
-            annenPart = annenPart?.first,
+            pleietrengende = pleietrengende,
+            annenPart = annenPart,
             correlationId = correlationId
         )
 

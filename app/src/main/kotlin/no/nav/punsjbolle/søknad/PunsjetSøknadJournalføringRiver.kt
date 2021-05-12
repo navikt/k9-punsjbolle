@@ -6,28 +6,24 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.k9.rapid.river.*
 import no.nav.punsjbolle.CorrelationId.Companion.correlationId
+import no.nav.punsjbolle.JournalpostId
+import no.nav.punsjbolle.K9Saksnummer
 import no.nav.punsjbolle.joark.SafClient
+import no.nav.punsjbolle.joark.Journalpost
 import no.nav.punsjbolle.k9sak.K9SakClient
+import no.nav.punsjbolle.meldinger.FerdigstillJournalføringForK9Melding
 import no.nav.punsjbolle.meldinger.HentAktørIderMelding
-import no.nav.punsjbolle.ruting.RutingService
+import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
+import no.nav.punsjbolle.meldinger.SendPunsjetSøknadTilK9SakMelding
+import no.nav.punsjbolle.meldinger.SendPunsjetSøknadTilK9SakMelding.SendPunsjetSøknadTilK9SakGrunnlag.Companion.somSendSøknadTilK9SakGrunnlag
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 
 internal class PunsjetSøknadJournalføringRiver(
     rapidsConnection: RapidsConnection,
-    k9SakClient: K9SakClient,
-    safClient: SafClient,
-    private val rutingService: RutingService) : BehovssekvensPacketListener(
+    private val k9SakClient: K9SakClient,
+    private val safClient: SafClient) : BehovssekvensPacketListener(
     logger = LoggerFactory.getLogger(PunsjetSøknadJournalføringRiver::class.java),
     mdcPaths = PunsjetSøknadMelding.mdcPaths) {
-
-    private val punsjetSøknadTilK9Sak = PunsjetSøknadTilK9Sak(
-        k9SakClient = k9SakClient,
-        safClient = safClient
-    )
-    private val punsjetSøknadTilInfotrygd = PunsjetSøknadTilInfotrygd(
-        safClient = safClient
-    )
 
     init {
         River(rapidsConnection).apply {
@@ -45,17 +41,70 @@ internal class PunsjetSøknadJournalføringRiver(
         val aktørIder = HentAktørIderMelding.hentLøsning(packet)
         val correlationId = packet.correlationId()
 
-        val destinasjon = runBlocking { rutingService.destinasjon(
-            søker = søknad.søker to aktørIder.getValue(søknad.søker),
-            fraOgMed = søknad.periode.fom ?: LocalDate.now(),
-            pleietrengende = søknad.pleietrengende?.let { it to aktørIder.getValue(it) },
-            annenPart = søknad.annenPart?.let { it to aktørIder.getValue(it) },
-            correlationId = correlationId
-        )}.also { logger.info("Destinasjon=[$it]") }
+        val hentK9SaksnummerGrunnlag = HentK9SaksnummerMelding.HentK9SaksnummerGrunnlag(
+            søknadstype = søknad.søknadstype,
+            søker = aktørIder.getValue(søknad.søker),
+            pleietrengende = søknad.pleietrengende?.let { aktørIder.getValue(it) },
+            annenPart = søknad.annenPart?.let { aktørIder.getValue(it) },
+            periode = søknad.periode
+        )
 
-        return when (destinasjon) {
-            RutingService.Destinasjon.K9Sak -> punsjetSøknadTilK9Sak.handlePacket(id, packet)
-            RutingService.Destinasjon.Infotrygd -> punsjetSøknadTilInfotrygd.handlePacket(id, packet)
+        val (k9Saksnummer, k9SaksnummerKilde) = when (søknad.saksnummer) {
+            null -> runBlocking { k9SakClient.hentSaksnummer(
+                grunnlag = hentK9SaksnummerGrunnlag,
+                correlationId = correlationId
+            ) to HentK9SaksnummerMelding.K9SaksnummerKilde.SlåttOppMotK9Sak }
+            else -> søknad.saksnummer to HentK9SaksnummerMelding.K9SaksnummerKilde.ManueltValgtIPunsj
         }
+        logger.info("Håndteres på K9Saksnummer=[$k9Saksnummer], Kilde=[${k9SaksnummerKilde.name}]")
+
+        packet.leggTilBehovMedLøsninger(PunsjetSøknadMelding.behovNavn, HentK9SaksnummerMelding.behovMedLøsning(
+            behovInput = hentK9SaksnummerGrunnlag,
+            løsning = k9Saksnummer to k9SaksnummerKilde
+        ))
+
+        val journalposter = runBlocking { safClient.hentJournalposter(
+            journalpostIder = søknad.journalpostIder,
+            correlationId = correlationId
+        )}
+
+        logger.info("Brevkoder=${journalposter.map { it.brevkode }}")
+
+        val journalføringBehov = FerdigstillJournalføringForK9Melding.behov(
+            Triple(søknad.søker, k9Saksnummer, journalpostIderSomSkalKnyttesTilSak(
+                journalposter = journalposter,
+                saksnummer = k9Saksnummer
+            ))
+        )
+
+        val innsendingBehov = SendPunsjetSøknadTilK9SakMelding.behov(
+            journalposter.somSendSøknadTilK9SakGrunnlag(
+                saksnummer = k9Saksnummer,
+                behovssekvensId = id
+            )
+        )
+
+        logger.info("Legger til behov for journalføring og innsending.")
+        packet.leggTilBehov(PunsjetSøknadMelding.behovNavn,
+            journalføringBehov, innsendingBehov
+        )
+
+        return true
+    }
+
+    private fun journalpostIderSomSkalKnyttesTilSak(journalposter: Set<Journalpost>, saksnummer: K9Saksnummer) : Set<JournalpostId> {
+        val skalKnyttesTilSak = journalposter.filter { it.skalKnyttesTilSak() }.also { if (it.isNotEmpty()) {
+            logger.info("Skal knyttes til sak. K9Saksnummer=[$saksnummer], JournalpostIder=${journalposter.map { journalpost -> journalpost.journalpostId }}")
+        }}
+
+        val erKnyttetTilSak = journalposter.filter { it.erKnyttetTil(saksnummer) }.also { if (it.isNotEmpty()) {
+            logger.info("Allerede knyttet til sak. K9Saksnummer=[$saksnummer], JournalpostIder=${journalposter.map { journalpost ->  journalpost.journalpostId }}")
+        }}
+
+        journalposter.minus(skalKnyttesTilSak).minus(erKnyttetTilSak).also { if (it.isNotEmpty()) {
+            throw IllegalStateException("Inneholder journalposter som ikke støttes. Journalposter=$it")
+        }}
+
+        return skalKnyttesTilSak.map { it.journalpostId }.toSet()
     }
 }

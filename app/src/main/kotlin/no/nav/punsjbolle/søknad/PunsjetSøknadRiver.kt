@@ -1,5 +1,6 @@
 package no.nav.punsjbolle.søknad
 
+import kotlinx.coroutines.runBlocking
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
@@ -7,12 +8,26 @@ import no.nav.k9.rapid.river.BehovssekvensPacketListener
 import no.nav.k9.rapid.river.leggTilBehov
 import no.nav.k9.rapid.river.skalLøseBehov
 import no.nav.k9.rapid.river.utenLøsningPåBehov
+import no.nav.punsjbolle.CorrelationId.Companion.correlationId
+import no.nav.punsjbolle.joark.SafClient
 import no.nav.punsjbolle.meldinger.HentAktørIderMelding
+import no.nav.punsjbolle.ruting.RutingService
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 
-internal class PunsjetSøknadRiver(rapidsConnection: RapidsConnection) : BehovssekvensPacketListener(
+import no.nav.punsjbolle.ruting.RutingService.Destinasjon.Infotrygd
+import no.nav.punsjbolle.ruting.RutingService.Destinasjon.K9Sak
+
+internal class PunsjetSøknadRiver(
+    rapidsConnection: RapidsConnection,
+    safClient: SafClient,
+    private val rutingService: RutingService) : BehovssekvensPacketListener(
     logger = LoggerFactory.getLogger(PunsjetSøknadRiver::class.java),
     mdcPaths = PunsjetSøknadMelding.mdcPaths) {
+
+    private val punsjetSøknadTilInfotrygd = PunsjetSøknadTilInfotrygd(
+        safClient = safClient
+    )
 
     init {
         River(rapidsConnection).apply {
@@ -34,13 +49,24 @@ internal class PunsjetSøknadRiver(rapidsConnection: RapidsConnection) : Behovss
     override fun handlePacket(id: String, packet: JsonMessage): Boolean {
         val søknad = PunsjetSøknadMelding.hentBehov(packet)
 
-        logger.info("Legger til behov for å hente aktørId på de involverte partene.")
+        val destinasjon = runBlocking { rutingService.destinasjon(
+            søker = søknad.søker,
+            fraOgMed = søknad.periode.fom ?: LocalDate.now(),
+            pleietrengende = søknad.pleietrengende,
+            annenPart = søknad.annenPart,
+            correlationId = packet.correlationId()
+        )}.also { logger.info("Destinasjon=[${it.name}]") }
 
-        packet.leggTilBehov(PunsjetSøknadMelding.behovNavn, HentAktørIderMelding.behov(
-            behovInput = søknad.identitetsnummer
-        ))
-
-        return true
+        return when (destinasjon) {
+            Infotrygd -> punsjetSøknadTilInfotrygd.handlePacket(packet)
+            K9Sak -> {
+                logger.info("Legger til behov for å hente aktørId på de involverte partene.")
+                packet.leggTilBehov(PunsjetSøknadMelding.behovNavn, HentAktørIderMelding.behov(
+                    behovInput = søknad.identitetsnummer
+                ))
+                true
+            }
+        }
     }
 
     private companion object {

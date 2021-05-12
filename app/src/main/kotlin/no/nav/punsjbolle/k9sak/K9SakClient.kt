@@ -7,9 +7,9 @@ import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.jsonBody
 import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.readTextOrThrow
 import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.stringBody
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
-import no.nav.punsjbolle.AktørId
 import no.nav.punsjbolle.AzureAwareClient
 import no.nav.punsjbolle.CorrelationId
+import no.nav.punsjbolle.Identitetsnummer
 import no.nav.punsjbolle.K9Saksnummer
 import no.nav.punsjbolle.K9Saksnummer.Companion.somK9Saksnummer
 import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
@@ -108,9 +108,9 @@ internal class K9SakClient(
 
     internal suspend fun harLøpendeSakSomInvolverer(
         fraOgMed: LocalDate,
-        søker: AktørId,
-        pleietrengende: AktørId?,
-        annenPart: AktørId?,
+        søker: Identitetsnummer,
+        pleietrengende: Identitetsnummer?,
+        annenPart: Identitetsnummer?,
         correlationId: CorrelationId
     ): RutingGrunnlag {
         return RutingGrunnlag(

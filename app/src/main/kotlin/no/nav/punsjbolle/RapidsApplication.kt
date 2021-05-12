@@ -8,13 +8,14 @@ import no.nav.punsjbolle.søknad.PunsjetSøknadRiver
 
 internal fun RapidsConnection.registerApplicationContext(applicationContext: ApplicationContext) {
     PunsjetSøknadRiver(
-        rapidsConnection = this
+        rapidsConnection = this,
+        safClient = applicationContext.safClient,
+        rutingService = applicationContext.rutingService
     )
     PunsjetSøknadJournalføringRiver(
         rapidsConnection = this,
         k9SakClient = applicationContext.k9SakClient,
-        safClient = applicationContext.safClient,
-        rutingService = applicationContext.rutingService
+        safClient = applicationContext.safClient
     )
     PunsjetSøknadInnsendingRiver(
         rapidsConnection = this,
