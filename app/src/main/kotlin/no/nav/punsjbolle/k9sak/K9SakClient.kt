@@ -7,17 +7,20 @@ import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.jsonBody
 import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.readTextOrThrow
 import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.stringBody
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
+import no.nav.punsjbolle.AktørId
 import no.nav.punsjbolle.AzureAwareClient
 import no.nav.punsjbolle.CorrelationId
 import no.nav.punsjbolle.K9Saksnummer
 import no.nav.punsjbolle.K9Saksnummer.Companion.somK9Saksnummer
 import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
 import no.nav.punsjbolle.meldinger.SendPunsjetSøknadTilK9SakMelding
+import no.nav.punsjbolle.ruting.RutingGrunnlag
 import no.nav.punsjbolle.søknad.PunsjetSøknadMelding
 import org.intellij.lang.annotations.Language
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URI
+import java.time.LocalDate
 import java.util.*
 
 internal class K9SakClient(
@@ -101,6 +104,20 @@ internal class K9SakClient(
         require(httpStatusCode.isSuccess()) {
             "Feil fra K9Sak. URL=[$SendInnSøknadUrl], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
         }
+    }
+
+    internal suspend fun harLøpendeSakSomInvolverer(
+        fraOgMed: LocalDate,
+        søker: AktørId,
+        pleietrengende: AktørId?,
+        annenPart: AktørId?,
+        correlationId: CorrelationId
+    ): RutingGrunnlag {
+        return RutingGrunnlag(
+            søker = false,
+            pleietrengende = false,
+            annenPart = false
+        )
     }
 
     private companion object {
