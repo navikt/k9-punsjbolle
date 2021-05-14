@@ -138,7 +138,7 @@ internal class K9SakClient(
                 "kodeverk": "FAGSAK_YTELSE"
             },
             "periode": {
-                "fom": $fraOgMed
+                "fom": "$fraOgMed"
             },
             "bruker": ${søker?.let { "$it" }},
             "pleietrengendeIdenter": ${pleietrengende.jsonArray()},
