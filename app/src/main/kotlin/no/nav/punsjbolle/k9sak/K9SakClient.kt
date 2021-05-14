@@ -19,6 +19,7 @@ import no.nav.punsjbolle.søknad.PunsjetSøknadMelding
 import org.intellij.lang.annotations.Language
 import org.json.JSONArray
 import org.json.JSONObject
+import org.slf4j.LoggerFactory
 import java.net.URI
 import java.time.LocalDate
 import java.util.*
@@ -35,12 +36,13 @@ internal class K9SakClient(
 
     private val HentSaksnummerUrl = URI("$baseUrl/api/fordel/fagsak/opprett")
     private val SendInnSøknadUrl = URI("$baseUrl/api/fordel/journalposter")
+    private val MatchFagsak = URI("$baseUrl/api/fagsak/match")
 
     internal suspend fun hentSaksnummer(
         grunnlag: HentK9SaksnummerMelding.HentK9SaksnummerGrunnlag,
         correlationId: CorrelationId) : K9Saksnummer {
 
-        // https://github.com/navikt/k9-sak/blob/84987481324fbbfe128d71156eea1d02f0202845/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/FinnEllerOpprettSak.java#L23
+        // https://github.com/navikt/k9-sak/blob/3.1.30/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/FinnEllerOpprettSak.java#L23
         @Language("JSON")
         val dto = """
             {
@@ -75,7 +77,7 @@ internal class K9SakClient(
         grunnlag: SendPunsjetSøknadTilK9SakMelding.SendPunsjetSøknadTilK9SakGrunnlag,
         correlationId: CorrelationId) {
 
-        // https://github.com/navikt/k9-sak/blob/6678d3432980fc1dd40684b82a517ba3f43371d3/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/JournalpostMottakDto.java#L31
+        // https://github.com/navikt/k9-sak/blob/3.1.30/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/JournalpostMottakDto.java#L31
         @Language("JSON")
         val dto = """
             [{
@@ -106,25 +108,78 @@ internal class K9SakClient(
         }
     }
 
-    internal suspend fun harLøpendeSakSomInvolverer(
-        fraOgMed: LocalDate,
+    internal suspend fun harLøpendeSakSomInvolvererEnAv(
         søker: Identitetsnummer,
         pleietrengende: Identitetsnummer?,
         annenPart: Identitetsnummer?,
+        fraOgMed: LocalDate,
         correlationId: CorrelationId
-    ): RutingGrunnlag { // TODO: Implementere mot https://github.com/navikt/k9-sak/blob/master/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/fagsak/MatchFagsak.java
-        return RutingGrunnlag(
-            søker = false,
-            pleietrengende = false,
-            annenPart = false
-        )
+    ) = RutingGrunnlag(
+        søker = finnesMatchendeFagsak(søker = søker, fraOgMed = fraOgMed, correlationId = correlationId),
+        pleietrengende = pleietrengende?.let { finnesMatchendeFagsak(pleietrengende = it, fraOgMed = fraOgMed, correlationId = correlationId) } ?: false,
+        annenPart = annenPart?.let { finnesMatchendeFagsak(søker = it, fraOgMed = fraOgMed, correlationId = correlationId) } ?: false
+    )
+
+    private suspend fun finnesMatchendeFagsak(
+        søker: Identitetsnummer? = null,
+        pleietrengende: Identitetsnummer? = null,
+        annenPart: Identitetsnummer? = null,
+        fraOgMed: LocalDate,
+        correlationId: CorrelationId
+    ): Boolean {
+
+        // TODO: ytelseType er required i requesten. Om dette skal dekke alle søknadstyper bør den gjøres optional. Per nå er den hardkodet til Pleiepenger
+        // https://github.com/navikt/k9-sak/tree/3.1.30/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/fagsak/MatchFagsak.java#L26
+        @Language("JSON")
+        val dto = """
+        {
+            "ytelseType": {
+                "kode": "PSB",
+                "kodeverk": "FAGSAK_YTELSE"
+            },
+            "periode": {
+                "fom": $fraOgMed
+            },
+            "bruker": ${søker?.let { "$it" }},
+            "pleietrengendeIdenter": ${pleietrengende.jsonArray()},
+            "relatertPersonIdenter": ${annenPart.jsonArray()}
+        }
+        """.trimIndent()
+
+        val (httpStatusCode, response) = MatchFagsak.httpPost {
+            it.header(HttpHeaders.Authorization, authorizationHeader())
+            it.header(CorrelationIdHeaderKey, "$correlationId")
+            it.header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+            it.accept(ContentType.Application.Json)
+            it.jsonBody(dto)
+        }.readTextOrThrow()
+
+        require(httpStatusCode.isSuccess()) {
+            "Feil fra K9Sak. URL=[$MatchFagsak], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
+        }
+
+        return JSONArray(response)
+            .asSequence()
+            .map { it as JSONObject }
+            .filterNot { it.getBoolean("skalBehandlesAvInfotrygd") }
+            .filterNot { it.getString("status") == "AVSLU" } // TODO: Skal vi filtrere bort dette?
+            .toSet()
+            .isNotEmpty()
+            .also { if (it) {
+                secureLogger.info("Fant sak(er) i K9sak, Request=[${JSONObject(dto)}], Response=[$response]")
+            }}
     }
 
     private companion object {
+        private val secureLogger = LoggerFactory.getLogger("tjenestekall")
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsjbolle"
         private const val CorrelationIdHeaderKey = "Nav-Callid"
         private fun HttpRequestBuilder.jsonArrayBody(json: String) =
             stringBody(string = JSONArray(json).toString(), contentType = ContentType.Application.Json)
+        private fun Identitetsnummer?.jsonArray() = when (this) {
+            null -> "[]"
+            else -> """["$this"]"""
+        }
     }
 }

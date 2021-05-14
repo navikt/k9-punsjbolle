@@ -30,5 +30,16 @@ private fun WireMockServer.mockSendInnSøknad(): WireMockServer {
     return this
 }
 
-internal fun WireMockServer.mockK9Sak() = mockPingUrl().mockHentSaksnummer().mockSendInnSøknad()
+// TODO: Utbedre mock
+private fun WireMockServer.mockMatchFagsak(): WireMockServer {
+    WireMock.stubFor(
+        WireMock.post(WireMock.urlPathMatching(".*$path/api/fagsak/match"))
+            .willReturn(WireMock.aResponse().withHeader("Content-Type", "application/json").withBody("""
+                []
+            """.trimIndent()).withStatus(200)))
+    return this
+}
+
+
+internal fun WireMockServer.mockK9Sak() = mockPingUrl().mockHentSaksnummer().mockSendInnSøknad().mockMatchFagsak()
 internal fun WireMockServer.k9SakBaseUrl() = baseUrl() + path

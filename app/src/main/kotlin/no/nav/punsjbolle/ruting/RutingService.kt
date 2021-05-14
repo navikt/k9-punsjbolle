@@ -17,7 +17,7 @@ internal class RutingService(
         annenPart: Identitetsnummer? = null,
         correlationId: CorrelationId) : Destinasjon {
 
-        val k9SakGrunnlag = k9SakClient.harLøpendeSakSomInvolverer(
+        val k9SakGrunnlag = k9SakClient.harLøpendeSakSomInvolvererEnAv(
             søker = søker,
             fraOgMed = fraOgMed,
             pleietrengende = pleietrengende,
@@ -25,7 +25,7 @@ internal class RutingService(
             correlationId = correlationId
         )
 
-        val infotrygdGrunnlag = infotrygdClient.harLøpendeSakSomInvolverer(
+        val infotrygdGrunnlag = infotrygdClient.harLøpendeSakSomInvolvererEnAv(
             søker = søker,
             fraOgMed = fraOgMed,
             pleietrengende = pleietrengende,
