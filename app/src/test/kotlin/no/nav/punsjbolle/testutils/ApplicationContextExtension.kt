@@ -23,8 +23,8 @@ internal class ApplicationContextExtension : ParameterResolver {
             "K9_SAK_SCOPES" to "k9-sak/.default",
             "SAF_BASE_URL" to mockedEnvironment.wireMockServer.safBaseUrl(),
             "SAF_SCOPES" to "saf/.default",
-            "INFOTRYGD_GRUNNAG_PAAROERENDE_SYKDOM_BASE_URL" to mockedEnvironment.wireMockServer.infotrygdGrunnlagPaaroerendeSykdomBaseUrl(),
-            "INFOTRYGD_GRUNNAG_PAAROERENDE_SYKDOM_SCOPES" to "infotrygd-grunnlag-paaroerende-sykdom/.default"
+            "INFOTRYGD_GRUNNLAG_PAAROERENDE_SYKDOM_BASE_URL" to mockedEnvironment.wireMockServer.infotrygdGrunnlagPaaroerendeSykdomBaseUrl(),
+            "INFOTRYGD_GRUNNLAG_PAAROERENDE_SYKDOM_SCOPES" to "infotrygd-grunnlag-paaroerende-sykdom/.default"
         )
 
         init {

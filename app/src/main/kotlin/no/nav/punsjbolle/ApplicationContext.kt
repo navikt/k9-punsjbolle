@@ -61,9 +61,9 @@ internal class ApplicationContext(
             )
 
             val benyttetInfotrygdClient = infotrygdClient ?: InfotrygdClient(
-                baseUrl = URI(benyttetEnv.hentRequiredEnv("INFOTRYGD_GRUNNAG_PAAROERENDE_SYKDOM_BASE_URL")),
+                baseUrl = URI(benyttetEnv.hentRequiredEnv("INFOTRYGD_GRUNNLAG_PAAROERENDE_SYKDOM_BASE_URL")),
                 accessTokenClient = benyttetAccessTokenClient,
-                scopes = benyttetEnv.hentRequiredEnv("INFOTRYGD_GRUNNAG_PAAROERENDE_SYKDOM_SCOPES").csvTilSet()
+                scopes = benyttetEnv.hentRequiredEnv("INFOTRYGD_GRUNNLAG_PAAROERENDE_SYKDOM_SCOPES").csvTilSet()
             )
 
             return ApplicationContext(
