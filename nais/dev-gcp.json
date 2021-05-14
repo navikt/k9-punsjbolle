@@ -14,6 +14,8 @@
     "SAF_BASE_URL": "https://omsorgspenger-proxy.dev-fss-pub.nais.io/saf",
     "SAF_SCOPES": "824525c6-74df-47fc-8892-444e5f8506de/.default",
     "K9_SAK_BASE_URL": "https://omsorgspenger-proxy.dev-fss-pub.nais.io/k9-sak",
-    "K9_SAK_SCOPES": "824525c6-74df-47fc-8892-444e5f8506de/.default"
+    "K9_SAK_SCOPES": "824525c6-74df-47fc-8892-444e5f8506de/.default",
+    "INFOTRYGD_GRUNNAG_PAAROERENDE_SYKDOM_BASE_URL": "https://omsorgspenger-proxy.dev-fss-pub.nais.io/infotrygd-grunnlag-paaroerende-sykdom",
+    "INFOTRYGD_GRUNNAG_PAAROERENDE_SYKDOM_SCOPES": "32551525-c4dd-44ae-b906-2f8d8a00bb03/.default"
   }
 }

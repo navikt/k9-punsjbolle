@@ -60,7 +60,6 @@ internal class ApplicationContext(
                 scopes = benyttetEnv.hentRequiredEnv("SAF_SCOPES").csvTilSet(),
             )
 
-            // TODO: Legge til config for nais deploy på disse to
             val benyttetInfotrygdClient = infotrygdClient ?: InfotrygdClient(
                 baseUrl = URI(benyttetEnv.hentRequiredEnv("INFOTRYGD_GRUNNAG_PAAROERENDE_SYKDOM_BASE_URL")),
                 accessTokenClient = benyttetAccessTokenClient,
