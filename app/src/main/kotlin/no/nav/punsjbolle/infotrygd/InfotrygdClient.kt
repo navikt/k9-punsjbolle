@@ -35,9 +35,12 @@ internal class InfotrygdClient(
         annenPart: Identitetsnummer?,
         correlationId: CorrelationId
     ) = RutingGrunnlag(
-        søker = harSakSomSøker(søker, fraOgMed, correlationId),
-        pleietrengende = pleietrengende?.let { harSakSomPleietrengende(it, fraOgMed, correlationId) } ?: false,
-        annenPart = annenPart?.let { harSakSomSøker(it, fraOgMed, correlationId) } ?: false
+        søker = false,
+        pleietrengende = false,
+        annenPart = false
+        //søker = harSakSomSøker(søker, fraOgMed, correlationId),
+        //pleietrengende = pleietrengende?.let { harSakSomPleietrengende(it, fraOgMed, correlationId) } ?: false,
+        //annenPart = annenPart?.let { harSakSomSøker(it, fraOgMed, correlationId) } ?: false
     )
 
     private suspend fun harSakSomSøker(
