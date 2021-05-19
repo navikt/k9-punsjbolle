@@ -54,6 +54,7 @@ internal class PunsjetSøknadRiver(
             fraOgMed = søknad.periode.fom ?: LocalDate.now(),
             pleietrengende = søknad.pleietrengende,
             annenPart = søknad.annenPart,
+            søknadstype = søknad.søknadstype,
             correlationId = packet.correlationId()
         )}.also { logger.info("Destinasjon=[${it.name}]") }
 
