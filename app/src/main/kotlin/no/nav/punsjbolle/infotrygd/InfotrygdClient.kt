@@ -81,7 +81,7 @@ internal class InfotrygdClient(
         }
 
         return JSONArray(response).inneholderAktuelleVedtak().also { if (it) {
-            secureLogger.info("Fant vedtk i Infotrygd som pleietrengende for Identitetsnummer=[$identitetsnummer], FraOgMed=[$fraOgMed], Response=[$response]")
+            secureLogger.info("Fant vedtak i Infotrygd som pleietrengende for Identitetsnummer=[$identitetsnummer], FraOgMed=[$fraOgMed], Response=[$response]")
         }}
     }
 
@@ -103,8 +103,8 @@ internal class InfotrygdClient(
             true -> getString(key)
             else -> null
         }
-        private fun JSONObject.hasJSONObject(key: String) = has(key) && get(key) is JSONObject
 
+        private fun JSONObject.hasJSONObject(key: String) = has(key) && get(key) is JSONObject
 
         private fun JSONObject.inneholderAktuelle(key: String) =
             getJSONArrayOrEmptyArray(key)
@@ -124,6 +124,5 @@ internal class InfotrygdClient(
             map { it as JSONObject }
             .map { it.inneholderAktuelle("vedtak") }
             .any { it }
-
     }
 }

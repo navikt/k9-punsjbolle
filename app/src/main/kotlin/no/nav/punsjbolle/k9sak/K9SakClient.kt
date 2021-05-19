@@ -20,7 +20,6 @@ import no.nav.punsjbolle.søknad.PunsjetSøknadMelding
 import org.intellij.lang.annotations.Language
 import org.json.JSONArray
 import org.json.JSONObject
-import org.slf4j.LoggerFactory
 import java.net.URI
 import java.time.LocalDate
 import java.util.*
@@ -160,13 +159,10 @@ internal class K9SakClient(
             "Feil fra K9Sak. URL=[$MatchFagsak], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
         }
 
-        return response.inneholderMatchendeFagsak().also { if (it) {
-            secureLogger.info("Fant sak(er) i K9sak, Request=[${JSONObject(dto)}], Response=[$response]")
-        }}
+        return response.inneholderMatchendeFagsak()
     }
 
     internal companion object {
-        private val secureLogger = LoggerFactory.getLogger("tjenestekall")
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsjbolle"
         private const val CorrelationIdHeaderKey = "Nav-Callid"
