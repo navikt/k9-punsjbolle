@@ -158,28 +158,31 @@ internal class K9SakClient(
             "Feil fra K9Sak. URL=[$MatchFagsak], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
         }
 
-        return JSONArray(response)
-            .asSequence()
-            .map { it as JSONObject }
-            .filterNot { it.getBoolean("skalBehandlesAvInfotrygd") }
-            .filterNot { it.getString("status") == "AVSLU" } // TODO: Skal vi filtrere bort dette?
-            .toSet()
-            .isNotEmpty()
-            .also { if (it) {
-                secureLogger.info("Fant sak(er) i K9sak, Request=[${JSONObject(dto)}], Response=[$response]")
-            }}
+        return response.inneholderMatchendeFagsak().also { if (it) {
+            secureLogger.info("Fant sak(er) i K9sak, Request=[${JSONObject(dto)}], Response=[$response]")
+        }}
     }
 
-    private companion object {
+    internal companion object {
         private val secureLogger = LoggerFactory.getLogger("tjenestekall")
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsjbolle"
         private const val CorrelationIdHeaderKey = "Nav-Callid"
+
         private fun HttpRequestBuilder.jsonArrayBody(json: String) =
             stringBody(string = JSONArray(json).toString(), contentType = ContentType.Application.Json)
+
         private fun Identitetsnummer?.jsonArray() = when (this) {
             null -> "[]"
             else -> """["$this"]"""
         }
+
+        internal fun String.inneholderMatchendeFagsak() = JSONArray(this)
+            .asSequence()
+            .map { it as JSONObject }
+            .filterNot { it.getBoolean("skalBehandlesAvInfotrygd") }
+            .filterNot { it.getString("status") == "AVSLU" }
+            .toSet()
+            .isNotEmpty()
     }
 }
