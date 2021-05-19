@@ -115,11 +115,19 @@ internal class K9SakClient(
         fraOgMed: LocalDate,
         søknadstype: Søknadstype,
         correlationId: CorrelationId
-    ) = RutingGrunnlag(
-        søker = finnesMatchendeFagsak(søker = søker, fraOgMed = fraOgMed, correlationId = correlationId, søknadstype = søknadstype),
-        pleietrengende = pleietrengende?.let { finnesMatchendeFagsak(pleietrengende = it, fraOgMed = fraOgMed, correlationId = correlationId, søknadstype = søknadstype) } ?: false,
-        annenPart = annenPart?.let { finnesMatchendeFagsak(søker = it, fraOgMed = fraOgMed, correlationId = correlationId, søknadstype = søknadstype) } ?: false
-    )
+    ) : RutingGrunnlag {
+        if (finnesMatchendeFagsak(søker = søker, fraOgMed = fraOgMed, correlationId = correlationId, søknadstype = søknadstype)) {
+            return RutingGrunnlag(søker = true)
+        }
+        if (pleietrengende?.let { finnesMatchendeFagsak(pleietrengende = it, fraOgMed = fraOgMed, correlationId = correlationId, søknadstype = søknadstype) } == true) {
+            return RutingGrunnlag(søker = false, pleietrengende = true)
+        }
+        return RutingGrunnlag(
+            søker = false,
+            pleietrengende = false,
+            annenPart = annenPart?.let { finnesMatchendeFagsak(søker = it, fraOgMed = fraOgMed, correlationId = correlationId, søknadstype = søknadstype) } ?: false
+        )
+    }
 
     private suspend fun finnesMatchendeFagsak(
         søker: Identitetsnummer? = null,
