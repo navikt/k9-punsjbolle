@@ -1,5 +1,6 @@
 package no.nav.punsjbolle.api
 
+import com.fasterxml.jackson.databind.node.ObjectNode
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.request.*
@@ -20,7 +21,6 @@ import no.nav.punsjbolle.joark.SafClient
 import no.nav.punsjbolle.k9sak.K9SakClient
 import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
 import no.nav.punsjbolle.ruting.RutingService
-import org.json.JSONObject
 import java.time.LocalDate
 
 internal fun Route.SaksnummerApi(
@@ -89,16 +89,23 @@ internal data class Request(
     )
 
     internal companion object {
-        private fun JSONObject.stringOrNull(key: String) = when (has(key) && get(key) is String) {
-            true -> getString(key)
+        private fun ObjectNode.stringOrNull(key: String) = when (hasNonNull(key) && get(key).isTextual) {
+            true -> get(key).textValue()
             false -> null
         }
-        private fun JSONObject.partOrNull(key: String) = kotlin.runCatching { getJSONObject(key).let { part ->
-            Part(aktørId = part.getString("aktørId").somAktørId(), identitetsnummer = part.getString("identitetsnummer").somIdentitetsnummer())
-        }}.fold(onSuccess = {it}, onFailure = {null})
-        private suspend fun ApplicationCall.json() = kotlin.runCatching { JSONObject(receiveText()) }.fold(onSuccess = {it}, onFailure = {JSONObject()})
+
+        private fun ObjectNode.objectNodeOrNull(key: String) = when (hasNonNull(key) && get(key).isObject) {
+            true -> get(key) as ObjectNode
+            false -> null
+        }
+
+        private fun ObjectNode.partOrNull(key: String) = objectNodeOrNull(key)?.let { part -> Part(
+            identitetsnummer = part.stringOrNull("identitetsnummer")?.somIdentitetsnummer() ?: throw IllegalStateException("Mangler identitetsnummer på $key"),
+            aktørId = part.stringOrNull("aktørId")?.somAktørId() ?: throw IllegalStateException("Mangler aktørId på $key")
+        )}
+
         internal suspend fun ApplicationCall.request() : Request {
-            val json = json()
+            val json = receive<ObjectNode>()
             return Request(
                 correlationId = request.header(HttpHeaders.XCorrelationId)?.somCorrelationId() ?: throw IllegalStateException("Mangler correlationId"),
                 journalpostId = json.stringOrNull("journalpostId")?.somJournalpostId(),

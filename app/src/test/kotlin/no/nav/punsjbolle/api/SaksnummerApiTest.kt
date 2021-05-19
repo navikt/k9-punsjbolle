@@ -146,7 +146,7 @@ internal class SaksnummerApiTest(
         )) = withTestApplication( { punsjbolle(applicationContext)}) {
         handleRequest(HttpMethod.Post, "/api/saksnummer") {
             addHeader(HttpHeaders.XCorrelationId, "${UUID.randomUUID()}")
-            addHeader(HttpHeaders.ContentType, "application/json; charset=UTF-8")
+            addHeader(HttpHeaders.ContentType, "application/json")
             jwt?.let { addHeader(HttpHeaders.Authorization, "Bearer $it") }
             setBody(requestBody(fraOgMed = fraOgMed, journalpostId = journalpostId))
         }.let {
