@@ -5,6 +5,7 @@ import io.ktor.features.*
 import io.ktor.jackson.*
 import io.ktor.routing.*
 import no.nav.helse.dusseldorf.ktor.health.*
+import no.nav.punsjbolle.api.SaksnummerApi
 
 internal fun Application.punsjbolle(
     applicationContext: ApplicationContext = ApplicationContext.Builder().build()) {
@@ -32,6 +33,13 @@ internal fun Application.punsjbolle(
 
     routing {
         HealthRoute(healthService = healthService)
+        route("/api") {
+            SaksnummerApi(
+                rutingService = applicationContext.rutingService,
+                safClient = applicationContext.safClient,
+                k9SakClient = applicationContext.k9SakClient
+            )
+        }
     }
 }
 

@@ -5,6 +5,7 @@ import no.nav.punsjbolle.Identitetsnummer
 import no.nav.punsjbolle.Søknadstype
 import no.nav.punsjbolle.infotrygd.InfotrygdClient
 import no.nav.punsjbolle.k9sak.K9SakClient
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 internal class RutingService(
@@ -37,9 +38,9 @@ internal class RutingService(
         )
 
         return when {
-            k9SakGrunnlag.minstEnPart && infotrygdGrunnlag.minstEnPart -> throw IllegalStateException(
-                "Berører parter som finnes både i K9Sak og Infotrygd. K9Sak=[$k9SakGrunnlag], Infotrygd=[$infotrygdGrunnlag]"
-            )
+            k9SakGrunnlag.minstEnPart && infotrygdGrunnlag.minstEnPart -> logger.warn(
+                "Berører parter som finnes både i Infotrygd og K9Sak. Infotrygd=[$infotrygdGrunnlag], K9Sak=[$k9SakGrunnlag]"
+            ).let { Destinasjon.K9Sak }
             infotrygdGrunnlag.minstEnPart -> Destinasjon.Infotrygd
             else -> Destinasjon.K9Sak
         }
@@ -48,6 +49,10 @@ internal class RutingService(
     internal enum class Destinasjon {
         K9Sak,
         Infotrygd
+    }
+
+    private companion object {
+        private val logger = LoggerFactory.getLogger(RutingService::class.java)
     }
 }
 

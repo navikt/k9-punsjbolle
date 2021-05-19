@@ -6,6 +6,7 @@ import io.mockk.mockk
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.punsjbolle.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
+import no.nav.punsjbolle.K9Saksnummer.Companion.somK9Saksnummer
 import no.nav.punsjbolle.Periode.Companion.somPeriode
 import no.nav.punsjbolle.infotrygd.InfotrygdClient
 import no.nav.punsjbolle.k9sak.K9SakClient
@@ -13,6 +14,8 @@ import no.nav.punsjbolle.ruting.RutingGrunnlag
 import no.nav.punsjbolle.testutils.*
 import no.nav.punsjbolle.testutils.ApplicationContextExtension
 import no.nav.punsjbolle.testutils.printSisteMelding
+import no.nav.punsjbolle.testutils.rapid.mockFerdigstillJournalføringForK9
+import no.nav.punsjbolle.testutils.rapid.mockHentAktørIder
 import no.nav.punsjbolle.testutils.sisteMeldingHarLøsningPå
 import no.nav.punsjbolle.testutils.sisteMeldingManglerLøsningPå
 import no.nav.punsjbolle.testutils.søknad.PunsjetSøknadVerktøy
@@ -21,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.skyscreamer.jsonassert.JSONAssert
-import kotlin.test.assertEquals
 
 @ExtendWith(ApplicationContextExtension::class)
 internal class PunsjetSøknadRutingTest(
@@ -73,9 +75,13 @@ internal class PunsjetSøknadRutingTest(
             k9sak = RutingGrunnlag(søker = true, pleietrengende = false, annenPart = false),
             infotrygd = RutingGrunnlag(søker = false, pleietrengende = true, annenPart = false)
         )
+        coEvery { k9SakClientMock.hentSaksnummer(any(),any()) }.returns("123SAK".somK9Saksnummer())
+        coEvery { k9SakClientMock.sendInnSøknad(any(), any(), any()) }.returns(Unit)
 
-        // Kaster exception og det kommer ikke videre
-        assertEquals(0, rapid.inspektør.size)
+        rapid.sendPunsjetSøknad()
+        rapid.mockHentAktørIder(setOf(søker, barn))
+        rapid.mockFerdigstillJournalføringForK9()
+        rapid.sisteMeldingHarLøsningPå("PunsjetSøknad")
     }
 
     private fun mock(infotrygd: RutingGrunnlag, k9sak: RutingGrunnlag) {

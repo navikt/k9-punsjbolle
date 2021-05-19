@@ -59,7 +59,7 @@ internal class SafClient(
         return journalposter
     }
 
-    private suspend fun hentJournalpost(
+    internal suspend fun hentJournalpost(
         journalpostId: JournalpostId,
         correlationId: CorrelationId
     ): Journalpost {

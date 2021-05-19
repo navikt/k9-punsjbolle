@@ -45,7 +45,7 @@ internal data class CorrelationId private constructor(private val value: String)
     override fun toString() = value
     internal companion object {
         private val Regex = "[a-zA-Z0-9_.\\-æøåÆØÅ]{5,200}".toRegex()
-        private fun String.somCorrelationId() = CorrelationId(this)
+        internal fun String.somCorrelationId() = CorrelationId(this)
         internal fun JsonMessage.correlationId() = get(Behovsformat.CorrelationId).asText().somCorrelationId()
     }
 }
