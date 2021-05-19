@@ -29,6 +29,11 @@ internal class RutingService(
             correlationId = correlationId
         )
 
+        if (k9SakGrunnlag.minstEnPart) {
+            logger.info("Rutes til K9Sak ettersom minst en part er involvert i løpende sak. K9Sak=[$k9SakGrunnlag]")
+            return Destinasjon.K9Sak
+        }
+
         val infotrygdGrunnlag = infotrygdClient.harLøpendeSakSomInvolvererEnAv(
             søker = søker,
             fraOgMed = fraOgMed,
@@ -38,11 +43,12 @@ internal class RutingService(
         )
 
         return when {
-            k9SakGrunnlag.minstEnPart && infotrygdGrunnlag.minstEnPart -> logger.warn(
-                "Berører parter som finnes både i Infotrygd og K9Sak. Infotrygd=[$infotrygdGrunnlag], K9Sak=[$k9SakGrunnlag]"
-            ).let { Destinasjon.K9Sak }
-            infotrygdGrunnlag.minstEnPart -> Destinasjon.Infotrygd
-            else -> Destinasjon.K9Sak
+            infotrygdGrunnlag.minstEnPart -> Destinasjon.Infotrygd.also {
+                logger.info("Rutes til Infotrygd ettersom minst en part er involvert i en løpende sak. Infotrygd=[$infotrygdGrunnlag]")
+            }
+            else -> Destinasjon.K9Sak.also {
+                logger.info("Rutes til K9Sak ettersom ingen parter er involvert hverken i Infotrygd eller K9Sak fra før")
+            }
         }
     }
 
