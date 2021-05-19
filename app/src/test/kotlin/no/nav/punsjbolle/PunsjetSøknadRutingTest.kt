@@ -93,7 +93,7 @@ internal class PunsjetSøknadRutingTest(
             {
                "identitetsnummer": "111111111111",
                "berørteIdentitetsnummer": ["222222222222"],
-               "journalpostType": "PleiepengerSyktBarnSøknad",
+               "journalpostType": "PleiepengerSyktBarn",
                "journalpostIder": ["1112131415"]
             }
         """.trimIndent()

@@ -79,11 +79,14 @@ internal data class Periode(internal val fom: LocalDate?, internal val tom: Loca
     }
 }
 
-internal enum class Søknadstype(internal val k9YtelseType: String, internal val k9Type: String) {
-    PleiepengerSyktBarn("PSB", "PLEIEPENGER_SOKNAD"),
-    OmsorgspengerUtbetaling("OMP", "SØKNAD_UTBETALING_OMS"),
-    OmsorgspengerKroniskSyktBarn("OMP_KS", "SØKNAD_OMS_UTVIDETRETT_KS"),
-    OmsorgspengerMidlertidigAlene("OMS_MA", "SØKNAD_OMS_UTVIDETRETT_MA");
+internal enum class Søknadstype(
+    internal val k9YtelseType: String,
+    internal val k9Type: String,
+    internal val journalpostType: String) {
+    PleiepengerSyktBarn("PSB", "PLEIEPENGER_SOKNAD", "PleiepengerSyktBarn"),
+    OmsorgspengerUtbetaling("OMP", "SØKNAD_UTBETALING_OMS", "UtbetaleOmsorgspenger"),
+    OmsorgspengerKroniskSyktBarn("OMP_KS", "SØKNAD_OMS_UTVIDETRETT_KS", "KroniskSyktBarn"),
+    OmsorgspengerMidlertidigAlene("OMS_MA", "SØKNAD_OMS_UTVIDETRETT_MA", "MidlertidigAlene");
 
     internal companion object {
         internal fun fraK9FormatYtelsetype(ytelsetype: String) = when (ytelsetype) {
