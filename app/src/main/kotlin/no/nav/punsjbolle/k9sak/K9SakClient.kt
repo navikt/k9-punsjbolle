@@ -12,6 +12,7 @@ import no.nav.punsjbolle.CorrelationId
 import no.nav.punsjbolle.Identitetsnummer
 import no.nav.punsjbolle.K9Saksnummer
 import no.nav.punsjbolle.K9Saksnummer.Companion.somK9Saksnummer
+import no.nav.punsjbolle.Søknadstype
 import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
 import no.nav.punsjbolle.meldinger.SendPunsjetSøknadTilK9SakMelding
 import no.nav.punsjbolle.ruting.RutingGrunnlag
@@ -113,11 +114,12 @@ internal class K9SakClient(
         pleietrengende: Identitetsnummer?,
         annenPart: Identitetsnummer?,
         fraOgMed: LocalDate,
+        søknadstype: Søknadstype,
         correlationId: CorrelationId
     ) = RutingGrunnlag(
-        søker = finnesMatchendeFagsak(søker = søker, fraOgMed = fraOgMed, correlationId = correlationId),
-        pleietrengende = pleietrengende?.let { finnesMatchendeFagsak(pleietrengende = it, fraOgMed = fraOgMed, correlationId = correlationId) } ?: false,
-        annenPart = annenPart?.let { finnesMatchendeFagsak(søker = it, fraOgMed = fraOgMed, correlationId = correlationId) } ?: false
+        søker = finnesMatchendeFagsak(søker = søker, fraOgMed = fraOgMed, correlationId = correlationId, søknadstype = søknadstype),
+        pleietrengende = pleietrengende?.let { finnesMatchendeFagsak(pleietrengende = it, fraOgMed = fraOgMed, correlationId = correlationId, søknadstype = søknadstype) } ?: false,
+        annenPart = annenPart?.let { finnesMatchendeFagsak(søker = it, fraOgMed = fraOgMed, correlationId = correlationId, søknadstype = søknadstype) } ?: false
     )
 
     private suspend fun finnesMatchendeFagsak(
@@ -125,16 +127,16 @@ internal class K9SakClient(
         pleietrengende: Identitetsnummer? = null,
         annenPart: Identitetsnummer? = null,
         fraOgMed: LocalDate,
+        søknadstype: Søknadstype,
         correlationId: CorrelationId
     ): Boolean {
 
-        // TODO: ytelseType er required i requesten. Om dette skal dekke alle søknadstyper bør den gjøres optional. Per nå er den hardkodet til Pleiepenger
         // https://github.com/navikt/k9-sak/tree/3.1.30/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/fagsak/MatchFagsak.java#L26
         @Language("JSON")
         val dto = """
         {
             "ytelseType": {
-                "kode": "PSB",
+                "kode": "${søknadstype.k9YtelseType}",
                 "kodeverk": "FAGSAK_YTELSE"
             },
             "periode": {
@@ -158,28 +160,31 @@ internal class K9SakClient(
             "Feil fra K9Sak. URL=[$MatchFagsak], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
         }
 
-        return JSONArray(response)
-            .asSequence()
-            .map { it as JSONObject }
-            .filterNot { it.getBoolean("skalBehandlesAvInfotrygd") }
-            .filterNot { it.getString("status") == "AVSLU" } // TODO: Skal vi filtrere bort dette?
-            .toSet()
-            .isNotEmpty()
-            .also { if (it) {
-                secureLogger.info("Fant sak(er) i K9sak, Request=[${JSONObject(dto)}], Response=[$response]")
-            }}
+        return response.inneholderMatchendeFagsak().also { if (it) {
+            secureLogger.info("Fant sak(er) i K9sak, Request=[${JSONObject(dto)}], Response=[$response]")
+        }}
     }
 
-    private companion object {
+    internal companion object {
         private val secureLogger = LoggerFactory.getLogger("tjenestekall")
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsjbolle"
         private const val CorrelationIdHeaderKey = "Nav-Callid"
+
         private fun HttpRequestBuilder.jsonArrayBody(json: String) =
             stringBody(string = JSONArray(json).toString(), contentType = ContentType.Application.Json)
+
         private fun Identitetsnummer?.jsonArray() = when (this) {
             null -> "[]"
             else -> """["$this"]"""
         }
+
+        internal fun String.inneholderMatchendeFagsak() = JSONArray(this)
+            .asSequence()
+            .map { it as JSONObject }
+            .filterNot { it.getBoolean("skalBehandlesAvInfotrygd") }
+            .filterNot { it.getString("status") == "AVSLU" }
+            .toSet()
+            .isNotEmpty()
     }
 }

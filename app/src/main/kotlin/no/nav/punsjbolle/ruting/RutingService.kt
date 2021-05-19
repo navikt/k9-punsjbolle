@@ -2,6 +2,7 @@ package no.nav.punsjbolle.ruting
 
 import no.nav.punsjbolle.CorrelationId
 import no.nav.punsjbolle.Identitetsnummer
+import no.nav.punsjbolle.Søknadstype
 import no.nav.punsjbolle.infotrygd.InfotrygdClient
 import no.nav.punsjbolle.k9sak.K9SakClient
 import java.time.LocalDate
@@ -15,6 +16,7 @@ internal class RutingService(
         fraOgMed: LocalDate,
         pleietrengende: Identitetsnummer? = null,
         annenPart: Identitetsnummer? = null,
+        søknadstype: Søknadstype,
         correlationId: CorrelationId) : Destinasjon {
 
         val k9SakGrunnlag = k9SakClient.harLøpendeSakSomInvolvererEnAv(
@@ -22,6 +24,7 @@ internal class RutingService(
             fraOgMed = fraOgMed,
             pleietrengende = pleietrengende,
             annenPart = annenPart,
+            søknadstype = søknadstype,
             correlationId = correlationId
         )
 

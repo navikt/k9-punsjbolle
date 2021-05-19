@@ -3,7 +3,6 @@ package no.nav.punsjbolle.meldinger
 import no.nav.k9.rapid.behov.Behov
 import no.nav.punsjbolle.JournalpostId
 import no.nav.punsjbolle.LeggTilBehov
-import no.nav.punsjbolle.Søknadstype
 import no.nav.punsjbolle.søknad.PunsjetSøknadMelding
 
 internal object OpprettGosysJournalføringsoppgaverMelding : LeggTilBehov<Pair<PunsjetSøknadMelding.PunsjetSøknad, Set<JournalpostId>>> {
@@ -18,10 +17,8 @@ internal object OpprettGosysJournalføringsoppgaverMelding : LeggTilBehov<Pair<P
                 "identitetsnummer" to "${søknad.søker}",
                 "berørteIdentitetsnummer" to søknad.identitetsnummer.minus(søknad.søker).map { "$it" },
                 "journalpostIder" to journalpostIder.map { "$it" },
-                "journalpostType" to søknad.søknadstype.somJournalpostType()
+                "journalpostType" to søknad.søknadstype.journalpostType
             )
         )
     }
-    
-    internal fun Søknadstype.somJournalpostType() = "${name}Søknad"
 }

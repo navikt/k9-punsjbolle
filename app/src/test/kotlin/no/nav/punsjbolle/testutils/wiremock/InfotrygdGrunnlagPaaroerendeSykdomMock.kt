@@ -28,7 +28,7 @@ private fun WireMockServer.mockVedtakForPleietrengende(): WireMockServer {
     WireMock.stubFor(
         WireMock.get(WireMock.urlPathMatching(".*$path/vedtakForPleietrengende.*"))
             .withDefaultGetHeaders().withQueryParam("fnr", AnythingPattern()).withQueryParam("fom", AnythingPattern())
-            .willReturn(WireMock.aResponse().withJson("""{"vedtak":[]}""")))
+            .willReturn(WireMock.aResponse().withJson("""[{"vedtak":[]}]""")))
     return this
 }
 

@@ -57,11 +57,8 @@ internal class InfotrygdClient(
             "Feil fra Infotrygd. URL=[$HentSakerUrl], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
         }
 
-        val json = JSONObject(response)
-        val saker = json.innehoderAktuellSak("saker")
-        val vedtak = json.innehoderAktuellSak("vedtak")
-        return (saker || vedtak).also { if (it) {
-            secureLogger.info("Fant sak(er) i Infotrygd som søker for Identitetsnummer=[$identitetsnummer], FraOgMed=[$fraOgMed], Response=[$response]")
+        return JSONObject(response).inneholderAktuelleSakerEllerVedtak().also { if (it) {
+            secureLogger.info("Fant saker/vedtak i Infotrygd som søker for Identitetsnummer=[$identitetsnummer], FraOgMed=[$fraOgMed], Response=[$response]")
         }}
     }
 
@@ -83,13 +80,12 @@ internal class InfotrygdClient(
             "Feil fra Infotrygd. URL=[$HentVedtakForPleietrengende], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
         }
 
-        val json = JSONObject(response)
-        return json.innehoderAktuellSak("vedtak").also { if (it) {
-            secureLogger.info("Fant sak(er) i Infotrygd som pleietrengende for Identitetsnummer=[$identitetsnummer], FraOgMed=[$fraOgMed], Response=[$response]")
+        return JSONArray(response).inneholderAktuelleVedtak().also { if (it) {
+            secureLogger.info("Fant vedtk i Infotrygd som pleietrengende for Identitetsnummer=[$identitetsnummer], FraOgMed=[$fraOgMed], Response=[$response]")
         }}
     }
 
-    private companion object {
+    internal companion object {
         private val secureLogger = LoggerFactory.getLogger("tjenestekall")
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsjbolle"
@@ -103,17 +99,31 @@ internal class InfotrygdClient(
             false -> JSONArray()
         }
 
-        private fun JSONObject.hasString(key: String) = has(key) && get(key) is String
+        private fun JSONObject.stringOrNull(key: String) = when (has(key) && get(key) is String) {
+            true -> getString(key)
+            else -> null
+        }
+        private fun JSONObject.hasJSONObject(key: String) = has(key) && get(key) is JSONObject
 
-        private fun JSONObject.innehoderAktuellSak(key: String) =
+
+        private fun JSONObject.inneholderAktuelle(key: String) =
             getJSONArrayOrEmptyArray(key)
             .asSequence()
             .map { it as JSONObject }
-            .filter { it.hasString("tema") }
-            .filter { it.getString("tema").toUpperCase() == "BS" }
-            .filter { it.hasString("behandlingstema") }
-            .filter { relevanteBehandlingstema.contains(it.getString("behandlingstema").toUpperCase()) }
+            .filter { it.hasJSONObject("tema") }
+            .filter { "BS" == it.getJSONObject("tema").stringOrNull("kode") }
+            .filter { it.hasJSONObject("behandlingstema") }
+            .filter { relevanteBehandlingstema.contains(it.getJSONObject("behandlingstema").stringOrNull("kode")) }
             .toList()
             .isNotEmpty()
+
+        internal fun JSONObject.inneholderAktuelleSakerEllerVedtak() =
+            inneholderAktuelle("saker") || inneholderAktuelle("vedtak")
+
+        internal fun JSONArray.inneholderAktuelleVedtak() =
+            map { it as JSONObject }
+            .map { it.inneholderAktuelle("vedtak") }
+            .any { it }
+
     }
 }

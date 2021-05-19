@@ -15,26 +15,42 @@ private fun WireMockServer.mockPingUrl(): WireMockServer {
     return this
 }
 
-// TODO: Utbedre mock
 private fun WireMockServer.mockHentSaksnummer(): WireMockServer {
     WireMock.stubFor(
-        WireMock.post(WireMock.urlPathMatching(".*$path/api/fordel/fagsak/opprett")).withDefaultPostHeaders()
+        WireMock.post(WireMock.urlPathMatching(".*$path/api/fordel/fagsak/opprett"))
+            .withDefaultPostHeaders()
+            .withRequestBody(WireMock.matchingJsonPath("$.ytelseType"))
+            .withRequestBody(WireMock.matchingJsonPath("$.aktørId"))
+            .withRequestBody(WireMock.matchingJsonPath("$.pleietrengendeAktørId"))
+            .withRequestBody(WireMock.matchingJsonPath("$.periode"))
             .willReturn(WireMock.aResponse().withJson("""{"saksnummer": "SAK123"}""")))
     return this
 }
 
-// TODO: Utbedre mock
 private fun WireMockServer.mockSendInnSøknad(): WireMockServer {
     WireMock.stubFor(
-        WireMock.post(WireMock.urlPathMatching(".*$path/api/fordel/journalposter")).withDefaultPostHeaders()
+        WireMock.post(WireMock.urlPathMatching(".*$path/api/fordel/journalposter"))
+            .withDefaultPostHeaders()
+            .withRequestBody(WireMock.matchingJsonPath("$.[0].saksnummer"))
+            .withRequestBody(WireMock.matchingJsonPath("$.[0].journalpostId"))
+            .withRequestBody(WireMock.matchingJsonPath("$.[0].ytelseType.kode"))
+            .withRequestBody(WireMock.matchingJsonPath("$.[0].ytelseType.kodeverk", WireMock.equalTo("FAGSAK_YTELSE")))
+            .withRequestBody(WireMock.matchingJsonPath("$.[0].kanalReferanse"))
+            .withRequestBody(WireMock.matchingJsonPath("$.[0].type"))
+            .withRequestBody(WireMock.matchingJsonPath("$.[0].forsendelseMottattTidspunkt"))
+            .withRequestBody(WireMock.matchingJsonPath("$.[0].forsendelseMottatt"))
+            .withRequestBody(WireMock.matchingJsonPath("$.[0].payload"))
             .willReturn(WireMock.aResponse().withStatus(204)))
     return this
 }
 
-// TODO: Utbedre mock
 private fun WireMockServer.mockMatchFagsak(): WireMockServer {
     WireMock.stubFor(
-        WireMock.post(WireMock.urlPathMatching(".*$path/api/fagsak/match")).withDefaultPostHeaders()
+        WireMock.post(WireMock.urlPathMatching(".*$path/api/fagsak/match"))
+            .withDefaultPostHeaders()
+            .withRequestBody(WireMock.matchingJsonPath("$.ytelseType.kode"))
+            .withRequestBody(WireMock.matchingJsonPath("$.ytelseType.kodeverk", WireMock.equalTo("FAGSAK_YTELSE")))
+            .withRequestBody(WireMock.matchingJsonPath("$.periode.fom"))
             .willReturn(WireMock.aResponse().withJson("[]")))
     return this
 }
