@@ -1,6 +1,7 @@
 package no.nav.punsjbolle.testutils
 
 import no.nav.helse.dusseldorf.testsupport.wiremock.WireMockBuilder
+import no.nav.punsjbolle.testutils.wiremock.mockInfotrygdGrunnlagPaaroerendeSykdom
 import no.nav.punsjbolle.testutils.wiremock.mockK9Sak
 import no.nav.punsjbolle.testutils.wiremock.mockSaf
 
@@ -11,6 +12,7 @@ internal class MockedEnvironment {
         .build()
         .mockK9Sak()
         .mockSaf()
+        .mockInfotrygdGrunnlagPaaroerendeSykdom()
 
     internal fun start() = this
     internal fun stop() {
