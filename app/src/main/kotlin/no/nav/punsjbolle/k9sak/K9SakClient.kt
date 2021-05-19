@@ -49,11 +49,11 @@ internal class K9SakClient(
             {
                 "ytelseType": "${grunnlag.søknadstype.k9YtelseType}",
                 "aktørId": "${grunnlag.søker}",
-                "pleietrengendeAktørId": ${grunnlag.pleietrengende?.let { "$it" }},
-                "relatertPersonAktørId": ${grunnlag.annenPart?.let { "$it" }},
+                "pleietrengendeAktørId": ${grunnlag.pleietrengende?.let { """"$it"""" }},
+                "relatertPersonAktørId": ${grunnlag.annenPart?.let { """"$it"""" }},
                 "periode": {
-                    "fom": ${grunnlag.periode.fom?.let { "$it" }},
-                    "tom": ${grunnlag.periode.tom?.let { "$it" }}
+                    "fom": ${grunnlag.periode.fom?.let { """"$it"""" }},
+                    "tom": ${grunnlag.periode.tom?.let { """"$it"""" }}
                 }
             }
         """.trimIndent()
@@ -142,12 +142,12 @@ internal class K9SakClient(
             "periode": {
                 "fom": "$fraOgMed"
             },
-            "bruker": ${søker?.let { "$it" }},
+            "bruker": ${søker?.let { """"$it"""" }},
             "pleietrengendeIdenter": ${pleietrengende.jsonArray()},
             "relatertPersonIdenter": ${annenPart.jsonArray()}
         }
         """.trimIndent()
-
+        
         val (httpStatusCode, response) = MatchFagsak.httpPost {
             it.header(HttpHeaders.Authorization, authorizationHeader())
             it.header(CorrelationIdHeaderKey, "$correlationId")
