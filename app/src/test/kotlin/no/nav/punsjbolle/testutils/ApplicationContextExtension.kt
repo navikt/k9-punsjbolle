@@ -1,6 +1,8 @@
 package no.nav.punsjbolle.testutils
 
 import com.github.tomakehurst.wiremock.WireMockServer
+import no.nav.helse.dusseldorf.testsupport.jws.Azure
+import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2JwksUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2TokenUrl
 import no.nav.punsjbolle.ApplicationContext
 import no.nav.punsjbolle.testutils.wiremock.infotrygdGrunnlagPaaroerendeSykdomBaseUrl
@@ -19,6 +21,8 @@ internal class ApplicationContextExtension : ParameterResolver {
             "AZURE_APP_CLIENT_ID" to "k9-punsjbolle",
             "AZURE_APP_CLIENT_SECRET" to "foo",
             "AZURE_OPENID_CONFIG_TOKEN_ENDPOINT" to mockedEnvironment.wireMockServer.getAzureV2TokenUrl(),
+            "AZURE_OPENID_CONFIG_ISSUER" to Azure.V2_0.getIssuer(),
+            "AZURE_OPENID_CONFIG_JWKS_URI" to mockedEnvironment.wireMockServer.getAzureV2JwksUrl(),
             "K9_SAK_BASE_URL" to mockedEnvironment.wireMockServer.k9SakBaseUrl(),
             "K9_SAK_SCOPES" to "k9-sak/.default",
             "SAF_BASE_URL" to mockedEnvironment.wireMockServer.safBaseUrl(),

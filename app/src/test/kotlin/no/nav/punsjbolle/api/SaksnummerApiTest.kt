@@ -3,6 +3,7 @@ package no.nav.punsjbolle.api
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import io.mockk.*
+import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.punsjbolle.AktørId.Companion.somAktørId
 import no.nav.punsjbolle.ApplicationContext
 import no.nav.punsjbolle.Identitetsnummer.Companion.somIdentitetsnummer
@@ -109,13 +110,52 @@ internal class SaksnummerApiTest(
         verifiserSafIkkeKalt()
     }
 
-    private fun request(fraOgMed: LocalDate?, journalpostId: JournalpostId?) = withTestApplication( { punsjbolle(applicationContext)}) {
+    @Test
+    fun `Ingen authorization header`() {
+        val (httpStatus, k9Saksnummer) = request(journalpostId = null, fraOgMed = LocalDate.now(), jwt = null)
+        assertEquals(HttpStatusCode.Unauthorized, httpStatus)
+        assertNull(k9Saksnummer)
+    }
+
+    @Test
+    fun `Feil audience`() {
+        val (httpStatus, k9Saksnummer) = request(journalpostId = null, fraOgMed = LocalDate.now(), jwt = Azure.V2_0.generateJwt(
+            clientId = "foo",
+            audience = "k9-sak"
+        ))
+        assertEquals(HttpStatusCode.Forbidden, httpStatus)
+        assertNull(k9Saksnummer)
+    }
+
+    @Test
+    fun `Feil issuer`() {
+        val (httpStatus, k9Saksnummer) = request(journalpostId = null, fraOgMed = LocalDate.now(), jwt = Azure.V1_0.generateJwt(
+            clientId = "foo",
+            audience = "k9-punsjbolle"
+        ))
+        assertEquals(HttpStatusCode.Unauthorized, httpStatus)
+        assertNull(k9Saksnummer)
+    }
+
+    private fun request(
+        fraOgMed: LocalDate?,
+        journalpostId: JournalpostId?,
+        jwt: String? = Azure.V2_0.generateJwt(
+            clientId = "foo",
+            audience = "k9-punsjbolle"
+        )) = withTestApplication( { punsjbolle(applicationContext)}) {
         handleRequest(HttpMethod.Post, "/api/saksnummer") {
             addHeader(HttpHeaders.XCorrelationId, "${UUID.randomUUID()}")
             addHeader(HttpHeaders.ContentType, "application/json; charset=UTF-8")
+            jwt?.let { addHeader(HttpHeaders.Authorization, "Bearer $it") }
             setBody(requestBody(fraOgMed = fraOgMed, journalpostId = journalpostId))
         }.let {
-            it.response.status()!! to it.response.content?.let { json -> JSONObject(json).getString("saksnummer").somK9Saksnummer() }
+            val status = it.response.status()!!
+            val saksnummer = when (status == HttpStatusCode.OK) {
+                true -> JSONObject(it.response.content!!).getString("saksnummer").somK9Saksnummer()
+                false -> null
+            }
+            status to saksnummer
         }
     }
 
