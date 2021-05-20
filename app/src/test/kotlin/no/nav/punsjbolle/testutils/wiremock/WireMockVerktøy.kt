@@ -9,15 +9,21 @@ internal object WireMockVerktøy {
     internal fun MappingBuilder.withAuthorizationHeader() =
         withHeader("Authorization", WireMock.containing("Bearer e"))
 
-    internal fun MappingBuilder.withDefaultGetHeaders() =
+    internal fun MappingBuilder.withNavGetHeaders() =
         withAuthorizationHeader()
         .withHeader("Accept", WireMock.equalTo("application/json"))
         .withHeader("Nav-Consumer-Id", WireMock.equalTo("k9-punsjbolle"))
         .withHeader("Nav-Callid", AnythingPattern())
 
-    internal fun MappingBuilder.withDefaultPostHeaders() =
-        withDefaultGetHeaders()
+    internal fun MappingBuilder.withNavPostHeaders() =
+        withNavGetHeaders()
         .withHeader("Content-Type", WireMock.equalTo("application/json"))
+
+    internal fun MappingBuilder.withDefaultPostHeaders() =
+        withAuthorizationHeader()
+        .withHeader("Accept", WireMock.equalTo("application/json"))
+        .withHeader("Content-Type", WireMock.equalTo("application/json"))
+        .withHeader("X-Correlation-ID", AnythingPattern())
 
     internal fun ResponseDefinitionBuilder.withJson(json: String) =
         withHeader("Content-Type", "application/json")

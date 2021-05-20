@@ -21,12 +21,14 @@ import no.nav.punsjbolle.joark.SafClient
 import no.nav.punsjbolle.k9sak.K9SakClient
 import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
 import no.nav.punsjbolle.ruting.RutingService
+import no.nav.punsjbolle.sak.SakClient
 import java.time.LocalDate
 
 internal fun Route.SaksnummerApi(
     rutingService: RutingService,
     safClient: SafClient,
-    k9SakClient: K9SakClient) {
+    k9SakClient: K9SakClient,
+    sakClient: SakClient) {
 
     post("/saksnummer") {
         val request = call.request()
@@ -57,7 +59,11 @@ internal fun Route.SaksnummerApi(
                         periode = fraOgMed.somPeriode()
                     )
                 )
-                // TODO: Legge til kobling mot sak
+                sakClient.forsikreSakskoblingFinnes(
+                    saksnummer = saksnummer,
+                    søker = request.søker.aktørId,
+                    correlationId = request.correlationId
+                )
                 call.respondText(
                     contentType = ContentType.Application.Json,
                     text = """{"saksnummer": "$saksnummer"}""",

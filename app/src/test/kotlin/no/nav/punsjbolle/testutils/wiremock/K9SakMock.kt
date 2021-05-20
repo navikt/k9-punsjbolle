@@ -3,7 +3,7 @@ package no.nav.punsjbolle.testutils.wiremock
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.punsjbolle.testutils.wiremock.WireMockVerktøy.withAuthorizationHeader
-import no.nav.punsjbolle.testutils.wiremock.WireMockVerktøy.withDefaultPostHeaders
+import no.nav.punsjbolle.testutils.wiremock.WireMockVerktøy.withNavPostHeaders
 import no.nav.punsjbolle.testutils.wiremock.WireMockVerktøy.withJson
 
 private const val path = "/k9-sak-mock"
@@ -18,7 +18,7 @@ private fun WireMockServer.mockPingUrl(): WireMockServer {
 private fun WireMockServer.mockHentSaksnummer(): WireMockServer {
     WireMock.stubFor(
         WireMock.post(WireMock.urlPathMatching(".*$path/api/fordel/fagsak/opprett"))
-            .withDefaultPostHeaders()
+            .withNavPostHeaders()
             .withRequestBody(WireMock.matchingJsonPath("$.ytelseType"))
             .withRequestBody(WireMock.matchingJsonPath("$.aktørId"))
             .withRequestBody(WireMock.matchingJsonPath("$.pleietrengendeAktørId"))
@@ -30,7 +30,7 @@ private fun WireMockServer.mockHentSaksnummer(): WireMockServer {
 private fun WireMockServer.mockSendInnSøknad(): WireMockServer {
     WireMock.stubFor(
         WireMock.post(WireMock.urlPathMatching(".*$path/api/fordel/journalposter"))
-            .withDefaultPostHeaders()
+            .withNavPostHeaders()
             .withRequestBody(WireMock.matchingJsonPath("$.[0].saksnummer"))
             .withRequestBody(WireMock.matchingJsonPath("$.[0].journalpostId"))
             .withRequestBody(WireMock.matchingJsonPath("$.[0].ytelseType.kode"))
@@ -47,7 +47,7 @@ private fun WireMockServer.mockSendInnSøknad(): WireMockServer {
 private fun WireMockServer.mockMatchFagsak(): WireMockServer {
     WireMock.stubFor(
         WireMock.post(WireMock.urlPathMatching(".*$path/api/fagsak/match"))
-            .withDefaultPostHeaders()
+            .withNavPostHeaders()
             .withRequestBody(WireMock.matchingJsonPath("$.ytelseType.kode"))
             .withRequestBody(WireMock.matchingJsonPath("$.ytelseType.kodeverk", WireMock.equalTo("FAGSAK_YTELSE")))
             .withRequestBody(WireMock.matchingJsonPath("$.periode.fom"))
