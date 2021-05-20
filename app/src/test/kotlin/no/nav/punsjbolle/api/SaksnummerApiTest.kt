@@ -10,6 +10,8 @@ import no.nav.punsjbolle.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.punsjbolle.JournalpostId
 import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
 import no.nav.punsjbolle.K9Saksnummer.Companion.somK9Saksnummer
+import no.nav.punsjbolle.Periode
+import no.nav.punsjbolle.Periode.Companion.somPeriode
 import no.nav.punsjbolle.infotrygd.InfotrygdClient
 import no.nav.punsjbolle.joark.Journalpost
 import no.nav.punsjbolle.joark.SafClient
@@ -54,19 +56,19 @@ internal class SaksnummerApiTest(
         mockHentSaksnummer()
         mockHentJournalpost()
 
-        val (httpStatus, k9Saksnummer) = request(journalpostId = journalpostId, fraOgMed = null)
+        val (httpStatus, k9Saksnummer) = request(journalpostId = journalpostId, periode = null)
         assertEquals(HttpStatusCode.OK, httpStatus)
         assertEquals(saksnummer, k9Saksnummer)
         verifiserSafKalt()
     }
 
     @Test
-    fun `ingen saker i hverken Infotrygd eller K9sak med fraOgMed`() {
+    fun `ingen saker i hverken Infotrygd eller K9sak med periode`() {
         mockInfotrygd()
         mockK9Sak()
         mockHentSaksnummer()
 
-        val (httpStatus, k9Saksnummer) = request(journalpostId = null, fraOgMed = LocalDate.now())
+        val (httpStatus, k9Saksnummer) = request(journalpostId = null, periode = "2021-05-20/..".somPeriode())
         assertEquals(HttpStatusCode.OK, httpStatus)
         assertEquals(saksnummer, k9Saksnummer)
         verifiserSafIkkeKalt()
@@ -78,7 +80,7 @@ internal class SaksnummerApiTest(
         mockK9Sak()
         mockHentJournalpost()
 
-        val (httpStatus, k9Saksnummer) = request(journalpostId = journalpostId, fraOgMed = null)
+        val (httpStatus, k9Saksnummer) = request(journalpostId = journalpostId, periode = null)
         assertEquals(HttpStatusCode.Conflict, httpStatus)
         assertNull(k9Saksnummer)
         verifiserSafKalt()
@@ -91,7 +93,7 @@ internal class SaksnummerApiTest(
         mockK9Sak()
         mockHentJournalpost()
 
-        val (httpStatus, k9Saksnummer) = request(journalpostId = journalpostId, fraOgMed = null)
+        val (httpStatus, k9Saksnummer) = request(journalpostId = journalpostId, periode = null)
         assertEquals(HttpStatusCode.Conflict, httpStatus)
         assertNull(k9Saksnummer)
         verifiserSafKalt()
@@ -104,7 +106,7 @@ internal class SaksnummerApiTest(
         mockK9Sak(søker = true)
         mockHentSaksnummer()
 
-        val (httpStatus, k9Saksnummer) = request(journalpostId = null, fraOgMed = LocalDate.now())
+        val (httpStatus, k9Saksnummer) = request(journalpostId = null, periode = "2021-05-20/2030-12-31".somPeriode())
         assertEquals(HttpStatusCode.OK, httpStatus)
         assertEquals(saksnummer, k9Saksnummer)
         verifiserSafIkkeKalt()
@@ -112,14 +114,14 @@ internal class SaksnummerApiTest(
 
     @Test
     fun `Ingen authorization header`() {
-        val (httpStatus, k9Saksnummer) = request(journalpostId = null, fraOgMed = LocalDate.now(), jwt = null)
+        val (httpStatus, k9Saksnummer) = request(journalpostId = null, periode = "2021-05-20/2030-12-31".somPeriode(), jwt = null)
         assertEquals(HttpStatusCode.Unauthorized, httpStatus)
         assertNull(k9Saksnummer)
     }
 
     @Test
     fun `Feil audience`() {
-        val (httpStatus, k9Saksnummer) = request(journalpostId = null, fraOgMed = LocalDate.now(), jwt = Azure.V2_0.generateJwt(
+        val (httpStatus, k9Saksnummer) = request(journalpostId = null, periode = "2021-05-20/2030-12-31".somPeriode(), jwt = Azure.V2_0.generateJwt(
             clientId = "foo",
             audience = "k9-sak"
         ))
@@ -129,7 +131,7 @@ internal class SaksnummerApiTest(
 
     @Test
     fun `Feil issuer`() {
-        val (httpStatus, k9Saksnummer) = request(journalpostId = null, fraOgMed = LocalDate.now(), jwt = Azure.V1_0.generateJwt(
+        val (httpStatus, k9Saksnummer) = request(journalpostId = null, periode = "../2030-12-31".somPeriode(), jwt = Azure.V1_0.generateJwt(
             clientId = "foo",
             audience = "k9-punsjbolle"
         ))
@@ -138,7 +140,7 @@ internal class SaksnummerApiTest(
     }
 
     private fun request(
-        fraOgMed: LocalDate?,
+        periode: Periode?,
         journalpostId: JournalpostId?,
         jwt: String? = Azure.V2_0.generateJwt(
             clientId = "foo",
@@ -148,7 +150,7 @@ internal class SaksnummerApiTest(
             addHeader(HttpHeaders.XCorrelationId, "${UUID.randomUUID()}")
             addHeader(HttpHeaders.ContentType, "application/json")
             jwt?.let { addHeader(HttpHeaders.Authorization, "Bearer $it") }
-            setBody(requestBody(fraOgMed = fraOgMed, journalpostId = journalpostId))
+            setBody(requestBody(periode = periode, journalpostId = journalpostId))
         }.let {
             val status = it.response.status()!!
             val saksnummer = when (status == HttpStatusCode.OK) {
@@ -207,7 +209,7 @@ internal class SaksnummerApiTest(
         private val journalpostId = "55555555555".somJournalpostId()
 
         @Language("JSON")
-        private fun requestBody(fraOgMed: LocalDate?, journalpostId: JournalpostId?) = """
+        private fun requestBody(periode: Periode?, journalpostId: JournalpostId?) = """
             {
               "søker": {
                 "identitetsnummer": "$søkerIdentitetsnummer",
@@ -219,7 +221,7 @@ internal class SaksnummerApiTest(
               },
               "søknadstype": "PleiepengerSyktBarn",
               "journalpostId": ${journalpostId?.let { """"$it"""" }},
-              "fraOgMed": ${fraOgMed?.let { """"$it"""" }}
+              "periode": ${periode?.let { """"$it"""" }}
             }
         """.trimIndent()
     }

@@ -14,6 +14,8 @@ import no.nav.punsjbolle.Identitetsnummer
 import no.nav.punsjbolle.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.punsjbolle.JournalpostId
 import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
+import no.nav.punsjbolle.Periode
+import no.nav.punsjbolle.Periode.Companion.forsikreLukketPeriode
 import no.nav.punsjbolle.Periode.Companion.somPeriode
 import no.nav.punsjbolle.Søknadstype
 import no.nav.punsjbolle.api.Request.Companion.request
@@ -22,7 +24,6 @@ import no.nav.punsjbolle.k9sak.K9SakClient
 import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
 import no.nav.punsjbolle.ruting.RutingService
 import no.nav.punsjbolle.sak.SakClient
-import java.time.LocalDate
 
 internal fun Route.SaksnummerApi(
     rutingService: RutingService,
@@ -33,16 +34,16 @@ internal fun Route.SaksnummerApi(
     post("/saksnummer") {
         val request = call.request()
 
-        val fraOgMed = request.fraOgMed ?: safClient.hentJournalpost(
+        val periode = request.periode?.forsikreLukketPeriode() ?: safClient.hentJournalpost(
             journalpostId = request.journalpostId!!,
             correlationId = request.correlationId
-        ).opprettet.toLocalDate()
+        ).opprettet.toLocalDate().somPeriode()
 
         val destinasjon = rutingService.destinasjon(
             søker = request.søker.identitetsnummer,
             pleietrengende = request.pleietrengende?.identitetsnummer,
             annenPart = request.annenPart?.identitetsnummer,
-            fraOgMed = fraOgMed,
+            fraOgMed = periode.fom!!,
             søknadstype = request.søknadstype,
             correlationId = request.correlationId
         )
@@ -56,7 +57,7 @@ internal fun Route.SaksnummerApi(
                         søker = request.søker.aktørId,
                         pleietrengende = request.pleietrengende?.aktørId,
                         annenPart = request.annenPart?.aktørId,
-                        periode = fraOgMed.somPeriode()
+                        periode = periode
                     )
                 )
                 sakClient.forsikreSakskoblingFinnes(
@@ -83,11 +84,11 @@ internal data class Request(
     val søker: Part,
     val pleietrengende: Part?,
     val annenPart: Part?,
-    val fraOgMed: LocalDate?,
+    val periode: Periode?,
     val søknadstype: Søknadstype) {
 
-    init { require(journalpostId != null || fraOgMed != null) {
-        "Må sette enten journalpostId eller fraOgMed"
+    init { require(journalpostId != null || periode != null) {
+        "Må sette enten journalpostId eller periode"
     }}
 
     internal data class Part(
@@ -120,7 +121,7 @@ internal data class Request(
                 søker = json.partOrNull("søker") ?: throw IllegalStateException("Mangler søker"),
                 pleietrengende = json.partOrNull("pleietrengende"),
                 annenPart = json.partOrNull("annenPart"),
-                fraOgMed = json.stringOrNull("fraOgMed")?.let { LocalDate.parse(it) }
+                periode = json.stringOrNull("periode")?.somPeriode()
             )
         }
     }

@@ -77,6 +77,12 @@ internal data class Periode(internal val fom: LocalDate?, internal val tom: Loca
             )
         }
         internal fun LocalDate.somPeriode() = Periode(fom = this, tom = this)
+        internal fun Periode.forsikreLukketPeriode() = when {
+            fom != null && tom != null -> this
+            fom != null -> fom.somPeriode()
+            tom != null -> tom.somPeriode()
+            else -> throw IllegalStateException("Må være satt minst være satt fom eller tom for å lage en lukket periode.")
+        }
     }
 }
 
