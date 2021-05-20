@@ -76,6 +76,7 @@ internal data class Periode(internal val fom: LocalDate?, internal val tom: Loca
                 }
             )
         }
+        internal fun LocalDate.somPeriode() = Periode(fom = this, tom = this)
     }
 }
 

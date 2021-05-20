@@ -6,7 +6,6 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import no.nav.punsjbolle.*
 import no.nav.punsjbolle.AktørId
 import no.nav.punsjbolle.AktørId.Companion.somAktørId
 import no.nav.punsjbolle.CorrelationId
@@ -15,6 +14,7 @@ import no.nav.punsjbolle.Identitetsnummer
 import no.nav.punsjbolle.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.punsjbolle.JournalpostId
 import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
+import no.nav.punsjbolle.Periode.Companion.somPeriode
 import no.nav.punsjbolle.Søknadstype
 import no.nav.punsjbolle.api.Request.Companion.request
 import no.nav.punsjbolle.joark.SafClient
@@ -54,9 +54,10 @@ internal fun Route.SaksnummerApi(
                         søker = request.søker.aktørId,
                         pleietrengende = request.pleietrengende?.aktørId,
                         annenPart = request.annenPart?.aktørId,
-                        periode = Periode(fom = fraOgMed, tom = null)
+                        periode = fraOgMed.somPeriode()
                     )
                 )
+                // TODO: Legge til kobling mot sak
                 call.respondText(
                     contentType = ContentType.Application.Json,
                     text = """{"saksnummer": "$saksnummer"}""",
