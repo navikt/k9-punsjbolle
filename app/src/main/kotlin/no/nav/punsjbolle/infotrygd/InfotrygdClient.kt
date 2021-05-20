@@ -34,11 +34,19 @@ internal class InfotrygdClient(
         pleietrengende: Identitetsnummer?,
         annenPart: Identitetsnummer?,
         correlationId: CorrelationId
-    ) = RutingGrunnlag(
-        søker = harSakSomSøker(søker, fraOgMed, correlationId),
-        pleietrengende = pleietrengende?.let { harSakSomPleietrengende(it, fraOgMed, correlationId) } ?: false,
-        annenPart = annenPart?.let { harSakSomSøker(it, fraOgMed, correlationId) } ?: false
-    )
+    ) : RutingGrunnlag {
+        if (harSakSomSøker(søker, fraOgMed, correlationId)) {
+            return RutingGrunnlag(søker = true)
+        }
+        if (pleietrengende?.let { harSakSomPleietrengende(it, fraOgMed, correlationId) } == true) {
+            return RutingGrunnlag(søker = false, pleietrengende = true)
+        }
+        return RutingGrunnlag(
+            søker = false,
+            pleietrengende = false,
+            annenPart = annenPart?.let { harSakSomSøker(it, fraOgMed, correlationId) } ?: false
+        )
+    }
 
     private suspend fun harSakSomSøker(
         identitetsnummer: Identitetsnummer,
@@ -81,7 +89,7 @@ internal class InfotrygdClient(
         }
 
         return JSONArray(response).inneholderAktuelleVedtak().also { if (it) {
-            secureLogger.info("Fant vedtk i Infotrygd som pleietrengende for Identitetsnummer=[$identitetsnummer], FraOgMed=[$fraOgMed], Response=[$response]")
+            secureLogger.info("Fant vedtak i Infotrygd som pleietrengende for Identitetsnummer=[$identitetsnummer], FraOgMed=[$fraOgMed], Response=[$response]")
         }}
     }
 
@@ -103,8 +111,8 @@ internal class InfotrygdClient(
             true -> getString(key)
             else -> null
         }
-        private fun JSONObject.hasJSONObject(key: String) = has(key) && get(key) is JSONObject
 
+        private fun JSONObject.hasJSONObject(key: String) = has(key) && get(key) is JSONObject
 
         private fun JSONObject.inneholderAktuelle(key: String) =
             getJSONArrayOrEmptyArray(key)
@@ -124,6 +132,5 @@ internal class InfotrygdClient(
             map { it as JSONObject }
             .map { it.inneholderAktuelle("vedtak") }
             .any { it }
-
     }
 }
