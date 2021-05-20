@@ -1,5 +1,6 @@
 {
   "cluster": "prod-gcp",
+  "clusterFss": "prod-fss",
   "minReplicas": "2",
   "maxReplicas": "4",
   "azureTenant": "nav.no",

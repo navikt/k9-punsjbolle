@@ -1,5 +1,6 @@
 {
   "cluster": "dev-gcp",
+  "clusterFss": "dev-fss",
   "minReplicas": "2",
   "maxReplicas": "4",
   "azureTenant": "trygdeetaten.no",

@@ -20,6 +20,11 @@ spec:
       {{#each externalHosts as |host|}}
          - host: {{host}}
       {{/each}}
+    inbound:
+      rules:
+        - application: k9-punsj
+          namespace: k9saksbehandling
+          cluster: {{clusterFss}}
   liveness:
     path: isalive
     initialDelay: 20
