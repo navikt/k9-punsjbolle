@@ -17,7 +17,7 @@ internal data class Journalpost(
         return sak?.let { "K9" == it.fagsaksystem && "$saksnummer" == it.fagsakId }?:false
     }
 
-    internal fun skalKnyttesTilSak() : Boolean {
+    internal fun kanKnyttesTilSak() : Boolean {
         return journalpoststatus == "MOTTATT" && journalposttype == "I"
     }
 

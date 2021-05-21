@@ -14,16 +14,20 @@ import no.nav.punsjbolle.Identitetsnummer
 import no.nav.punsjbolle.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.punsjbolle.JournalpostId
 import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
+import no.nav.punsjbolle.K9Saksnummer
 import no.nav.punsjbolle.Periode
 import no.nav.punsjbolle.Periode.Companion.forsikreLukketPeriode
 import no.nav.punsjbolle.Periode.Companion.somPeriode
 import no.nav.punsjbolle.Søknadstype
 import no.nav.punsjbolle.api.Request.Companion.request
+import no.nav.punsjbolle.joark.Journalpost
 import no.nav.punsjbolle.joark.SafClient
 import no.nav.punsjbolle.k9sak.K9SakClient
 import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
 import no.nav.punsjbolle.ruting.RutingService
 import no.nav.punsjbolle.sak.SakClient
+import org.slf4j.LoggerFactory
+import java.net.URI
 
 internal fun Route.SaksnummerApi(
     rutingService: RutingService,
@@ -34,10 +38,12 @@ internal fun Route.SaksnummerApi(
     post("/saksnummer") {
         val request = call.request()
 
-        val periode = request.periode?.forsikreLukketPeriode() ?: safClient.hentJournalpost(
-            journalpostId = request.journalpostId!!,
+        val journalpost = safClient.hentJournalpost(
+            journalpostId = request.journalpostId,
             correlationId = request.correlationId
-        ).opprettet.toLocalDate().somPeriode()
+        )
+
+        val periode = request.periode?.forsikreLukketPeriode() ?: journalpost.opprettet.toLocalDate().somPeriode()
 
         val destinasjon = rutingService.destinasjon(
             søker = request.søker.identitetsnummer,
@@ -60,36 +66,63 @@ internal fun Route.SaksnummerApi(
                         periode = periode
                     )
                 )
-                sakClient.forsikreSakskoblingFinnes(
-                    saksnummer = saksnummer,
-                    søker = request.søker.aktørId,
-                    correlationId = request.correlationId
-                )
-                call.respondText(
-                    contentType = ContentType.Application.Json,
-                    text = """{"saksnummer": "$saksnummer"}""",
-                    status = HttpStatusCode.OK
-                )
+
+                if (journalpost.kanRutesTilK9Sak(saksnummer)) {
+                    sakClient.forsikreSakskoblingFinnes(
+                        saksnummer = saksnummer,
+                        søker = request.søker.aktørId,
+                        correlationId = request.correlationId
+                    )
+                    call.respondText(
+                        contentType = ContentType.Application.Json,
+                        text = """{"saksnummer": "$saksnummer"}""",
+                        status = HttpStatusCode.OK
+                    )
+                } else {
+                    call.respondConflict(
+                        feil = "ikke-støttet-journalpost",
+                        detaljer = "$journalpost kan ikke rutes inn til K9Sak på saksummer $saksnummer."
+                    )
+                }
             }
             RutingService.Destinasjon.Infotrygd -> {
-                call.respond(HttpStatusCode.Conflict)
+                call.respondConflict(
+                    feil = "må-behandles-i-infotrygd",
+                    detaljer = "Minst en part har en løpende sak i Infotrygd."
+                )
             }
         }
     }
 }
 
-internal data class Request(
-    val correlationId: CorrelationId,
-    val journalpostId: JournalpostId?,
-    val søker: Part,
-    val pleietrengende: Part?,
-    val annenPart: Part?,
-    val periode: Periode?,
-    val søknadstype: Søknadstype) {
+private val logger = LoggerFactory.getLogger("no.nav.punsjbolle.api.SaksnummerApi")
 
-    init { require(journalpostId != null || periode != null) {
-        "Må sette enten journalpostId eller periode"
-    }}
+private fun Journalpost.kanRutesTilK9Sak(saksnummer: K9Saksnummer) =
+    erKnyttetTil(saksnummer) || kanKnyttesTilSak()
+
+private suspend fun ApplicationCall.respondConflict(feil: String, detaljer: String) {
+    logger.warn("Feil=[$feil], Detaljer=[$detaljer]")
+    respondText(
+        contentType = ContentType.Application.Json,
+        text = """
+            {
+                "status": 409,
+                "type": "punsjbolle://$feil",
+                "details": "$detaljer"
+            }
+        """.trimIndent(),
+        status = HttpStatusCode.Conflict
+    )
+}
+
+internal data class Request(
+    internal val correlationId: CorrelationId,
+    internal val journalpostId: JournalpostId,
+    internal val søker: Part,
+    internal val pleietrengende: Part?,
+    internal val annenPart: Part?,
+    internal val periode: Periode?,
+    internal val søknadstype: Søknadstype) {
 
     internal data class Part(
         val aktørId: AktørId,
@@ -116,7 +149,7 @@ internal data class Request(
             val json = receive<ObjectNode>()
             return Request(
                 correlationId = request.header(HttpHeaders.XCorrelationId)?.somCorrelationId() ?: throw IllegalStateException("Mangler correlationId"),
-                journalpostId = json.stringOrNull("journalpostId")?.somJournalpostId(),
+                journalpostId = json.stringOrNull("journalpostId")?.somJournalpostId() ?: throw IllegalStateException("Mangler journalpostId"),
                 søknadstype = json.stringOrNull("søknadstype")?.let { Søknadstype.valueOf(it) } ?: throw IllegalStateException("Mangler søknadstype"),
                 søker = json.partOrNull("søker") ?: throw IllegalStateException("Mangler søker"),
                 pleietrengende = json.partOrNull("pleietrengende"),
