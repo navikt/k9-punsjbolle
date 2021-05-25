@@ -27,7 +27,6 @@ import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
 import no.nav.punsjbolle.ruting.RutingService
 import no.nav.punsjbolle.sak.SakClient
 import org.slf4j.LoggerFactory
-import java.net.URI
 
 internal fun Route.SaksnummerApi(
     rutingService: RutingService,
@@ -66,6 +65,8 @@ internal fun Route.SaksnummerApi(
                         periode = periode
                     )
                 )
+
+                logger.info("Hentet K9Saksnummer=[$saksnummer] for JournalpostId=[${request.journalpostId}], Periode=[$periode], Søknadstype=[${request.søknadstype.name}]")
 
                 if (journalpost.kanRutesTilK9Sak(saksnummer)) {
                     sakClient.forsikreSakskoblingFinnes(
