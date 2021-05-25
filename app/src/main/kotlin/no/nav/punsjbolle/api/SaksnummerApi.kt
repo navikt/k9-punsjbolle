@@ -124,6 +124,15 @@ internal data class Request(
     internal val annenPart: Part?,
     internal val periode: Periode?,
     internal val søknadstype: Søknadstype) {
+    
+    init {
+        val antallParter = listOfNotNull(søker, pleietrengende, annenPart).size
+        val antallUnikeIdentitetsnummer = setOfNotNull(søker.identitetsnummer, pleietrengende?.identitetsnummer, annenPart?.identitetsnummer).size
+        val antallUnikeAktørIder = setOfNotNull(søker.aktørId, pleietrengende?.aktørId, annenPart?.aktørId).size
+        require(antallParter == antallUnikeIdentitetsnummer && antallParter == antallUnikeAktørIder) {
+            "Ugylidig request, Inneholdt $antallParter parter, men $antallUnikeIdentitetsnummer identitetsnummer og $antallUnikeAktørIder aktørIder."
+        }
+    }
 
     internal data class Part(
         val aktørId: AktørId,

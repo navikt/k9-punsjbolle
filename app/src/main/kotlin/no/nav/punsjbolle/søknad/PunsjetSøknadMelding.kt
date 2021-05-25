@@ -24,6 +24,9 @@ internal object PunsjetSøknadMelding :
         init {
             require(identitetsnummer.isNotEmpty()) { "Søknaden må gjelde minst en person." }
             require(journalpostIder.isNotEmpty()) { "Søknaden må være knyttet til minst en journalpostId."}
+            require(listOfNotNull(søker, pleietrengende, annenPart).size == identitetsnummer.size) {
+                "Søknaden må ha unike personer som søker/pleietrengende/annenPart."
+            }
         }
     }
 
