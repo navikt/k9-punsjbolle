@@ -10,6 +10,7 @@ import no.nav.punsjbolle.søknad.PunsjetSøknadMelding
 import no.nav.punsjbolle.søknad.somPunsjetSøknad
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
+import java.time.ZonedDateTime
 import kotlin.test.assertEquals
 
 internal class OmsorgspengerMappingTest {
@@ -19,6 +20,7 @@ internal class OmsorgspengerMappingTest {
         val json = """
         {
           "søknadId": "$søknadId",
+          "mottattDato": "$mottatt",
           "søker": {
             "norskIdentitetsnummer": "$søker"
           },
@@ -34,16 +36,17 @@ internal class OmsorgspengerMappingTest {
         val jacksonSøknad = json.jackson()
 
         val forventetPunsjetSøknad = PunsjetSøknadMelding.PunsjetSøknad(
-          versjon = "1.0.0",
-          søknadId = søknadId,
-          saksnummer = null,
-          søknadstype = Søknadstype.OmsorgspengerUtbetaling,
-          journalpostIder = setOf(journalpostId),
-          periode = "2020-01-01/2020-01-11".somPeriode(),
-          søker = søker,
-          annenPart = null,
-          pleietrengende = null,
-          søknadJson = jacksonSøknad
+            versjon = "1.0.0",
+            søknadId = søknadId,
+            saksnummer = null,
+            søknadstype = Søknadstype.OmsorgspengerUtbetaling,
+            journalpostIder = setOf(journalpostId),
+            periode = "2020-01-01/2020-01-11".somPeriode(),
+            søker = søker,
+            annenPart = null,
+            pleietrengende = null,
+            søknadJson = jacksonSøknad,
+            mottatt = ZonedDateTime.parse(mottatt)
         )
 
         assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null))
@@ -55,6 +58,7 @@ internal class OmsorgspengerMappingTest {
         val json = """
         {
           "søknadId": "$søknadId",
+          "mottattDato": "$mottatt",
           "søker": {
             "norskIdentitetsnummer": "$søker"
           },
@@ -72,16 +76,17 @@ internal class OmsorgspengerMappingTest {
         val jacksonSøknad = json.jackson()
 
         val forventetPunsjetSøknad = PunsjetSøknadMelding.PunsjetSøknad(
-          versjon = "1.0.0",
-          søknadId = søknadId,
-          saksnummer = null,
-          søknadstype = Søknadstype.OmsorgspengerKroniskSyktBarn,
-          journalpostIder = setOf(journalpostId),
-          periode = ÅpenPeriode,
-          søker = søker,
-          annenPart = null,
-          pleietrengende = barn,
-          søknadJson = jacksonSøknad
+            versjon = "1.0.0",
+            søknadId = søknadId,
+            saksnummer = null,
+            søknadstype = Søknadstype.OmsorgspengerKroniskSyktBarn,
+            journalpostIder = setOf(journalpostId),
+            periode = ÅpenPeriode,
+            søker = søker,
+            annenPart = null,
+            pleietrengende = barn,
+            søknadJson = jacksonSøknad,
+            mottatt = ZonedDateTime.parse(mottatt)
         )
 
         assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null))
@@ -93,6 +98,7 @@ internal class OmsorgspengerMappingTest {
         val json = """
         {
           "søknadId": "$søknadId",
+          "mottattDato": "$mottatt",
           "søker": {
             "norskIdentitetsnummer": "$søker"
           },
@@ -111,22 +117,24 @@ internal class OmsorgspengerMappingTest {
         val jacksonSøknad = json.jackson()
 
         val forventetPunsjetSøknad = PunsjetSøknadMelding.PunsjetSøknad(
-          versjon = "1.0.0",
-          søknadId = søknadId,
-          saksnummer = null,
-          søknadstype = Søknadstype.OmsorgspengerMidlertidigAlene,
-          journalpostIder = setOf(journalpostId),
-          periode = "2020-01-01/2050-04-04".somPeriode(),
-          søker = søker,
-          annenPart = annenForelder,
-          pleietrengende = null,
-          søknadJson = jacksonSøknad
+            versjon = "1.0.0",
+            søknadId = søknadId,
+            saksnummer = null,
+            søknadstype = Søknadstype.OmsorgspengerMidlertidigAlene,
+            journalpostIder = setOf(journalpostId),
+            periode = "2020-01-01/2050-04-04".somPeriode(),
+            søker = søker,
+            annenPart = annenForelder,
+            pleietrengende = null,
+            søknadJson = jacksonSøknad,
+            mottatt = ZonedDateTime.parse(mottatt)
         )
 
         assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null))
     }
 
     private companion object {
+        private val mottatt = "2021-05-03T16:08:45.800Z"
         private val søknadId = "2ce43013-951c-4569-8afe-de701554e071"
         private val søker = "11111111111".somIdentitetsnummer()
         private val journalpostId = "22222222222".somJournalpostId()

@@ -5,6 +5,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.punsjbolle.*
 import no.nav.punsjbolle.K9Saksnummer.Companion.somK9Saksnummer
+import java.time.ZonedDateTime
 
 internal object PunsjetSøknadMelding :
     HentBehov<PunsjetSøknadMelding.PunsjetSøknad> {
@@ -19,6 +20,7 @@ internal object PunsjetSøknadMelding :
         internal val annenPart: Identitetsnummer?,
         internal val journalpostIder: Set<JournalpostId>,
         internal val periode: Periode,
+        internal val mottatt: ZonedDateTime,
         internal val søknadJson: ObjectNode) {
         internal val identitetsnummer = setOfNotNull(søker, pleietrengende, annenPart)
         init {

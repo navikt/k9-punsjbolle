@@ -10,6 +10,7 @@ import no.nav.punsjbolle.Periode
 import no.nav.punsjbolle.Periode.Companion.somPeriode
 import no.nav.punsjbolle.Periode.Companion.ÅpenPeriode
 import no.nav.punsjbolle.Søknadstype
+import java.time.ZonedDateTime
 
 internal fun ObjectNode.somPunsjetSøknad(
     versjon: String,
@@ -66,11 +67,13 @@ private fun ObjectNode.map(
         pleietrengende = pleietrengende,
         annenPart = annenPart,
         søknadJson = this,
-        periode = periode
+        periode = periode,
+        mottatt = mottatt()
     )
 }
 
 private fun ObjectNode.søknadsId() = get("søknadId").asText()
+private fun ObjectNode.mottatt() = ZonedDateTime.parse(get("mottattDato").asText())
 private fun ObjectNode.journalpostIder() = get("journalposter")?.let { (it as ArrayNode).map { it as ObjectNode }.map { it.get("journalpostId").asText().somJournalpostId() }.toSet() } ?: emptySet()
 private fun ObjectNode.søker() = get("søker").get("norskIdentitetsnummer").asText().somIdentitetsnummer()
 private fun ObjectNode.barn() = get("ytelse").get("barn")?.get("norskIdentitetsnummer")?.asText()?.somIdentitetsnummer()

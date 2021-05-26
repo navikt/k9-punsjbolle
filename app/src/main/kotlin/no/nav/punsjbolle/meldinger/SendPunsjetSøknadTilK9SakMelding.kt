@@ -1,7 +1,6 @@
 package no.nav.punsjbolle.meldinger
 
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.k9.rapid.behov.Behov
 import no.nav.punsjbolle.HentBehov
 import no.nav.punsjbolle.JournalpostId
@@ -11,7 +10,6 @@ import no.nav.punsjbolle.K9Saksnummer.Companion.somK9Saksnummer
 import no.nav.punsjbolle.LeggTilBehov
 import no.nav.punsjbolle.joark.Journalpost
 import no.nav.punsjbolle.joark.Journalpost.Companion.tidligstOpprettetJournalpost
-import java.time.LocalDateTime
 
 internal object SendPunsjetSøknadTilK9SakMelding :
     HentBehov<SendPunsjetSøknadTilK9SakMelding.SendPunsjetSøknadTilK9SakGrunnlag>,
@@ -20,7 +18,6 @@ internal object SendPunsjetSøknadTilK9SakMelding :
     internal data class SendPunsjetSøknadTilK9SakGrunnlag(
         internal val saksnummer: K9Saksnummer,
         internal val journalpostId: JournalpostId,
-        internal val mottatt: LocalDateTime,
         internal val referanse: String) {
 
         internal companion object {
@@ -30,7 +27,6 @@ internal object SendPunsjetSøknadTilK9SakMelding :
                 SendPunsjetSøknadTilK9SakGrunnlag(
                     saksnummer = saksnummer,
                     journalpostId = journalpost.journalpostId,
-                    mottatt = journalpost.opprettet,
                     referanse = journalpost.eksternReferanse ?: behovssekvensId
                 )
             }
@@ -41,7 +37,6 @@ internal object SendPunsjetSøknadTilK9SakMelding :
         return Behov(behovNavn, mapOf(
             "saksnummer" to "${behovInput.saksnummer}",
             "journalpostId" to "${behovInput.journalpostId}",
-            "mottatt" to "${behovInput.mottatt}",
             "referanse" to behovInput.referanse
         ))
     }
@@ -52,7 +47,6 @@ internal object SendPunsjetSøknadTilK9SakMelding :
         packet.interestedIn(
             SaksnummerKey,
             JournalpostIdKey,
-            MottattKey,
             ReferanseKey
         )
     }
@@ -61,14 +55,12 @@ internal object SendPunsjetSøknadTilK9SakMelding :
         return SendPunsjetSøknadTilK9SakGrunnlag(
             saksnummer = packet[SaksnummerKey].asText().somK9Saksnummer(),
             journalpostId = packet[JournalpostIdKey].asText().somJournalpostId(),
-            mottatt = packet[MottattKey].asLocalDateTime(),
             referanse = packet[ReferanseKey].asText()
         )
     }
 
     private val SaksnummerKey = "@behov.$behovNavn.saksnummer"
     private val JournalpostIdKey = "@behov.$behovNavn.journalpostId"
-    private val MottattKey = "@behov.$behovNavn.mottatt"
     private val ReferanseKey = "@behov.$behovNavn.referanse"
     override val mdcPaths = mapOf("k9_saksnummer" to SaksnummerKey)
 }

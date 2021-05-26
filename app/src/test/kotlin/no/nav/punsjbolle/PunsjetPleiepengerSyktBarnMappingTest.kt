@@ -12,6 +12,7 @@ import org.intellij.lang.annotations.Language
 import org.json.JSONObject
 import org.junit.jupiter.api.Test
 import org.skyscreamer.jsonassert.JSONAssert
+import java.time.ZonedDateTime
 import java.util.*
 import kotlin.test.assertEquals
 
@@ -34,7 +35,7 @@ internal class PunsjetPleiepengerSyktBarnMappingTest {
 
         @Language("JSON")
         val forventetJson = """
-          {"ytelse":{"type":"PLEIEPENGER_SYKT_BARN","barn":{"norskIdentitetsnummer":"33333333333"},"søknadsperiode":["2021-01-01/2050-12-15","2022-04-04/.."]},"journalposter":[{"journalpostId":"22222222222"}],"søknadId":"1e7652a9-d834-42a1-997b-b29b93c58b33","søker":{"norskIdentitetsnummer":"11111111111"}}
+          {"ytelse":{"type":"PLEIEPENGER_SYKT_BARN","barn":{"norskIdentitetsnummer":"33333333333"},"søknadsperiode":["2021-01-01/2050-12-15","2022-04-04/.."]},"journalposter":[{"journalpostId":"22222222222"}],"søknadId":"1e7652a9-d834-42a1-997b-b29b93c58b33","mottattDato":"$mottatt","søker":{"norskIdentitetsnummer":"11111111111"}}
         """.trimIndent()
 
         JSONAssert.assertEquals(forventetJson, søknadJson.toString(), true)
@@ -42,16 +43,17 @@ internal class PunsjetPleiepengerSyktBarnMappingTest {
         val jacksonSøknad = søknadJson.jackson()
 
         val forventetPunsjetSøknad = PunsjetSøknadMelding.PunsjetSøknad(
-                versjon = "1.0.0",
-                søknadId = søknadId,
-                saksnummer = null,
-                søknadstype = Søknadstype.PleiepengerSyktBarn,
-                journalpostIder = journalpostIder,
-                periode = "2021-01-01/..".somPeriode(),
-                søker = søker,
-                annenPart = null,
-                pleietrengende = barn,
-                søknadJson = jacksonSøknad
+            versjon = "1.0.0",
+            søknadId = søknadId,
+            saksnummer = null,
+            søknadstype = Søknadstype.PleiepengerSyktBarn,
+            journalpostIder = journalpostIder,
+            periode = "2021-01-01/..".somPeriode(),
+            søker = søker,
+            annenPart = null,
+            pleietrengende = barn,
+            søknadJson = jacksonSøknad,
+            mottatt = ZonedDateTime.parse(mottatt)
         )
 
         assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null))
@@ -74,7 +76,7 @@ internal class PunsjetPleiepengerSyktBarnMappingTest {
 
         @Language("JSON")
         val forventetJson = """
-          {"ytelse":{"type":"PLEIEPENGER_SYKT_BARN","endringsperiode":["2021-01-01/.."]},"journalposter":[{"journalpostId":"22222222222"}],"søknadId":"1e7652a9-d834-42a1-997b-b29b93c58b32","søker":{"norskIdentitetsnummer":"11111111111"}}
+          {"ytelse":{"type":"PLEIEPENGER_SYKT_BARN","endringsperiode":["2021-01-01/.."]},"journalposter":[{"journalpostId":"22222222222"}],"søknadId":"1e7652a9-d834-42a1-997b-b29b93c58b32","mottattDato":"$mottatt","søker":{"norskIdentitetsnummer":"11111111111"}}
         """.trimIndent()
 
         JSONAssert.assertEquals(forventetJson, søknadJson.toString(), true)
@@ -91,7 +93,8 @@ internal class PunsjetPleiepengerSyktBarnMappingTest {
             søker = søker,
             annenPart = null,
             pleietrengende = null,
-            søknadJson = jacksonSøknad
+            søknadJson = jacksonSøknad,
+            mottatt = ZonedDateTime.parse(mottatt)
         )
 
         assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null))
@@ -113,7 +116,7 @@ internal class PunsjetPleiepengerSyktBarnMappingTest {
 
         @Language("JSON")
         val forventetJson = """
-          {"ytelse":{"type":"PLEIEPENGER_SYKT_BARN","barn":{"norskIdentitetsnummer":"33333333333"}},"journalposter":[{"journalpostId":"22222222222"}],"søknadId":"1e7652a9-d834-42a1-997b-b29b93c58b34","søker":{"norskIdentitetsnummer":"11111111111"}}
+          {"ytelse":{"type":"PLEIEPENGER_SYKT_BARN","barn":{"norskIdentitetsnummer":"33333333333"}},"journalposter":[{"journalpostId":"22222222222"}],"søknadId":"1e7652a9-d834-42a1-997b-b29b93c58b34","mottattDato":"$mottatt","søker":{"norskIdentitetsnummer":"11111111111"}}
         """.trimIndent()
 
         JSONAssert.assertEquals(forventetJson, søknadJson.toString(), true)
@@ -121,22 +124,24 @@ internal class PunsjetPleiepengerSyktBarnMappingTest {
         val jacksonSøknad = søknadJson.jackson()
 
         val forventetPunsjetSøknad = PunsjetSøknadMelding.PunsjetSøknad(
-                versjon = "1.0.0",
-                søknadId = søknadId,
-                saksnummer = null,
-                søknadstype = Søknadstype.PleiepengerSyktBarn,
-                journalpostIder = journalpostIder,
-                periode = ÅpenPeriode,
-                søker = søker,
-                annenPart = null,
-                pleietrengende = barn,
-                søknadJson = jacksonSøknad
+            versjon = "1.0.0",
+            søknadId = søknadId,
+            saksnummer = null,
+            søknadstype = Søknadstype.PleiepengerSyktBarn,
+            journalpostIder = journalpostIder,
+            periode = ÅpenPeriode,
+            søker = søker,
+            annenPart = null,
+            pleietrengende = barn,
+            søknadJson = jacksonSøknad,
+            mottatt = ZonedDateTime.parse(mottatt)
         )
 
         assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null))
     }
 
     internal companion object {
+        private val mottatt = "2021-05-03T16:08:45.800Z"
         private val søker = "11111111111".somIdentitetsnummer()
         private val journalpostId = "22222222222".somJournalpostId()
         private val barn = "33333333333".somIdentitetsnummer()
@@ -158,14 +163,17 @@ internal class PunsjetPleiepengerSyktBarnMappingTest {
             endringsperioder?.also {
                 ytelse.put("endringsperiode", it.map { periode -> "$periode" })
             }
-            barn?.also {
-                ytelse.put("barn", mapOf(
-                    "norskIdentitetsnummer" to "$barn"
-                ))
+            val also = barn?.also {
+                ytelse.put(
+                    "barn", mapOf(
+                        "norskIdentitetsnummer" to "$barn"
+                    )
+                )
             }
 
             val søknad = JSONObject(mapOf(
                 "søknadId" to søknadId,
+                "mottattDato" to mottatt,
                 "søker" to mapOf(
                     "norskIdentitetsnummer" to "$søker"
                 ),

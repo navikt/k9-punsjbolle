@@ -7,12 +7,8 @@ import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.jsonBody
 import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.readTextOrThrow
 import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.stringBody
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
-import no.nav.punsjbolle.AzureAwareClient
-import no.nav.punsjbolle.CorrelationId
-import no.nav.punsjbolle.Identitetsnummer
-import no.nav.punsjbolle.K9Saksnummer
+import no.nav.punsjbolle.*
 import no.nav.punsjbolle.K9Saksnummer.Companion.somK9Saksnummer
-import no.nav.punsjbolle.Søknadstype
 import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
 import no.nav.punsjbolle.meldinger.SendPunsjetSøknadTilK9SakMelding
 import no.nav.punsjbolle.ruting.RutingGrunnlag
@@ -22,6 +18,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URI
 import java.time.LocalDate
+import java.time.ZoneId
 import java.util.*
 
 internal class K9SakClient(
@@ -77,6 +74,8 @@ internal class K9SakClient(
         grunnlag: SendPunsjetSøknadTilK9SakMelding.SendPunsjetSøknadTilK9SakGrunnlag,
         correlationId: CorrelationId) {
 
+        val forsendelseMottattTidspunkt = søknad.mottatt.withZoneSameInstant(Oslo).toLocalDateTime()
+
         // https://github.com/navikt/k9-sak/blob/3.1.30/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/JournalpostMottakDto.java#L31
         @Language("JSON")
         val dto = """
@@ -89,8 +88,8 @@ internal class K9SakClient(
                 },
                 "kanalReferanse": "${grunnlag.referanse}",
                 "type": "${søknad.søknadstype.k9Type}",
-                "forsendelseMottattTidspunkt": "${grunnlag.mottatt}",
-                "forsendelseMottatt": "${grunnlag.mottatt.toLocalDate()}",
+                "forsendelseMottattTidspunkt": "$forsendelseMottattTidspunkt",
+                "forsendelseMottatt": "${forsendelseMottattTidspunkt.toLocalDate()}",
                 "payload": "${Base64.getUrlEncoder().encodeToString(søknad.søknadJson.toString().toByteArray())}"
             }]
         """.trimIndent()
@@ -171,6 +170,8 @@ internal class K9SakClient(
     }
 
     internal companion object {
+        private val Oslo = ZoneId.of("Europe/Oslo")
+
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsjbolle"
         private const val CorrelationIdHeaderKey = "Nav-Callid"
