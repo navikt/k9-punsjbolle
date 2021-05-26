@@ -40,14 +40,7 @@ internal class PunsjetSøknadRiver(
     }
 
     override fun doHandlePacket(id: String, packet: JsonMessage): Boolean {
-        val søknad = kotlin.runCatching { PunsjetSøknadMelding.hentBehov(packet) }.fold(
-            onSuccess = { it },
-            onFailure = { throwable ->
-                secureLogger.error("Ugyldig søknad. ErrorPacket=${packet.toJson()}", throwable)
-                null
-            }
-        )?:return false
-
+        val søknad = PunsjetSøknadMelding.hentBehov(packet)
         val erStøttetVersjon = søknad.versjon in StøttedeVersjoner
         logger.info("Søknadstype=[${søknad.søknadstype.name}], Versjon=[${søknad.versjon}], ErStøttetVersjon=[$erStøttetVersjon]")
         return erStøttetVersjon
