@@ -50,7 +50,8 @@ internal fun Route.SaksnummerApi(
             annenPart = request.annenPart?.identitetsnummer,
             fraOgMed = periode.fom!!,
             søknadstype = request.søknadstype,
-            correlationId = request.correlationId
+            correlationId = request.correlationId,
+            aktørIder = request.aktørIder
         )
 
         when (destinasjon) {
@@ -124,13 +125,13 @@ internal data class Request(
     internal val annenPart: Part?,
     internal val periode: Periode?,
     internal val søknadstype: Søknadstype) {
-    
+    private val identitetsnumer = setOfNotNull(søker.identitetsnummer, pleietrengende?.identitetsnummer, annenPart?.identitetsnummer)
+    internal val aktørIder = setOfNotNull(søker.aktørId, pleietrengende?.aktørId, annenPart?.aktørId)
+
     init {
         val antallParter = listOfNotNull(søker, pleietrengende, annenPart).size
-        val antallUnikeIdentitetsnummer = setOfNotNull(søker.identitetsnummer, pleietrengende?.identitetsnummer, annenPart?.identitetsnummer).size
-        val antallUnikeAktørIder = setOfNotNull(søker.aktørId, pleietrengende?.aktørId, annenPart?.aktørId).size
-        require(antallParter == antallUnikeIdentitetsnummer && antallParter == antallUnikeAktørIder) {
-            "Ugylidig request, Inneholdt $antallParter parter, men $antallUnikeIdentitetsnummer identitetsnummer og $antallUnikeAktørIder aktørIder."
+        require(antallParter == identitetsnumer.size && antallParter == aktørIder.size) {
+            "Ugylidig request, Inneholdt $antallParter parter, men ${identitetsnumer.size} identitetsnummer og ${aktørIder.size} aktørIder."
         }
     }
 

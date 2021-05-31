@@ -53,6 +53,7 @@ internal class PunsjetSøknadRutingTest(
         )
 
         rapid.sendPunsjetSøknad()
+        rapid.mockHentAktørIder(setOf(søker, barn))
         rapid.assertGosysJournalføringsoppgave()
         rapid.printSisteMelding()
     }
@@ -65,6 +66,7 @@ internal class PunsjetSøknadRutingTest(
         )
 
         rapid.sendPunsjetSøknad()
+        rapid.mockHentAktørIder(setOf(søker, barn))
         rapid.assertGosysJournalføringsoppgave()
         rapid.printSisteMelding()
     }
@@ -107,6 +109,7 @@ internal class PunsjetSøknadRutingTest(
         @Language("JSON")
         val forventetBehovsrekkefølge = """
             [
+              "HentPersonopplysninger",
               "PunsjetSøknad",
               "OpprettGosysJournalføringsoppgaver"
             ]

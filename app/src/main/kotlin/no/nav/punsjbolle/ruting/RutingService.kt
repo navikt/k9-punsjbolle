@@ -1,5 +1,6 @@
 package no.nav.punsjbolle.ruting
 
+import no.nav.punsjbolle.AktørId
 import no.nav.punsjbolle.CorrelationId
 import no.nav.punsjbolle.Identitetsnummer
 import no.nav.punsjbolle.Søknadstype
@@ -18,7 +19,10 @@ internal class RutingService(
         pleietrengende: Identitetsnummer? = null,
         annenPart: Identitetsnummer? = null,
         søknadstype: Søknadstype,
+        aktørIder: Set<AktørId>,
         correlationId: CorrelationId) : Destinasjon {
+
+        // TODO: Legge til oppslag mot unntaksliste i k9-sak
 
         val k9SakGrunnlag = k9SakClient.harLøpendeSakSomInvolvererEnAv(
             søker = søker,
