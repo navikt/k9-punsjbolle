@@ -222,6 +222,7 @@ internal class K9SakClient(
         internal fun String.inneholderMatchendeFagsak() = JSONArray(this)
             .asSequence()
             .map { it as JSONObject }
+            .filterNot { it.getString("status") == "OPPR" }
             .toSet()
             .isNotEmpty()
     }

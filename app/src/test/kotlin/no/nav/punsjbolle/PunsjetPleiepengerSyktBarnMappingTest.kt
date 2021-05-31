@@ -163,7 +163,7 @@ internal class PunsjetPleiepengerSyktBarnMappingTest {
             endringsperioder?.also {
                 ytelse.put("endringsperiode", it.map { periode -> "$periode" })
             }
-            val also = barn?.also {
+            barn?.also {
                 ytelse.put(
                     "barn", mapOf(
                         "norskIdentitetsnummer" to "$barn"

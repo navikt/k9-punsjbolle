@@ -11,10 +11,12 @@ internal class MatchFagsakMappingTest {
     fun `mapper matching av fagsaker`() {
         assertTrue(HarFagsaker.inneholderMatchendeFagsak())
         assertFalse(IngenFagsaker.inneholderMatchendeFagsak())
+        assertFalse(KunOpprettetFagsaker.inneholderMatchendeFagsak())
     }
 
     private companion object {
         private const val IngenFagsaker = "[]"
-        private const val HarFagsaker = """[{"foo": "bar"},{"foo":"bar2"}]"""
+        private const val HarFagsaker = """[{"status": "bar"},{"status":"bar2"}]"""
+        private const val KunOpprettetFagsaker = """[{"status":"OPPR"}]"""
     }
 }
