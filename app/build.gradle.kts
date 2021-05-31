@@ -2,8 +2,8 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 val junitJupiterVersion = "5.7.2"
 val k9rapidVersion = "1.f20388f"
-val dusseldorfVersion = "1.5.4.ae44e47"
-val ktorVersion = "1.5.4"
+val dusseldorfVersion = "2.1.6.0-d31132e"
+val ktorVersion = "1.6.0"
 val jsonassertVersion = "1.5.0"
 val mockkVersion = "1.11.0"
 val assertjVersion = "3.19.0"
@@ -25,19 +25,15 @@ dependencies {
     implementation("io.ktor:ktor-jackson:$ktorVersion")
     implementation("no.nav.helse:dusseldorf-ktor-core:$dusseldorfVersion")
     implementation("no.nav.helse:dusseldorf-ktor-health:$dusseldorfVersion")
-    implementation("no.nav.helse:dusseldorf-ktor-client:$dusseldorfVersion") {
-        exclude(group = "com.github.kittinunf.fuel")
-    }
+    implementation("no.nav.helse:dusseldorf-ktor-client:$dusseldorfVersion")
     implementation("no.nav.helse:dusseldorf-ktor-metrics:$dusseldorfVersion")
     implementation("no.nav.helse:dusseldorf-ktor-auth:$dusseldorfVersion")
     implementation("no.nav.helse:dusseldorf-oauth2-client:$dusseldorfVersion")
-    implementation("org.skyscreamer:jsonassert:$jsonassertVersion")
 
     // Test
+    testImplementation("no.nav.helse:dusseldorf-test-support:$dusseldorfVersion")
+    testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
-    testImplementation("no.nav.helse:dusseldorf-test-support:$dusseldorfVersion") {
-        exclude(group = "com.github.jknack")
-    }
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion") {
         exclude(group = "org.eclipse.jetty")
