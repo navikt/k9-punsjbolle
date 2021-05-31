@@ -49,7 +49,7 @@ private fun WireMockServer.mockPleiepengerSyktBarnUnntaksliste(): WireMockServer
         WireMock.post(WireMock.urlPathMatching(".*$path/api/fordel/psb-infotrygd/finnes"))
             .withNavPostHeaders()
             .withRequestBody(WireMock.matchingJsonPath("$.aktører"))
-            .willReturn(WireMock.aResponse().withStatus(200)))
+            .willReturn(WireMock.aResponse().withStatus(200).withBody("false")))
     return this
 }
 

@@ -196,9 +196,11 @@ internal class K9SakClient(
             it.jsonBody(dto)
         }.readTextOrThrow()
 
-        logger.info("PleiepengerSyktBarnUnntaksliste, URL=[$PleiepengerSyktBarnUnntaksliste], HttpStatusCode=${httpStatusCode}, Response=[$response]")
+        require(httpStatusCode.isSuccess() && (response == "true" || response == "false")) {
+            "Feil fra K9Sak. URL=[$PleiepengerSyktBarnUnntaksliste], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
+        }
 
-        return false
+        return "true" == response
     }
 
     internal companion object {
