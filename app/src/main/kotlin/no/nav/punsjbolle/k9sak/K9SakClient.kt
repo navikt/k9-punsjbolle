@@ -16,6 +16,7 @@ import no.nav.punsjbolle.søknad.PunsjetSøknadMelding
 import org.intellij.lang.annotations.Language
 import org.json.JSONArray
 import org.json.JSONObject
+import org.slf4j.LoggerFactory
 import java.net.URI
 import java.time.LocalDate
 import java.time.ZoneId
@@ -34,6 +35,8 @@ internal class K9SakClient(
     private val HentSaksnummerUrl = URI("$baseUrl/api/fordel/fagsak/opprett")
     private val SendInnSøknadUrl = URI("$baseUrl/api/fordel/journalposter")
     private val MatchFagsak = URI("$baseUrl/api/fagsak/match")
+    private val PleiepengerSyktBarnUnntaksliste = URI("$baseUrl/api/fordel/psb-infotrygd/finnes")
+
 
     internal suspend fun hentSaksnummer(
         grunnlag: HentK9SaksnummerMelding.HentK9SaksnummerGrunnlag,
@@ -169,7 +172,37 @@ internal class K9SakClient(
         return response.inneholderMatchendeFagsak()
     }
 
+    internal suspend fun inngårIUnntaksliste(
+        aktørIder: Set<AktørId>,
+        søknadstype: Søknadstype,
+        correlationId: CorrelationId) : Boolean {
+
+        if (Søknadstype.PleiepengerSyktBarn != søknadstype) {
+            logger.info("Finnes inngen unntaksliste for ${søknadstype.name}")
+            return false
+        }
+
+        // https://github.com/navikt/k9-sak/tree/3.2.7/web/src/main/java/no/nav/k9/sak/web/app/tjenester/fordeling/FordelRestTjeneste.java#L164
+        // https://github.com/navikt/k9-sak/tree/3.2.7/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/Akt%C3%B8rListeDto.java#L19
+        val dto = JSONObject().also {
+            it.put("aktører", JSONArray(aktørIder.map { aktørId ->  "$aktørId" }))
+        }.toString()
+
+        val (httpStatusCode, response) = PleiepengerSyktBarnUnntaksliste.httpPost {
+            it.header(HttpHeaders.Authorization, authorizationHeader())
+            it.header(CorrelationIdHeaderKey, "$correlationId")
+            it.header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+            it.accept(ContentType.Application.Json)
+            it.jsonBody(dto)
+        }.readTextOrThrow()
+
+        logger.info("PleiepengerSyktBarnUnntaksliste, URL=[$PleiepengerSyktBarnUnntaksliste], HttpStatusCode=${httpStatusCode}, Response=[$response]")
+
+        return false
+    }
+
     internal companion object {
+        private val logger = LoggerFactory.getLogger(K9SakClient::class.java)
         private val Oslo = ZoneId.of("Europe/Oslo")
 
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
@@ -187,8 +220,6 @@ internal class K9SakClient(
         internal fun String.inneholderMatchendeFagsak() = JSONArray(this)
             .asSequence()
             .map { it as JSONObject }
-            .filterNot { it.getBoolean("skalBehandlesAvInfotrygd") }
-            .filterNot { it.getString("status") == "AVSLU" }
             .toSet()
             .isNotEmpty()
     }

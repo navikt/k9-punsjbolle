@@ -214,10 +214,13 @@ internal class SaksnummerApiTest(
             RutingGrunnlag(søker = søker, pleietrengende = pleietrengende, annenPart = annenPart)
         )
 
-    private fun mockK9Sak(søker: Boolean = false, pleietrengende: Boolean = false, annenPart: Boolean = false) = coEvery {
-        k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(),any(), any(), any(), any(), any()) }.returns(
+    private fun mockK9Sak(søker: Boolean = false, pleietrengende: Boolean = false, annenPart: Boolean = false) {
+        coEvery {
+            k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(),any(), any(), any(), any(), any()) }.returns(
             RutingGrunnlag(søker = søker, pleietrengende = pleietrengende, annenPart = annenPart)
         )
+        coEvery { k9SakClientMock.inngårIUnntaksliste(any(), any(), any()) }.returns(false)
+    }
 
     private fun mockHentSaksnummer() = coEvery { k9SakClientMock.hentSaksnummer(any(),any()) }.returns(saksnummer)
 

@@ -22,8 +22,6 @@ internal class RutingService(
         aktørIder: Set<AktørId>,
         correlationId: CorrelationId) : Destinasjon {
 
-        // TODO: Legge til oppslag mot unntaksliste i k9-sak
-
         val k9SakGrunnlag = k9SakClient.harLøpendeSakSomInvolvererEnAv(
             søker = søker,
             fraOgMed = fraOgMed,
@@ -36,6 +34,11 @@ internal class RutingService(
         if (k9SakGrunnlag.minstEnPart) {
             logger.info("Rutes til K9Sak ettersom minst en part er involvert i løpende sak. K9Sak=[$k9SakGrunnlag]")
             return Destinasjon.K9Sak
+        }
+
+        if (k9SakClient.inngårIUnntaksliste(aktørIder = aktørIder, søknadstype = søknadstype, correlationId = correlationId)) {
+            logger.info("Rutes til Infotrygd ettersom minst en part er lagt til i unntakslisten i K9Sak.")
+            return Destinasjon.Infotrygd
         }
 
         val infotrygdGrunnlag = infotrygdClient.harLøpendeSakSomInvolvererEnAv(

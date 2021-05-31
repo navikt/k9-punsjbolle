@@ -44,6 +44,16 @@ private fun WireMockServer.mockSendInnSøknad(): WireMockServer {
     return this
 }
 
+private fun WireMockServer.mockPleiepengerSyktBarnUnntaksliste(): WireMockServer {
+    WireMock.stubFor(
+        WireMock.post(WireMock.urlPathMatching(".*$path/api/fordel/psb-infotrygd/finnes"))
+            .withNavPostHeaders()
+            .withRequestBody(WireMock.matchingJsonPath("$.aktører"))
+            .willReturn(WireMock.aResponse().withStatus(200)))
+    return this
+}
+
+
 private fun WireMockServer.mockMatchFagsak(): WireMockServer {
     WireMock.stubFor(
         WireMock.post(WireMock.urlPathMatching(".*$path/api/fagsak/match"))
@@ -56,5 +66,5 @@ private fun WireMockServer.mockMatchFagsak(): WireMockServer {
 }
 
 
-internal fun WireMockServer.mockK9Sak() = mockPingUrl().mockHentSaksnummer().mockSendInnSøknad().mockMatchFagsak()
+internal fun WireMockServer.mockK9Sak() = mockPingUrl().mockHentSaksnummer().mockSendInnSøknad().mockMatchFagsak().mockPleiepengerSyktBarnUnntaksliste()
 internal fun WireMockServer.k9SakBaseUrl() = baseUrl() + path
