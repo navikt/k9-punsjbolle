@@ -43,7 +43,7 @@ internal class RutingService(
 
         val infotrygdGrunnlag = infotrygdClient.harLøpendeSakSomInvolvererEnAv(
             søker = søker,
-            fraOgMed = fraOgMed,
+            fraOgMed = fraOgMed.minusYears(2),
             pleietrengende = pleietrengende,
             annenPart = annenPart,
             correlationId = correlationId
