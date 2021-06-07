@@ -34,15 +34,19 @@ internal fun Route.SaksnummerApi(
     k9SakClient: K9SakClient,
     sakClient: SakClient) {
 
+    suspend fun periodeOgJournalpost(request: Request) : Pair<Periode, Journalpost?> {
+        val journalpost = request.journalpostId?.let { safClient.hentJournalpost(
+            journalpostId = it,
+            correlationId = request.correlationId
+        )}
+        val periode = request.periode?.forsikreLukketPeriode() ?: journalpost!!.opprettet.toLocalDate().somPeriode()
+        return periode to journalpost
+    }
+
     post("/saksnummer") {
         val request = call.request()
 
-        val journalpost = safClient.hentJournalpost(
-            journalpostId = request.journalpostId,
-            correlationId = request.correlationId
-        )
-
-        val periode = request.periode?.forsikreLukketPeriode() ?: journalpost.opprettet.toLocalDate().somPeriode()
+        val (periode, journalpost) = periodeOgJournalpost(request)
 
         val destinasjon = rutingService.destinasjon(
             søker = request.søker.identitetsnummer,
@@ -69,7 +73,7 @@ internal fun Route.SaksnummerApi(
 
                 logger.info("Hentet K9Saksnummer=[$saksnummer] for JournalpostId=[${request.journalpostId}], Periode=[$periode], Søknadstype=[${request.søknadstype.name}]")
 
-                if (journalpost.kanRutesTilK9Sak(saksnummer)) {
+                if (journalpost?.kanRutesTilK9Sak(saksnummer) != false) {
                     sakClient.forsikreSakskoblingFinnes(
                         saksnummer = saksnummer,
                         søker = request.søker.aktørId,
@@ -119,7 +123,7 @@ private suspend fun ApplicationCall.respondConflict(feil: String, detaljer: Stri
 
 internal data class Request(
     internal val correlationId: CorrelationId,
-    internal val journalpostId: JournalpostId,
+    internal val journalpostId: JournalpostId?,
     internal val søker: Part,
     internal val pleietrengende: Part?,
     internal val annenPart: Part?,
@@ -132,6 +136,9 @@ internal data class Request(
         val antallParter = listOfNotNull(søker, pleietrengende, annenPart).size
         require(antallParter == identitetsnumer.size && antallParter == aktørIder.size) {
             "Ugyldig request, Inneholdt $antallParter parter, men ${identitetsnumer.size} identitetsnummer og ${aktørIder.size} aktørIder."
+        }
+        require(journalpostId != null || periode != null) {
+            "Må sette enten periode eller journalpostId"
         }
     }
 
@@ -160,7 +167,7 @@ internal data class Request(
             val json = receive<ObjectNode>()
             return Request(
                 correlationId = request.header(HttpHeaders.XCorrelationId)?.somCorrelationId() ?: throw IllegalStateException("Mangler correlationId"),
-                journalpostId = json.stringOrNull("journalpostId")?.somJournalpostId() ?: throw IllegalStateException("Mangler journalpostId"),
+                journalpostId = json.stringOrNull("journalpostId")?.somJournalpostId(),
                 søknadstype = json.stringOrNull("søknadstype")?.let { Søknadstype.valueOf(it) } ?: throw IllegalStateException("Mangler søknadstype"),
                 søker = json.partOrNull("søker") ?: throw IllegalStateException("Mangler søker"),
                 pleietrengende = json.partOrNull("pleietrengende"),

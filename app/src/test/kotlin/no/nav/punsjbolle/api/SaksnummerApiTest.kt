@@ -9,6 +9,7 @@ import no.nav.punsjbolle.AktørId.Companion.somAktørId
 import no.nav.punsjbolle.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
 import no.nav.punsjbolle.K9Saksnummer.Companion.somK9Saksnummer
+import no.nav.punsjbolle.Periode.Companion.somPeriode
 import no.nav.punsjbolle.infotrygd.InfotrygdClient
 import no.nav.punsjbolle.joark.Journalpost
 import no.nav.punsjbolle.joark.SafClient
@@ -150,6 +151,19 @@ internal class SaksnummerApiTest(
 
 
     @Test
+    fun `requeste uten journalpostId men med periode`() {
+        mockInfotrygd()
+        mockK9Sak()
+        mockHentSaksnummer()
+        mockForsikreSakskobling()
+
+        val (httpStatus, k9Saksnummer) = request(periode = "2021-01-01/2021-01-01".somPeriode(), journalpostId = null)
+        assertEquals(HttpStatusCode.OK, httpStatus)
+        assertEquals(saksnummer, k9Saksnummer)
+        assertSafIkkeKalt()
+    }
+
+    @Test
     fun `Ingen authorization header`() {
         val (httpStatus, k9Saksnummer) = request(jwt = null)
         assertEquals(HttpStatusCode.Unauthorized, httpStatus)
@@ -178,6 +192,7 @@ internal class SaksnummerApiTest(
 
     private fun request(
         periode: Periode? = null,
+        journalpostId: JournalpostId? = benyttetJournalpostId,
         jwt: String? = Azure.V2_0.generateJwt(
             clientId = "foo",
             audience = "k9-punsjbolle"
@@ -186,7 +201,7 @@ internal class SaksnummerApiTest(
             addHeader(HttpHeaders.XCorrelationId, "${UUID.randomUUID()}")
             addHeader(HttpHeaders.ContentType, "application/json")
             jwt?.let { addHeader(HttpHeaders.Authorization, "Bearer $it") }
-            setBody(requestBody(periode = periode))
+            setBody(requestBody(periode = periode, journalpostId = journalpostId))
         }.let {
             val status = it.response.status()!!
             val saksnummerEllerErrorType : Any? = when (status) {
@@ -208,6 +223,9 @@ internal class SaksnummerApiTest(
         true -> coVerify(exactly = 1) { k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }
         false -> coVerify { k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) wasNot Called }
     }
+
+    private fun assertSafIkkeKalt() =
+        coVerify { safClientMock.hentJournalpost(any(), any()) wasNot Called }
 
     private fun mockInfotrygd(søker: Boolean = false, pleietrengende: Boolean = false, annenPart: Boolean = false)  = coEvery {
         infotrygdClientMock.harLøpendeSakSomInvolvererEnAv(any(),any(), any(), any(), any()) }.returns(
@@ -231,7 +249,7 @@ internal class SaksnummerApiTest(
         val sak =  when (sakskobling) { false -> null else -> Journalpost.Sak(fagsaksystem = fagsaksystem!!, fagsakId = fagsakId!!)}
         val journalpoststatus = when (sakskobling) {false -> "MOTTATT" else -> "JOURNALFØRT"}
         coEvery { safClientMock.hentJournalpost(any(), any()) }.returns(Journalpost(
-            journalpostId = journalpostId,
+            journalpostId = benyttetJournalpostId,
             journalposttype = "I",
             journalpoststatus = journalpoststatus,
             opprettet = opprettet.atStartOfDay(),
@@ -248,10 +266,10 @@ internal class SaksnummerApiTest(
         private val søkerAktørId = "22222222222".somAktørId()
         private val pleietrengendeIdentitetsnummer = "33333333333".somIdentitetsnummer()
         private val pleietrengendeAktørId = "44444444444".somAktørId()
-        private val journalpostId = "55555555555".somJournalpostId()
+        private val benyttetJournalpostId = "55555555555".somJournalpostId()
 
         @Language("JSON")
-        private fun requestBody(periode: Periode?) = """
+        private fun requestBody(periode: Periode?, journalpostId: JournalpostId?) = """
             {
               "søker": {
                 "identitetsnummer": "$søkerIdentitetsnummer",
@@ -262,7 +280,7 @@ internal class SaksnummerApiTest(
                 "aktørId": "$pleietrengendeAktørId"
               },
               "søknadstype": "PleiepengerSyktBarn",
-              "journalpostId": "$journalpostId",
+              "journalpostId": ${journalpostId?.let { """"$it"""" }},
               "periode": ${periode?.let { """"$it"""" }}
             }
         """.trimIndent()
