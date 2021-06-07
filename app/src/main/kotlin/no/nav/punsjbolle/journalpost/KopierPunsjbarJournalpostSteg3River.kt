@@ -36,7 +36,7 @@ internal class KopierPunsjbarJournalpostSteg3River(
         packet.leggTilLøsning(
             behov = KopierPunsjbarJournalpostMelding.behovNavn,
             løsning = mapOf(
-                "journalpostId" to kopiertJournalpostId
+                "journalpostId" to "$kopiertJournalpostId"
             )
         )
 
