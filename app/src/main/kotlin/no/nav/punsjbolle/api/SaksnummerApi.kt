@@ -131,7 +131,7 @@ internal data class Request(
     init {
         val antallParter = listOfNotNull(søker, pleietrengende, annenPart).size
         require(antallParter == identitetsnumer.size && antallParter == aktørIder.size) {
-            "Ugylidig request, Inneholdt $antallParter parter, men ${identitetsnumer.size} identitetsnummer og ${aktørIder.size} aktørIder."
+            "Ugyldig request, Inneholdt $antallParter parter, men ${identitetsnumer.size} identitetsnummer og ${aktørIder.size} aktørIder."
         }
     }
 
