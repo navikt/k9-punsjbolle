@@ -33,7 +33,8 @@ internal fun RapidsConnection.registerApplicationContext(applicationContext: App
         safClient = applicationContext.safClient
     )
     KopierPunsjbarJournalpostSteg3River(
-        rapidsConnection = this
+        rapidsConnection = this,
+        punsjbarJournalpostClient = applicationContext.punsjbarJournalpostClient
     )
 
     register(object : RapidsConnection.StatusListener {
