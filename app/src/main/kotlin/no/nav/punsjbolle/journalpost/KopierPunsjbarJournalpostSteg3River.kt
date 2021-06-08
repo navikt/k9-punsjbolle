@@ -9,7 +9,8 @@ import no.nav.punsjbolle.meldinger.KopierJournalpostForK9Melding
 import org.slf4j.LoggerFactory
 
 internal class KopierPunsjbarJournalpostSteg3River(
-    rapidsConnection: RapidsConnection
+    rapidsConnection: RapidsConnection,
+    private val punsjbarJournalpostClient: PunsjbarJournalpostClient
 ) : BehovssekvensPacketListener(
     logger = LoggerFactory.getLogger(KopierPunsjbarJournalpostSteg3River::class.java),
     mdcPaths = KopierPunsjbarJournalpostMelding.mdcPaths) {
@@ -28,19 +29,26 @@ internal class KopierPunsjbarJournalpostSteg3River(
     }
 
     override fun handlePacket(id: String, packet: JsonMessage): Boolean {
-        val kopiertJournalpostId = KopierJournalpostForK9Melding.hentLøsning(packet)
-        val aktørId = HentAktørIderMelding.hentLøsning(packet).getValue(KopierPunsjbarJournalpostMelding.hentBehov(packet).til)
-
-        logger.info("Behov ${KopierPunsjbarJournalpostMelding.behovNavn} løst med JournalpostId=[$kopiertJournalpostId]")
+        val nyJournalpostId = KopierJournalpostForK9Melding.hentLøsning(packet)
+        val kopiertPunsjbarJournalpost = KopierPunsjbarJournalpostMelding.hentBehov(packet)
+        val opprinneligJournalpostId = kopiertPunsjbarJournalpost.journalpostId
+        val aktørId = HentAktørIderMelding.hentLøsning(packet).getValue(kopiertPunsjbarJournalpost.til)
 
         packet.leggTilLøsning(
             behov = KopierPunsjbarJournalpostMelding.behovNavn,
             løsning = mapOf(
-                "journalpostId" to "$kopiertJournalpostId"
+                "journalpostId" to "$nyJournalpostId"
             )
         )
 
-        logger.warn("TODO: Sende på topic til Punsj for å opprette oppgave")
+        punsjbarJournalpostClient.send(KopiertJournalpost(
+            journalpostId = nyJournalpostId,
+            aktørId = aktørId,
+            søknadstype = kopiertPunsjbarJournalpost.søknadstype,
+            opprinneligJournalpostId = kopiertPunsjbarJournalpost.journalpostId
+        ))
+
+        logger.info("Behov ${KopierPunsjbarJournalpostMelding.behovNavn} løst. OpprinneligJournalpostId=[${opprinneligJournalpostId}], NyJournalpostId=[$nyJournalpostId]")
 
         return true
     }
