@@ -5,6 +5,7 @@ import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.ClientSecretAccessTokenClient
 
 import no.nav.k9.rapid.river.Environment
+import no.nav.k9.rapid.river.KafkaBuilder.kafkaProducer
 import no.nav.k9.rapid.river.RapidsStateListener
 import no.nav.k9.rapid.river.csvTilSet
 import no.nav.k9.rapid.river.hentRequiredEnv
@@ -78,7 +79,9 @@ internal class ApplicationContext(
                 scopes = benyttetEnv.hentRequiredEnv("INFOTRYGD_GRUNNLAG_PAAROERENDE_SYKDOM_SCOPES").csvTilSet()
             )
 
-            val benyttetPunsjbarJournalpostClient = punsjbarJournalpostClient ?: PunsjbarJournalpostClient()
+            val benyttetPunsjbarJournalpostClient = punsjbarJournalpostClient ?: PunsjbarJournalpostClient(
+                kafkaProducer = benyttetEnv.kafkaProducer("punsjbar-journalpost")
+            )
 
             return ApplicationContext(
                 env = benyttetEnv,

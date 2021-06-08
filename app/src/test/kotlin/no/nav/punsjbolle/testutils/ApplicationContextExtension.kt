@@ -1,10 +1,13 @@
 package no.nav.punsjbolle.testutils
 
 import com.github.tomakehurst.wiremock.WireMockServer
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.helse.dusseldorf.testsupport.jws.Azure
 import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2JwksUrl
 import no.nav.helse.dusseldorf.testsupport.wiremock.getAzureV2TokenUrl
 import no.nav.punsjbolle.ApplicationContext
+import no.nav.punsjbolle.journalpost.PunsjbarJournalpostClient
 import no.nav.punsjbolle.testutils.wiremock.infotrygdGrunnlagPaaroerendeSykdomBaseUrl
 import no.nav.punsjbolle.testutils.wiremock.k9SakBaseUrl
 import no.nav.punsjbolle.testutils.wiremock.safBaseUrl
@@ -56,7 +59,10 @@ internal class ApplicationContextExtension : ParameterResolver {
         return when (parameterContext.parameter.type) {
             WireMockServer::class.java -> mockedEnvironment.wireMockServer
             else -> ApplicationContext.Builder(
-                env = env
+                env = env,
+                punsjbarJournalpostClient = mockk<PunsjbarJournalpostClient>().also {
+                    every { it.send(any()) }.returns(Unit)
+                }
             )
         }
     }
