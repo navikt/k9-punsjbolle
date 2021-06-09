@@ -62,6 +62,7 @@ internal class ApplicationContextExtension : ParameterResolver {
                 env = env,
                 punsjbarJournalpostClient = mockk<PunsjbarJournalpostClient>().also {
                     every { it.send(any()) }.returns(Unit)
+                    every { it.close() }.returns(Unit)
                 }
             )
         }

@@ -23,6 +23,8 @@ internal class PunsjbarJournalpostClient(
         }
     }
 
+    internal fun close() = logger.info("Lukker KafkaProducer").also { kafkaProducer.close() }
+
     internal companion object {
         private const val Topic = "k9saksbehandling.punsjbar-journalpost"
         private val logger = LoggerFactory.getLogger(PunsjbarJournalpost::class.java)

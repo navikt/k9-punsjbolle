@@ -44,7 +44,9 @@ internal class ApplicationContext(
         var punsjbarJournalpostClient: PunsjbarJournalpostClient? = null,
         var rutingService: RutingService? = null,
         var onStart: (applicationContext: ApplicationContext) -> Unit = {},
-        var onStop: (applicationContext: ApplicationContext) -> Unit = {}) {
+        var onStop: (applicationContext: ApplicationContext) -> Unit = {
+            it.punsjbarJournalpostClient.close()
+        }) {
 
         internal fun build(): ApplicationContext {
             val benyttetEnv = env ?: System.getenv()
