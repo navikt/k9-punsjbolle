@@ -77,7 +77,7 @@ internal class PunsjetSøknadRutingTest(
             k9sak = RutingGrunnlag(søker = true, pleietrengende = false, annenPart = false),
             infotrygd = RutingGrunnlag(søker = false, pleietrengende = true, annenPart = false)
         )
-        coEvery { k9SakClientMock.hentSaksnummer(any(),any()) }.returns("123SAK".somK9Saksnummer())
+        coEvery { k9SakClientMock.hentEllerOpprettSaksnummer(any(),any()) }.returns("123SAK".somK9Saksnummer())
         coEvery { k9SakClientMock.sendInnSøknad(any(), any(), any()) }.returns(Unit)
 
         rapid.sendPunsjetSøknad()

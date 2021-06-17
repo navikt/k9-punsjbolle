@@ -60,7 +60,7 @@ internal fun Route.SaksnummerApi(
 
         when (destinasjon) {
             RutingService.Destinasjon.K9Sak -> {
-                val saksnummer = k9SakClient.hentSaksnummer(
+                val saksnummer = k9SakClient.hentEllerOpprettSaksnummer(
                     correlationId = request.correlationId,
                     grunnlag = HentK9SaksnummerMelding.HentK9SaksnummerGrunnlag(
                         søknadstype = request.søknadstype,

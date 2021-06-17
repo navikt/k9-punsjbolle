@@ -164,6 +164,20 @@ internal class SaksnummerApiTest(
     }
 
     @Test
+    fun `requeste med både journalpostId og periode`() {
+        mockInfotrygd()
+        mockK9Sak()
+        mockHentSaksnummer()
+        mockForsikreSakskobling()
+        mockHentJournalpost()
+
+
+        val (httpStatus, k9Saksnummer) = request(periode = "2021-01-01/2025-01-01".somPeriode(), journalpostId = benyttetJournalpostId)
+        assertEquals(HttpStatusCode.OK, httpStatus)
+        assertEquals(saksnummer, k9Saksnummer)
+    }
+
+    @Test
     fun `Ingen authorization header`() {
         val (httpStatus, k9Saksnummer) = request(jwt = null)
         assertEquals(HttpStatusCode.Unauthorized, httpStatus)
@@ -240,7 +254,7 @@ internal class SaksnummerApiTest(
         coEvery { k9SakClientMock.inngårIUnntaksliste(any(), any(), any()) }.returns(false)
     }
 
-    private fun mockHentSaksnummer() = coEvery { k9SakClientMock.hentSaksnummer(any(),any()) }.returns(saksnummer)
+    private fun mockHentSaksnummer() = coEvery { k9SakClientMock.hentEllerOpprettSaksnummer(any(),any()) }.returns(saksnummer)
 
     private fun mockForsikreSakskobling() = coEvery { sakClientMock.forsikreSakskoblingFinnes(any(),any(),any()) }.returns(Unit)
 

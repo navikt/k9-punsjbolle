@@ -32,17 +32,55 @@ internal class K9SakClient(
     scopes = scopes,
     pingUrl = URI("$baseUrl/internal/health/isReady")) {
 
-    private val HentSaksnummerUrl = URI("$baseUrl/api/fordel/fagsak/opprett")
+    private val HentEllerOpprettSaksnummerUrl = URI("$baseUrl/api/fordel/fagsak/opprett")
+    private val HentSaksnummerUrl = URI("$baseUrl/api/fagsak/siste") // TODO: Proxy
+
     private val SendInnSøknadUrl = URI("$baseUrl/api/fordel/journalposter")
-    private val MatchFagsak = URI("$baseUrl/api/fagsak/match")
-    private val PleiepengerSyktBarnUnntaksliste = URI("$baseUrl/api/fordel/psb-infotrygd/finnes")
+    private val MatchFagsakUrl = URI("$baseUrl/api/fagsak/match")
+    private val PleiepengerSyktBarnUnntakslisteUrl = URI("$baseUrl/api/fordel/psb-infotrygd/finnes")
 
-
-    internal suspend fun hentSaksnummer(
+    internal suspend fun hentEllerOpprettSaksnummer(
         grunnlag: HentK9SaksnummerMelding.HentK9SaksnummerGrunnlag,
         correlationId: CorrelationId) : K9Saksnummer {
 
-        // https://github.com/navikt/k9-sak/blob/3.1.30/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/FinnEllerOpprettSak.java#L23
+        val (httpStatusCode, response) = hentEllerOpprettSaksnummer(
+            grunnlag = grunnlag,
+            correlationId = correlationId,
+            uri = HentEllerOpprettSaksnummerUrl
+        )
+
+        require(httpStatusCode == HttpStatusCode.OK) {
+            "Feil fra K9Sak. URL=[$HentEllerOpprettSaksnummerUrl], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
+        }
+
+        return response.saksnummer()
+    }
+
+    internal suspend fun hentEksisterendeSaksnummer(
+        grunnlag: HentK9SaksnummerMelding.HentK9SaksnummerGrunnlag,
+        correlationId: CorrelationId) : K9Saksnummer? {
+
+        val (httpStatusCode, response) = hentEllerOpprettSaksnummer(
+            grunnlag = grunnlag,
+            correlationId = correlationId,
+            uri = HentSaksnummerUrl
+        )
+
+        return when (httpStatusCode) {
+            HttpStatusCode.OK -> response.saksnummer()
+            HttpStatusCode.NoContent -> null
+            else -> throw IllegalStateException(
+                "Feil fra K9Sak. URL=[$HentSaksnummerUrl], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
+            )
+        }
+    }
+
+    private suspend fun hentEllerOpprettSaksnummer(
+        grunnlag: HentK9SaksnummerMelding.HentK9SaksnummerGrunnlag,
+        uri: URI,
+        correlationId: CorrelationId) : Pair<HttpStatusCode, String> {
+        // https://github.com/navikt/k9-sak/blob/3.2.10/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/FinnEllerOpprettSak.java#L49
+        // https://github.com/navikt/k9-sak/blob/3.2.10/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/FinnSak.java#L46
         @Language("JSON")
         val dto = """
             {
@@ -57,19 +95,13 @@ internal class K9SakClient(
             }
         """.trimIndent()
 
-        val (httpStatusCode, response) = HentSaksnummerUrl.httpPost {
+        return uri.httpPost {
             it.header(HttpHeaders.Authorization, authorizationHeader())
             it.header(CorrelationIdHeaderKey, "$correlationId")
             it.header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
             it.accept(ContentType.Application.Json)
             it.jsonBody(dto)
         }.readTextOrThrow()
-
-        require(httpStatusCode == HttpStatusCode.OK) {
-            "Feil fra K9Sak. URL=[$HentSaksnummerUrl], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
-        }
-
-        return JSONObject(response).getString("saksnummer").somK9Saksnummer()
     }
 
     internal suspend fun sendInnSøknad(
@@ -157,7 +189,7 @@ internal class K9SakClient(
         }
         """.trimIndent()
         
-        val (httpStatusCode, response) = MatchFagsak.httpPost {
+        val (httpStatusCode, response) = MatchFagsakUrl.httpPost {
             it.header(HttpHeaders.Authorization, authorizationHeader())
             it.header(CorrelationIdHeaderKey, "$correlationId")
             it.header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
@@ -166,7 +198,7 @@ internal class K9SakClient(
         }.readTextOrThrow()
 
         require(httpStatusCode.isSuccess()) {
-            "Feil fra K9Sak. URL=[$MatchFagsak], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
+            "Feil fra K9Sak. URL=[$MatchFagsakUrl], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
         }
 
         return response.inneholderMatchendeFagsak()
@@ -188,7 +220,7 @@ internal class K9SakClient(
             it.put("aktører", JSONArray(aktørIder.map { aktørId ->  "$aktørId" }))
         }.toString()
 
-        val (httpStatusCode, response) = PleiepengerSyktBarnUnntaksliste.httpPost {
+        val (httpStatusCode, response) = PleiepengerSyktBarnUnntakslisteUrl.httpPost {
             it.header(HttpHeaders.Authorization, authorizationHeader())
             it.header(CorrelationIdHeaderKey, "$correlationId")
             it.header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
@@ -197,7 +229,7 @@ internal class K9SakClient(
         }.readTextOrThrow()
 
         require(httpStatusCode.isSuccess() && (response == "true" || response == "false")) {
-            "Feil fra K9Sak. URL=[$PleiepengerSyktBarnUnntaksliste], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
+            "Feil fra K9Sak. URL=[$PleiepengerSyktBarnUnntakslisteUrl], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
         }
 
         return "true" == response
@@ -218,6 +250,8 @@ internal class K9SakClient(
             null -> "[]"
             else -> """["$this"]"""
         }
+
+        private fun String.saksnummer() = JSONObject(this).getString("saksnummer").somK9Saksnummer()
 
         internal fun String.inneholderMatchendeFagsak() = JSONArray(this)
             .asSequence()

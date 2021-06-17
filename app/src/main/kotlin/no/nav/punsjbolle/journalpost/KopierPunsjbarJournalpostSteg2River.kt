@@ -71,7 +71,7 @@ internal class KopierPunsjbarJournalpostSteg2River(
         )
 
         logger.info("Henter saksnummer for personen det kopieres fra, og personen det kopieres til.")
-        val fraSaksnummer = runBlocking { k9SakClient.hentSaksnummer(
+        val fraSaksnummer = runBlocking { k9SakClient.hentEllerOpprettSaksnummer(
             grunnlag = fraSaksnummerGrunnlag,
             correlationId = packet.correlationId()
         )}
@@ -80,7 +80,7 @@ internal class KopierPunsjbarJournalpostSteg2River(
             "Kan ikke kopieres. $journalpost"
         }
 
-        val tilSaksnummer = runBlocking { k9SakClient.hentSaksnummer(
+        val tilSaksnummer = runBlocking { k9SakClient.hentEllerOpprettSaksnummer(
             grunnlag = fraSaksnummerGrunnlag.copy(
                 søker = aktørIder.getValue(kopierPunsjbarJournalpost.til)
             ),
