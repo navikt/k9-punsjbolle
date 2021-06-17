@@ -33,7 +33,7 @@ internal class K9SakClient(
     pingUrl = URI("$baseUrl/internal/health/isReady")) {
 
     private val HentEllerOpprettSaksnummerUrl = URI("$baseUrl/api/fordel/fagsak/opprett")
-    private val HentSaksnummerUrl = URI("$baseUrl/api/fagsak/siste") // TODO: Proxy
+    private val HentSaksnummerUrl = URI("$baseUrl/api/fagsak/siste")
     private val SendInnSøknadUrl = URI("$baseUrl/api/fordel/journalposter")
     private val MatchFagsakUrl = URI("$baseUrl/api/fagsak/match")
     private val PleiepengerSyktBarnUnntakslisteUrl = URI("$baseUrl/api/fordel/psb-infotrygd/finnes")
