@@ -5,8 +5,11 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.k9.rapid.river.*
+import no.nav.punsjbolle.CorrelationId
 import no.nav.punsjbolle.CorrelationId.Companion.correlationId
+import no.nav.punsjbolle.K9Saksnummer
 import no.nav.punsjbolle.Periode.Companion.somPeriode
+import no.nav.punsjbolle.joark.Journalpost
 import no.nav.punsjbolle.joark.SafClient
 import no.nav.punsjbolle.k9sak.K9SakClient
 import no.nav.punsjbolle.meldinger.HentAktørIderMelding
@@ -71,14 +74,11 @@ internal class KopierPunsjbarJournalpostSteg2River(
         )
 
         logger.info("Henter saksnummer for personen det kopieres fra, og personen det kopieres til.")
-        val fraSaksnummer = runBlocking { k9SakClient.hentEllerOpprettSaksnummer(
-            grunnlag = fraSaksnummerGrunnlag,
-            correlationId = packet.correlationId()
+        val fraSaksnummer = runBlocking { validerJournalpostOgHentFraSaksnummer(
+            journalpost = journalpost,
+            saksnummerGrunnlag = fraSaksnummerGrunnlag,
+            correlationId = correlationId
         )}
-
-        require(journalpost.kanKnyttesTilSak() || journalpost.erKnyttetTil(fraSaksnummer)) {
-            "Kan ikke kopieres. $journalpost"
-        }
 
         val tilSaksnummer = runBlocking { k9SakClient.hentEllerOpprettSaksnummer(
             grunnlag = fraSaksnummerGrunnlag.copy(
@@ -97,5 +97,30 @@ internal class KopierPunsjbarJournalpostSteg2River(
             ))
         )
         return true
+    }
+
+    private suspend fun validerJournalpostOgHentFraSaksnummer(
+        journalpost: Journalpost,
+        saksnummerGrunnlag: HentK9SaksnummerMelding.HentK9SaksnummerGrunnlag,
+        correlationId: CorrelationId
+    ) : K9Saksnummer {
+        // Er fortsatt ikke journalført, så kan hente/opprette saksnummer
+        if (journalpost.kanKnyttesTilSak()) {
+            return k9SakClient.hentEllerOpprettSaksnummer(
+                grunnlag = saksnummerGrunnlag,
+                correlationId = correlationId
+            )
+        }
+        val eksisterendeSaksnummer = k9SakClient.hentEksisterendeSaksnummer(
+            grunnlag = saksnummerGrunnlag,
+            correlationId = correlationId
+        )
+
+        // For å gå videre her må det være knyttet til det eksisterende saksnummeret
+        require(eksisterendeSaksnummer != null && journalpost.erKnyttetTil(eksisterendeSaksnummer)) {
+            "Kan ikke kopieres. $journalpost. EksisterendeSaksnummer=[$eksisterendeSaksnummer]"
+        }
+
+        return eksisterendeSaksnummer
     }
 }
