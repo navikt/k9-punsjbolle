@@ -42,8 +42,23 @@ internal class K9SakClient(
         grunnlag: HentK9SaksnummerMelding.HentK9SaksnummerGrunnlag,
         correlationId: CorrelationId) : K9Saksnummer {
 
-        val (httpStatusCode, response) = hentEllerOpprettSaksnummer(
-            grunnlag = grunnlag,
+        // https://github.com/navikt/k9-sak/blob/3.2.10/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/FinnEllerOpprettSak.java#L49
+        @Language("JSON")
+        val dto = """
+            {
+                "ytelseType": "${grunnlag.søknadstype.k9YtelseType}",
+                "aktørId": "${grunnlag.søker}",
+                "pleietrengendeAktørId": ${grunnlag.pleietrengende?.let { """"$it"""" }},
+                "relatertPersonAktørId": ${grunnlag.annenPart?.let { """"$it"""" }},
+                "periode": {
+                    "fom": ${grunnlag.periode.fom?.let { """"$it"""" }},
+                    "tom": ${grunnlag.periode.tom?.let { """"$it"""" }}
+                }
+            }
+        """.trimIndent()
+
+        val (httpStatusCode, response) = post(
+            dto = dto,
             correlationId = correlationId,
             uri = HentEllerOpprettSaksnummerUrl
         )
@@ -59,8 +74,20 @@ internal class K9SakClient(
         grunnlag: HentK9SaksnummerMelding.HentK9SaksnummerGrunnlag,
         correlationId: CorrelationId) : K9Saksnummer? {
 
-        val (httpStatusCode, response) = hentEllerOpprettSaksnummer(
-            grunnlag = grunnlag,
+        // https://github.com/navikt/k9-sak/blob/3.2.10/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/FinnSak.java#L46
+        @Language("JSON")
+        val dto = """
+            {
+                "ytelseType": "${grunnlag.søknadstype.k9YtelseType}",
+                "aktørId": "${grunnlag.søker}",
+                "pleietrengendeAktørId": ${grunnlag.pleietrengende?.let { """"$it"""" }},
+                "relatertPersonAktørId": ${grunnlag.annenPart?.let { """"$it"""" }},
+                "periode": {}
+            }
+        """.trimIndent()
+
+        val (httpStatusCode, response) = post(
+            dto = dto,
             correlationId = correlationId,
             uri = HentSaksnummerUrl
         )
@@ -74,25 +101,10 @@ internal class K9SakClient(
         }
     }
 
-    private suspend fun hentEllerOpprettSaksnummer(
-        grunnlag: HentK9SaksnummerMelding.HentK9SaksnummerGrunnlag,
+    private suspend fun post(
         uri: URI,
+        dto: String,
         correlationId: CorrelationId) : Pair<HttpStatusCode, String> {
-        // https://github.com/navikt/k9-sak/blob/3.2.10/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/FinnEllerOpprettSak.java#L49
-        // https://github.com/navikt/k9-sak/blob/3.2.10/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/FinnSak.java#L46
-        @Language("JSON")
-        val dto = """
-            {
-                "ytelseType": "${grunnlag.søknadstype.k9YtelseType}",
-                "aktørId": "${grunnlag.søker}",
-                "pleietrengendeAktørId": ${grunnlag.pleietrengende?.let { """"$it"""" }},
-                "relatertPersonAktørId": ${grunnlag.annenPart?.let { """"$it"""" }},
-                "periode": {
-                    "fom": ${grunnlag.periode.fom?.let { """"$it"""" }},
-                    "tom": ${grunnlag.periode.tom?.let { """"$it"""" }}
-                }
-            }
-        """.trimIndent()
 
         return uri.httpPost {
             it.header(HttpHeaders.Authorization, authorizationHeader())

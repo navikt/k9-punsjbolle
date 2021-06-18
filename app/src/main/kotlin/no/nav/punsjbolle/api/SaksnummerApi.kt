@@ -7,18 +7,13 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.util.pipeline.*
-import no.nav.punsjbolle.AktørId
+import no.nav.punsjbolle.*
 import no.nav.punsjbolle.AktørId.Companion.somAktørId
-import no.nav.punsjbolle.CorrelationId
 import no.nav.punsjbolle.CorrelationId.Companion.somCorrelationId
-import no.nav.punsjbolle.Identitetsnummer
 import no.nav.punsjbolle.Identitetsnummer.Companion.somIdentitetsnummer
-import no.nav.punsjbolle.JournalpostId
 import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
-import no.nav.punsjbolle.Periode
 import no.nav.punsjbolle.Periode.Companion.forsikreLukketPeriode
 import no.nav.punsjbolle.Periode.Companion.somPeriode
-import no.nav.punsjbolle.Søknadstype
 import no.nav.punsjbolle.api.Request.Companion.request
 import no.nav.punsjbolle.joark.Journalpost
 import no.nav.punsjbolle.joark.Journalpost.Companion.kanSendesTilK9Sak
@@ -68,10 +63,13 @@ internal fun Route.SaksnummerApi(
                 }
                 when (kanSendesTilK9Sak) {
                     true -> onK9Sak(request, periode)
-                    false -> call.respondConflict(
-                        feil = "ikke-støttet-journalpost",
-                        detaljer = "$journalpost kan ikke rutes inn til K9Sak."
-                    )
+                    false -> {
+                        secureLogger.warn("Ikke støttet journalpost. RutingRequest=${request}")
+                        call.respondConflict(
+                            feil = "ikke-støttet-journalpost",
+                            detaljer = "$journalpost kan ikke rutes inn til K9Sak."
+                        )
+                    }
                 }
             }
         }
@@ -108,6 +106,7 @@ internal fun Route.SaksnummerApi(
 }
 
 private val logger = LoggerFactory.getLogger("no.nav.punsjbolle.api.SaksnummerApi")
+private val secureLogger = LoggerFactory.getLogger("tjenestekall")
 
 private suspend fun ApplicationCall.respondConflict(feil: String, detaljer: String) {
     logger.warn("Feil=[$feil], Detaljer=[$detaljer]")
