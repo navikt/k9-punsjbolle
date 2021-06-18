@@ -2,6 +2,7 @@ package no.nav.punsjbolle.joark
 
 import no.nav.punsjbolle.JournalpostId
 import no.nav.punsjbolle.K9Saksnummer
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 
 internal data class Journalpost(
@@ -17,6 +18,8 @@ internal data class Journalpost(
         return sak?.let { "K9" == it.fagsaksystem && "$saksnummer" == it.fagsakId }?:false
     }
 
+    private fun erInngående() = journalposttype == "I"
+
     internal fun kanKnyttesTilSak() : Boolean {
         return journalpoststatus == "MOTTATT" && journalposttype == "I"
     }
@@ -27,7 +30,20 @@ internal data class Journalpost(
     )
 
     internal companion object {
+        private val logger = LoggerFactory.getLogger(Journalpost::class.java)
+
         internal fun Set<Journalpost>.tidligstOpprettetJournalpost() =
             minByOrNull { it.opprettet }!!
+
+        internal suspend fun Journalpost?.kanSendesTilK9Sak(eksisterendeSaksnummer: suspend () -> K9Saksnummer?) : Boolean {
+            if (this == null || kanKnyttesTilSak()) return true
+            val saksnummer = eksisterendeSaksnummer().also {
+                logger.info("Eksisterende K9Saksnummer=[$it]")
+            }
+            return saksnummer != null && erKnyttetTil(saksnummer)
+        }
+
+        internal suspend fun Journalpost.kanKopieres(eksisterendeSaksnummer: suspend () -> K9Saksnummer?) =
+            erInngående() && kanSendesTilK9Sak(eksisterendeSaksnummer)
     }
 }

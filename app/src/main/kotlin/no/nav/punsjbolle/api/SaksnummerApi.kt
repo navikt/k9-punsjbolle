@@ -21,6 +21,7 @@ import no.nav.punsjbolle.Periode.Companion.somPeriode
 import no.nav.punsjbolle.Søknadstype
 import no.nav.punsjbolle.api.Request.Companion.request
 import no.nav.punsjbolle.joark.Journalpost
+import no.nav.punsjbolle.joark.Journalpost.Companion.kanSendesTilK9Sak
 import no.nav.punsjbolle.joark.SafClient
 import no.nav.punsjbolle.k9sak.K9SakClient
 import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
@@ -43,17 +44,7 @@ internal fun Route.SaksnummerApi(
         return periode to journalpost
     }
 
-    suspend fun Journalpost?.kanRutesTilK9Sak(request: Request, periode: Periode) : Boolean {
-        if (this == null || kanKnyttesTilSak()) return true
-        val eksisterendeSaksnummer = k9SakClient.hentEksisterendeSaksnummer(
-            grunnlag = request.hentSaksnummerGrunnlag(periode),
-            correlationId = request.correlationId
-        )
-        logger.info("EksisterendeSaksnummer=[$eksisterendeSaksnummer]")
-        return eksisterendeSaksnummer != null && erKnyttetTil(eksisterendeSaksnummer)
-    }
-
-    suspend fun PipelineContext<Unit, ApplicationCall>.håndterRequest(
+    suspend fun PipelineContext<Unit, ApplicationCall>.ruting(
         onInfotrygd: suspend () -> Unit,
         onK9Sak: suspend (request: Request, periode: Periode) -> Unit) {
         val request = call.request()
@@ -67,24 +58,31 @@ internal fun Route.SaksnummerApi(
             correlationId = request.correlationId,
             aktørIder = request.aktørIder
         )
+        logger.info("Ruting for JournalpostId=[${request.journalpostId}], Periode=[$periode], Søknadstype=[${request.søknadstype.name}, Destinasjon=[$destinasjon]]")
         when (destinasjon) {
             RutingService.Destinasjon.Infotrygd -> onInfotrygd()
-            RutingService.Destinasjon.K9Sak -> when (journalpost.kanRutesTilK9Sak(request, periode)) {
-                true -> onK9Sak(request, periode)
-                false -> call.respondConflict(
-                    feil = "ikke-støttet-journalpost",
-                    detaljer = "$journalpost kan ikke rutes inn til K9Sak."
-                )
+            RutingService.Destinasjon.K9Sak -> {
+                val kanSendesTilK9Sak = journalpost.kanSendesTilK9Sak { k9SakClient.hentEksisterendeSaksnummer(
+                    grunnlag = request.hentSaksnummerGrunnlag(periode),
+                    correlationId = request.correlationId)
+                }
+                when (kanSendesTilK9Sak) {
+                    true -> onK9Sak(request, periode)
+                    false -> call.respondConflict(
+                        feil = "ikke-støttet-journalpost",
+                        detaljer = "$journalpost kan ikke rutes inn til K9Sak."
+                    )
+                }
             }
         }
     }
 
-    post("/ruting") { håndterRequest(
+    post("/ruting") { ruting(
         onInfotrygd = { call.respondDestinasjon(RutingService.Destinasjon.Infotrygd) },
         onK9Sak = { _,_ -> call.respondDestinasjon(RutingService.Destinasjon.K9Sak) }
     )}
 
-    post("/saksnummer") { håndterRequest(
+    post("/saksnummer") { ruting(
         onInfotrygd = { call.respondConflict(
             feil = "må-behandles-i-infotrygd",
             detaljer = "Minst en part har en løpende sak i Infotrygd."
@@ -94,7 +92,7 @@ internal fun Route.SaksnummerApi(
                 correlationId = request.correlationId,
                 grunnlag = request.hentSaksnummerGrunnlag(periode)
             )
-            logger.info("Hentet K9Saksnummer=[$saksnummer] for JournalpostId=[${request.journalpostId}], Periode=[$periode], Søknadstype=[${request.søknadstype.name}]")
+            logger.info("Hentet/Opprettet K9Saksnummer=[$saksnummer].")
             sakClient.forsikreSakskoblingFinnes(
                 saksnummer = saksnummer,
                 søker = request.søker.aktørId,
