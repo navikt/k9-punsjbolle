@@ -58,7 +58,7 @@ internal fun Route.SaksnummerApi(
             correlationId = request.correlationId,
             aktørIder = request.aktørIder
         )
-        logger.info("Ruting for JournalpostId=[${request.journalpostId}], Periode=[$periode], Søknadstype=[${request.søknadstype.name}, Destinasjon=[$destinasjon]]")
+        logger.info("Ruting for JournalpostId=[${request.journalpostId}], Periode=[$periode], Søknadstype=[${request.søknadstype.name}], Destinasjon=[${destinasjon.name}]")
         when (destinasjon) {
             RutingService.Destinasjon.Infotrygd -> onInfotrygd()
             RutingService.Destinasjon.K9Sak -> {
