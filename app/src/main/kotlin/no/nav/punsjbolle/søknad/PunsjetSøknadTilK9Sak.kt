@@ -35,7 +35,7 @@ internal class PunsjetSøknadTilK9Sak(
         )
 
         val (k9Saksnummer, k9SaksnummerKilde) = when (søknad.saksnummer) {
-            null -> runBlocking { k9SakClient.hentSaksnummer(
+            null -> runBlocking { k9SakClient.hentEllerOpprettSaksnummer(
                 grunnlag = hentK9SaksnummerGrunnlag,
                 correlationId = correlationId
             ) to HentK9SaksnummerMelding.K9SaksnummerKilde.SlåttOppMotK9Sak }

@@ -15,6 +15,7 @@ import no.nav.punsjbolle.joark.Journalpost
 import no.nav.punsjbolle.joark.SafClient
 import no.nav.punsjbolle.k9sak.K9SakClient
 import no.nav.punsjbolle.ruting.RutingGrunnlag
+import no.nav.punsjbolle.ruting.RutingService
 import no.nav.punsjbolle.sak.SakClient
 import no.nav.punsjbolle.testutils.ApplicationContextExtension
 import org.intellij.lang.annotations.Language
@@ -58,9 +59,10 @@ internal class SaksnummerApiTest(
         mockHentJournalpost()
         mockForsikreSakskobling()
 
-        val (httpStatus, k9Saksnummer) = request()
+        val (httpStatus, k9Saksnummer) = requestSaksnummer()
         assertEquals(HttpStatusCode.OK, httpStatus)
         assertEquals(saksnummer, k9Saksnummer)
+        assertEquals(RutingService.Destinasjon.K9Sak, requestDestinasjon())
 
         assertInfotrygdKalt(true)
         assertK9SakKalt(true)
@@ -74,9 +76,11 @@ internal class SaksnummerApiTest(
         mockHentJournalpost()
         mockForsikreSakskobling()
 
-        val (httpStatus, errorType) = request()
+        val (httpStatus, errorType) = requestSaksnummer()
         assertEquals(HttpStatusCode.Conflict, httpStatus)
         assertEquals(URI("punsjbolle://må-behandles-i-infotrygd"), errorType)
+        assertEquals(RutingService.Destinasjon.Infotrygd, requestDestinasjon())
+
 
         assertInfotrygdKalt(true)
         assertK9SakKalt(true)
@@ -89,9 +93,11 @@ internal class SaksnummerApiTest(
         mockK9Sak()
         mockHentJournalpost()
 
-        val (httpStatus, errorType) = request()
+        val (httpStatus, errorType) = requestSaksnummer()
         assertEquals(HttpStatusCode.Conflict, httpStatus)
         assertEquals(URI("punsjbolle://må-behandles-i-infotrygd"), errorType)
+        assertEquals(RutingService.Destinasjon.Infotrygd, requestDestinasjon())
+
         assertInfotrygdKalt(true)
         assertK9SakKalt(true)
     }
@@ -104,9 +110,10 @@ internal class SaksnummerApiTest(
         mockHentJournalpost()
         mockForsikreSakskobling()
 
-        val (httpStatus, k9Saksnummer) = request()
+        val (httpStatus, k9Saksnummer) = requestSaksnummer()
         assertEquals(HttpStatusCode.OK, httpStatus)
         assertEquals(saksnummer, k9Saksnummer)
+        assertEquals(RutingService.Destinasjon.K9Sak, requestDestinasjon())
 
         assertInfotrygdKalt(false)
         assertK9SakKalt(true)
@@ -119,9 +126,11 @@ internal class SaksnummerApiTest(
         mockHentSaksnummer()
         mockHentJournalpost(fagsaksystem = "K9", fagsakId = "EtAnnet")
 
-        val (httpStatus, errorType) = request()
+        val (httpStatus, errorType) = requestSaksnummer()
         assertEquals(HttpStatusCode.Conflict, httpStatus)
         assertEquals(URI("punsjbolle://ikke-støttet-journalpost"), errorType)
+        assertEquals(URI("punsjbolle://ikke-støttet-journalpost"), requestDestinasjon())
+
     }
 
     @Test
@@ -132,9 +141,10 @@ internal class SaksnummerApiTest(
         mockHentJournalpost(fagsaksystem = "K9", fagsakId = "$saksnummer")
         mockForsikreSakskobling()
 
-        val (httpStatus, k9Saksnummer) = request()
+        val (httpStatus, k9Saksnummer) = requestSaksnummer()
         assertEquals(HttpStatusCode.OK, httpStatus)
         assertEquals(saksnummer, k9Saksnummer)
+        assertEquals(RutingService.Destinasjon.K9Sak, requestDestinasjon())
     }
 
     @Test
@@ -144,11 +154,11 @@ internal class SaksnummerApiTest(
         mockHentSaksnummer()
         mockHentJournalpost(fagsaksystem = "FOO", fagsakId = "BAR")
 
-        val (httpStatus, errorType) = request()
+        val (httpStatus, errorType) = requestSaksnummer()
         assertEquals(HttpStatusCode.Conflict, httpStatus)
         assertEquals(URI("punsjbolle://ikke-støttet-journalpost"), errorType)
+        assertEquals(URI("punsjbolle://ikke-støttet-journalpost"), requestDestinasjon())
     }
-
 
     @Test
     fun `requeste uten journalpostId men med periode`() {
@@ -157,22 +167,38 @@ internal class SaksnummerApiTest(
         mockHentSaksnummer()
         mockForsikreSakskobling()
 
-        val (httpStatus, k9Saksnummer) = request(periode = "2021-01-01/2021-01-01".somPeriode(), journalpostId = null)
+        val (httpStatus, k9Saksnummer) = requestSaksnummer(periode = "2021-01-01/2021-01-01".somPeriode(), journalpostId = null)
         assertEquals(HttpStatusCode.OK, httpStatus)
         assertEquals(saksnummer, k9Saksnummer)
+        assertEquals(RutingService.Destinasjon.K9Sak, requestDestinasjon(periode = "2021-01-01/2021-01-01".somPeriode(), journalpostId = null))
         assertSafIkkeKalt()
     }
 
     @Test
+    fun `requeste med både journalpostId og periode`() {
+        mockInfotrygd()
+        mockK9Sak()
+        mockHentSaksnummer()
+        mockForsikreSakskobling()
+        mockHentJournalpost()
+
+
+        val (httpStatus, k9Saksnummer) = requestSaksnummer(periode = "2021-01-01/2025-01-01".somPeriode(), journalpostId = benyttetJournalpostId)
+        assertEquals(HttpStatusCode.OK, httpStatus)
+        assertEquals(saksnummer, k9Saksnummer)
+        assertEquals(RutingService.Destinasjon.K9Sak, requestDestinasjon(periode = "2021-01-01/2025-01-01".somPeriode(), journalpostId = benyttetJournalpostId))
+    }
+
+    @Test
     fun `Ingen authorization header`() {
-        val (httpStatus, k9Saksnummer) = request(jwt = null)
+        val (httpStatus, k9Saksnummer) = requestSaksnummer(jwt = null)
         assertEquals(HttpStatusCode.Unauthorized, httpStatus)
         assertNull(k9Saksnummer)
     }
 
     @Test
     fun `Feil audience`() {
-        val (httpStatus, k9Saksnummer) = request(jwt = Azure.V2_0.generateJwt(
+        val (httpStatus, k9Saksnummer) = requestSaksnummer(jwt = Azure.V2_0.generateJwt(
             clientId = "foo",
             audience = "k9-sak"
         ))
@@ -182,7 +208,7 @@ internal class SaksnummerApiTest(
 
     @Test
     fun `Feil issuer`() {
-        val (httpStatus, k9Saksnummer) = request(jwt = Azure.V1_0.generateJwt(
+        val (httpStatus, k9Saksnummer) = requestSaksnummer(jwt = Azure.V1_0.generateJwt(
             clientId = "foo",
             audience = "k9-punsjbolle"
         ))
@@ -190,7 +216,7 @@ internal class SaksnummerApiTest(
         assertNull(k9Saksnummer)
     }
 
-    private fun request(
+    private fun requestSaksnummer(
         periode: Periode? = null,
         journalpostId: JournalpostId? = benyttetJournalpostId,
         jwt: String? = Azure.V2_0.generateJwt(
@@ -213,6 +239,27 @@ internal class SaksnummerApiTest(
         }
     }
 
+    private fun requestDestinasjon(
+        periode: Periode? = null,
+        journalpostId: JournalpostId? = benyttetJournalpostId,
+        jwt: String? = Azure.V2_0.generateJwt(
+            clientId = "foo",
+            audience = "k9-punsjbolle"
+        )) = withTestApplication( { punsjbolle(applicationContext)}) {
+        handleRequest(HttpMethod.Post, "/api/ruting") {
+            addHeader(HttpHeaders.XCorrelationId, "${UUID.randomUUID()}")
+            addHeader(HttpHeaders.ContentType, "application/json")
+            jwt?.let { addHeader(HttpHeaders.Authorization, "Bearer $it") }
+            setBody(requestBody(periode = periode, journalpostId = journalpostId))
+        }.let {
+            val destinasjonEllerErrorType : Any? = when (it.response.status()!!) {
+                HttpStatusCode.OK -> JSONObject(it.response.content!!).getString("destinasjon").let { RutingService.Destinasjon.valueOf(it) }
+                HttpStatusCode.Conflict -> URI(JSONObject(it.response.content!!).getString("type"))
+                else -> null
+            }
+            destinasjonEllerErrorType
+        }
+    }
 
     private fun assertInfotrygdKalt(forventet:Boolean) = when (forventet) {
         true -> coVerify(exactly = 1) { infotrygdClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any()) }
@@ -240,7 +287,10 @@ internal class SaksnummerApiTest(
         coEvery { k9SakClientMock.inngårIUnntaksliste(any(), any(), any()) }.returns(false)
     }
 
-    private fun mockHentSaksnummer() = coEvery { k9SakClientMock.hentSaksnummer(any(),any()) }.returns(saksnummer)
+    private fun mockHentSaksnummer() {
+        coEvery { k9SakClientMock.hentEllerOpprettSaksnummer(any(),any()) }.returns(saksnummer)
+        coEvery { k9SakClientMock.hentEksisterendeSaksnummer(any(),any()) }.returns(saksnummer)
+    }
 
     private fun mockForsikreSakskobling() = coEvery { sakClientMock.forsikreSakskoblingFinnes(any(),any(),any()) }.returns(Unit)
 

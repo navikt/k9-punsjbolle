@@ -7,6 +7,7 @@ import no.nav.helse.rapids_rivers.River
 import no.nav.k9.rapid.river.*
 import no.nav.punsjbolle.CorrelationId.Companion.correlationId
 import no.nav.punsjbolle.Periode.Companion.somPeriode
+import no.nav.punsjbolle.joark.Journalpost.Companion.kanKopieres
 import no.nav.punsjbolle.joark.SafClient
 import no.nav.punsjbolle.k9sak.K9SakClient
 import no.nav.punsjbolle.meldinger.HentAktørIderMelding
@@ -70,17 +71,22 @@ internal class KopierPunsjbarJournalpostSteg2River(
             annenPart = kopierPunsjbarJournalpost.annenPart?.let { aktørIder.getValue(it) }
         )
 
-        logger.info("Henter saksnummer for personen det kopieres fra, og personen det kopieres til.")
-        val fraSaksnummer = runBlocking { k9SakClient.hentSaksnummer(
+        logger.info("Validerer at journalposten kan kopieres")
+        val kanKopieres = runBlocking { journalpost.kanKopieres {
+            k9SakClient.hentEksisterendeSaksnummer(
+                grunnlag = fraSaksnummerGrunnlag,
+                correlationId = correlationId
+            )
+        }}
+        require(kanKopieres) { "Kan ikke kopieres. $journalpost." }
+
+        logger.info("Henter/Oppretter saksnummer for personen det kopieres fra, og personen det kopieres til.")
+        val fraSaksnummer = runBlocking { k9SakClient.hentEllerOpprettSaksnummer(
             grunnlag = fraSaksnummerGrunnlag,
-            correlationId = packet.correlationId()
+            correlationId = correlationId
         )}
 
-        require(journalpost.kanKnyttesTilSak() || journalpost.erKnyttetTil(fraSaksnummer)) {
-            "Kan ikke kopieres. $journalpost"
-        }
-
-        val tilSaksnummer = runBlocking { k9SakClient.hentSaksnummer(
+        val tilSaksnummer = runBlocking { k9SakClient.hentEllerOpprettSaksnummer(
             grunnlag = fraSaksnummerGrunnlag.copy(
                 søker = aktørIder.getValue(kopierPunsjbarJournalpost.til)
             ),
