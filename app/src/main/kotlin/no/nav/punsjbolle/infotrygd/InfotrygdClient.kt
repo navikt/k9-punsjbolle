@@ -99,7 +99,7 @@ internal class InfotrygdClient(
         private const val ConsumerIdHeaderValue = "k9-punsjbolle"
         private const val CorrelationIdHeaderKey = "Nav-Callid"
         private val relevanteBehandlingstema = listOf(
-            "OM", "OP", "PB", "PP", "PN"
+            "OP", "PB", "PP", "PN"
         )
 
         private fun JSONObject.getJSONArrayOrEmptyArray(key: String) = when (has(key) && get(key) is JSONArray) {
