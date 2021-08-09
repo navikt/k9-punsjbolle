@@ -71,4 +71,64 @@ internal class SafMappingTest {
 
         assertEquals(forventet, response.somJournalpost(journalpostId))
     }
+
+    @Test
+    fun `har fagsaksystem men ikke fagsakid`() {
+        @Language("JSON")
+        val response = JSONObject("""
+            {
+               "journalposttype": "RAR2",
+               "journalstatus": "OK2",
+               "datoOpprettet": "$datoOpprettet",
+               "dokumenter": [{ "brevkode": null }, { "brevkode": "Brevkoden" }, { "brevkode": "Brevkoden2" }],
+               "eksternReferanseId": "Ekstern123",
+               "sak": {
+                  "fagsaksystem": "K9",
+                  "fagsakId": null
+               }
+            }
+        """.trimIndent())
+
+        val forventet = Journalpost(
+            journalpostId = journalpostId,
+            journalposttype = "RAR2",
+            journalpoststatus = "OK2",
+            opprettet = opprettet,
+            eksternReferanse = "Ekstern123",
+            brevkode = "Brevkoden",
+            sak = null
+        )
+
+        assertEquals(forventet, response.somJournalpost(journalpostId))
+    }
+
+    @Test
+    fun `har fagsakid men ikke fagsaksystem`() {
+        @Language("JSON")
+        val response = JSONObject("""
+            {
+               "journalposttype": "RAR2",
+               "journalstatus": "OK2",
+               "datoOpprettet": "$datoOpprettet",
+               "dokumenter": [{ "brevkode": null }, { "brevkode": "Brevkoden" }, { "brevkode": "Brevkoden2" }],
+               "eksternReferanseId": "Ekstern123",
+               "sak": {
+                  "fagsaksystem": null,
+                  "fagsakId": "SAK3"
+               }
+            }
+        """.trimIndent())
+
+        val forventet = Journalpost(
+            journalpostId = journalpostId,
+            journalposttype = "RAR2",
+            journalpoststatus = "OK2",
+            opprettet = opprettet,
+            eksternReferanse = "Ekstern123",
+            brevkode = "Brevkoden",
+            sak = null
+        )
+
+        assertEquals(forventet, response.somJournalpost(journalpostId))
+    }
 }
