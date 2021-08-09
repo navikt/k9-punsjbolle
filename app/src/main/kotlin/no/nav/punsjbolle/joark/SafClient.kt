@@ -133,10 +133,12 @@ internal class SafClient(
             eksternReferanse = getStringOrNull("eksternReferanseId"),
             brevkode = getJSONArray("dokumenter").mapNotNull { (it as JSONObject).getStringOrNull("brevkode") }.firstOrNull(),
             opprettet = LocalDateTime.parse(getString("datoOpprettet")),
-            sak = getJSONObjectOrNull("sak")?.let { sak -> Journalpost.Sak(
-                fagsakId = sak.getString("fagsakId"),
-                fagsaksystem = sak.getString("fagsaksystem")
-            )}
+            sak = getJSONObjectOrNull("sak")?.let { sak -> 
+                val fagsakId = sak.getStringOrNull("fagsakId")
+                val fagsaksystem = sak.getStringOrNull("fagsaksystem")
+                if (fagsakId == null || fagsaksystem == null) { null }
+                else { Journalpost.Sak(fagsakId = fagsakId, fagsaksystem = fagsaksystem) }
+            }
         )
     }
 }
