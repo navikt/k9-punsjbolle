@@ -133,11 +133,14 @@ internal class SafClient(
             eksternReferanse = getStringOrNull("eksternReferanseId"),
             brevkode = getJSONArray("dokumenter").mapNotNull { (it as JSONObject).getStringOrNull("brevkode") }.firstOrNull(),
             opprettet = LocalDateTime.parse(getString("datoOpprettet")),
-            sak = getJSONObjectOrNull("sak")?.let { sak -> 
+            sak = getJSONObjectOrNull("sak")?.let { sak ->
                 val fagsakId = sak.getStringOrNull("fagsakId")
                 val fagsaksystem = sak.getStringOrNull("fagsaksystem")
-                if (fagsakId == null || fagsaksystem == null) { null }
-                else { Journalpost.Sak(fagsakId = fagsakId, fagsaksystem = fagsaksystem) }
+                when {
+                    fagsakId == null && fagsaksystem == null -> null
+                    fagsakId != null && fagsaksystem != null -> Journalpost.Sak(fagsakId = fagsakId, fagsaksystem = fagsaksystem)
+                    else -> logger.warn("Journalpost har kun en av Fagsaksystem/FagsakId satt. SafResponse=$this").let { null }
+                }
             }
         )
     }

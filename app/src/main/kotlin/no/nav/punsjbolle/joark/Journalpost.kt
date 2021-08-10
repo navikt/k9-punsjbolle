@@ -14,11 +14,18 @@ internal data class Journalpost(
     internal val opprettet: LocalDateTime,
     internal val sak: Sak?) {
 
+    init {
+        if (sak == null && erJournalført()) {
+            logger.warn("Journalpost $journalpostId har status $journalpoststatus, men ingen sakskobling.")
+        }
+    }
+
     internal fun erKnyttetTil(saksnummer: K9Saksnummer) : Boolean {
         return sak?.let { "K9" == it.fagsaksystem && "$saksnummer" == it.fagsakId }?:false
     }
 
     private fun erInngående() = journalposttype == "I"
+    private fun erJournalført() = journalførtStatuser.contains(journalpoststatus)
 
     internal fun kanKnyttesTilSak() : Boolean {
         return journalpoststatus == "MOTTATT" && journalposttype == "I"
@@ -31,6 +38,7 @@ internal data class Journalpost(
 
     internal companion object {
         private val logger = LoggerFactory.getLogger(Journalpost::class.java)
+        private val journalførtStatuser = listOf("JOURNALFOERT", "FERDIGSTILT")
 
         internal fun Set<Journalpost>.tidligstOpprettetJournalpost() =
             minByOrNull { it.opprettet }!!
