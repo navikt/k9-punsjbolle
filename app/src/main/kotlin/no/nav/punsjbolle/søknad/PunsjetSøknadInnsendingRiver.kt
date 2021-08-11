@@ -8,6 +8,7 @@ import no.nav.k9.rapid.river.*
 import no.nav.punsjbolle.CorrelationId.Companion.correlationId
 import no.nav.punsjbolle.k9sak.K9SakClient
 import no.nav.punsjbolle.meldinger.FerdigstillJournalføringForK9Melding
+import no.nav.punsjbolle.meldinger.JournalførJsonMelding
 import no.nav.punsjbolle.meldinger.SendPunsjetSøknadTilK9SakMelding
 import org.slf4j.LoggerFactory
 
@@ -43,6 +44,13 @@ internal class PunsjetSøknadInnsendingRiver(
 
         packet.leggTilLøsning(behov = SendPunsjetSøknadTilK9SakMelding.behovNavn)
         packet.leggTilLøsning(behov = PunsjetSøknadMelding.behovNavn)
+
+        packet.leggTilBehovEtter(PunsjetSøknadMelding.behovNavn, JournalførJsonMelding.behov(
+            JournalførJsonMelding.JournalførJson(
+                punsjetSøknad = søknad,
+                saksnummer = grunnlag.saksnummer
+            )
+        ))
 
         return true
     }
