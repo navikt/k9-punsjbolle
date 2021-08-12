@@ -46,10 +46,11 @@ internal class OmsorgspengerMappingTest {
             annenPart = null,
             pleietrengende = null,
             søknadJson = jacksonSøknad,
-            mottatt = ZonedDateTime.parse(mottatt)
+            mottatt = ZonedDateTime.parse(mottatt),
+            saksbehandler = "n/a"
         )
 
-        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null))
+        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null, saksbehandler = "n/a"))
     }
 
     @Test
@@ -86,10 +87,11 @@ internal class OmsorgspengerMappingTest {
             annenPart = null,
             pleietrengende = barn,
             søknadJson = jacksonSøknad,
-            mottatt = ZonedDateTime.parse(mottatt)
+            mottatt = ZonedDateTime.parse(mottatt),
+            saksbehandler = "Saks Behandlersen"
         )
 
-        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null))
+        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null, saksbehandler = "Saks Behandlersen"))
     }
 
     @Test
@@ -127,10 +129,11 @@ internal class OmsorgspengerMappingTest {
             annenPart = annenForelder,
             pleietrengende = null,
             søknadJson = jacksonSøknad,
-            mottatt = ZonedDateTime.parse(mottatt)
+            mottatt = ZonedDateTime.parse(mottatt),
+            saksbehandler = "n/a"
         )
 
-        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null))
+        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null, saksbehandler = "n/a"))
     }
 
     private companion object {

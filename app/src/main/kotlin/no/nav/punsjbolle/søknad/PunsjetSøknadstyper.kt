@@ -14,6 +14,7 @@ import java.time.ZonedDateTime
 
 internal fun ObjectNode.somPunsjetSøknad(
     versjon: String,
+    saksbehandler: String,
     saksnummer: K9Saksnummer?) : PunsjetSøknadMelding.PunsjetSøknad {
 
     val ytelse = get("ytelse") as ObjectNode
@@ -25,33 +26,38 @@ internal fun ObjectNode.somPunsjetSøknad(
             versjon = versjon,
             saksnummer = saksnummer,
             pleietrengende = barn(),
-            periode = pleiepengerSyktBarnPeriode()
+            periode = pleiepengerSyktBarnPeriode(),
+            saksbehandler = saksbehandler
         )
         Søknadstype.OmsorgspengerUtbetaling -> map(
             søknadstype = søknadstype,
             versjon = versjon,
             saksnummer = saksnummer,
-            periode = omsorgspengerUtbetalingPeriode()
+            periode = omsorgspengerUtbetalingPeriode(),
+            saksbehandler = saksbehandler
         )
         Søknadstype.OmsorgspengerKroniskSyktBarn -> map(
             søknadstype = søknadstype,
             versjon = versjon,
             saksnummer = saksnummer,
             pleietrengende = barn(),
-            periode = ÅpenPeriode
+            periode = ÅpenPeriode,
+            saksbehandler = saksbehandler
         )
         Søknadstype.OmsorgspengerMidlertidigAlene -> map(
             søknadstype = søknadstype,
             versjon = versjon,
             saksnummer = saksnummer,
             annenPart = annenForelder(),
-            periode = omsorgspengerMidlertidigAlenePeriode()
+            periode = omsorgspengerMidlertidigAlenePeriode(),
+            saksbehandler = saksbehandler
         )
     }
 }
 
 private fun ObjectNode.map(
     versjon: String,
+    saksbehandler: String,
     saksnummer: K9Saksnummer?,
     periode: Periode,
     søknadstype: Søknadstype,
@@ -68,7 +74,8 @@ private fun ObjectNode.map(
         annenPart = annenPart,
         søknadJson = this,
         periode = periode,
-        mottatt = mottatt()
+        mottatt = mottatt(),
+        saksbehandler = saksbehandler
     )
 }
 

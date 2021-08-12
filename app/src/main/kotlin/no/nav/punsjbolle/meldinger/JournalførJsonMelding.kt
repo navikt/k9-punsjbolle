@@ -16,10 +16,17 @@ internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.Jou
 
     override fun behov(behovInput: JournalførJson): Behov {
         val søknad : Map<String, *> = jacksonObjectMapper().convertValue(behovInput.punsjetSøknad.søknadJson)
+        val json = linkedMapOf(
+            "nøkkelinformasjon" to mapOf(
+                "punsjetAv" to behovInput.punsjetSøknad.saksbehandler,
+                "saksnummer" to "${behovInput.saksnummer}"
+            ),
+            "innsending" to søknad
+        )
         return Behov(
             navn = "JournalførJson@punsjInnsending",
             input = mapOf(
-                "json" to søknad,
+                "json" to json,
                 "identitetsnummer" to "${behovInput.punsjetSøknad.søker}",
                 "fagsystem" to "K9",
                 "saksnummer" to "${behovInput.saksnummer}",
@@ -28,7 +35,7 @@ internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.Jou
                 "farge" to "#C1B5D0",
                 "tittel" to "Innsending fra Punsj",
                 "avsender" to mapOf(
-                    "navn" to "Saks behandlersen" // TODO
+                    "navn" to behovInput.punsjetSøknad.saksbehandler
                 )
             )
         )
