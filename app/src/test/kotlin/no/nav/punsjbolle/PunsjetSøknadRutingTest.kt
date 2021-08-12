@@ -14,7 +14,7 @@ import no.nav.punsjbolle.ruting.RutingGrunnlag
 import no.nav.punsjbolle.testutils.*
 import no.nav.punsjbolle.testutils.ApplicationContextExtension
 import no.nav.punsjbolle.testutils.printSisteMelding
-import no.nav.punsjbolle.testutils.rapid.mockFerdigstillJournalføringForK9
+import no.nav.punsjbolle.testutils.rapid.mockFerdigstillJournalføringForK9OgJournalførJson
 import no.nav.punsjbolle.testutils.rapid.mockHentAktørIder
 import no.nav.punsjbolle.testutils.sisteMeldingHarLøsningPå
 import no.nav.punsjbolle.testutils.sisteMeldingManglerLøsningPå
@@ -82,7 +82,7 @@ internal class PunsjetSøknadRutingTest(
 
         rapid.sendPunsjetSøknad()
         rapid.mockHentAktørIder(setOf(søker, barn))
-        rapid.mockFerdigstillJournalføringForK9()
+        rapid.mockFerdigstillJournalføringForK9OgJournalførJson()
         rapid.sisteMeldingHarLøsningPå("PunsjetSøknad")
     }
 

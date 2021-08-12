@@ -2,12 +2,19 @@ package no.nav.punsjbolle.meldinger
 
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.k9.rapid.behov.Behov
+import no.nav.punsjbolle.HentLøsning
+import no.nav.punsjbolle.JournalpostId
+import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
 import no.nav.punsjbolle.K9Saksnummer
 import no.nav.punsjbolle.LeggTilBehov
 import no.nav.punsjbolle.søknad.PunsjetSøknadMelding
 
-internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.JournalførJson>{
+internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.JournalførJson>, HentLøsning<JournalpostId> {
+
+    internal const val behovNavn = "JournalførJson@punsjInnsending"
+    private val journalpostIdKey = "@løsninger.${behovNavn}.journalpostId"
 
     internal data class JournalførJson(
         internal val punsjetSøknad: PunsjetSøknadMelding.PunsjetSøknad,
@@ -24,7 +31,7 @@ internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.Jou
             "innsending" to søknad
         )
         return Behov(
-            navn = "JournalførJson@punsjInnsending",
+            navn = behovNavn,
             input = mapOf(
                 "json" to json,
                 "identitetsnummer" to "${behovInput.punsjetSøknad.søker}",
@@ -40,4 +47,10 @@ internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.Jou
             )
         )
     }
+
+    override fun validateLøsning(packet: JsonMessage) {
+        packet.interestedIn(journalpostIdKey)
+    }
+
+    override fun hentLøsning(packet: JsonMessage) = packet[journalpostIdKey].asText().somJournalpostId()
 }

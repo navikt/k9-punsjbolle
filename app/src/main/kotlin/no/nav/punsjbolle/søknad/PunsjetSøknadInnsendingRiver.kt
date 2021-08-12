@@ -22,9 +22,13 @@ internal class PunsjetSøknadInnsendingRiver(
         River(rapidsConnection).apply {
             validate {
                 it.skalLøseBehov(SendPunsjetSøknadTilK9SakMelding.behovNavn)
-                it.harLøsningPåBehov(FerdigstillJournalføringForK9Melding.behovNavn)
+                it.harLøsningPåBehov(
+                    FerdigstillJournalføringForK9Melding.behovNavn,
+                    JournalførJsonMelding.behovNavn
+                )
                 SendPunsjetSøknadTilK9SakMelding.validateBehov(it)
                 PunsjetSøknadMelding.validateBehov(it)
+                JournalførJsonMelding.validateLøsning(it)
             }
         }.register(this)
     }
@@ -33,6 +37,7 @@ internal class PunsjetSøknadInnsendingRiver(
         val correlationId = packet.correlationId()
         val søknad = PunsjetSøknadMelding.hentBehov(packet)
         val grunnlag = SendPunsjetSøknadTilK9SakMelding.hentBehov(packet)
+        val journalpostId = JournalførJsonMelding.hentLøsning(packet)
 
         runBlocking { k9SakClient.sendInnSøknad(
             søknad = søknad,
@@ -40,17 +45,10 @@ internal class PunsjetSøknadInnsendingRiver(
             correlationId = correlationId
         )}
 
-        logger.info("Søknad sendt OK til K9Sak")
+        logger.info("Søknad sendt OK til K9Sak med JournalpostId=[$journalpostId]")
 
         packet.leggTilLøsning(behov = SendPunsjetSøknadTilK9SakMelding.behovNavn)
         packet.leggTilLøsning(behov = PunsjetSøknadMelding.behovNavn)
-
-        packet.leggTilBehovEtter(PunsjetSøknadMelding.behovNavn, JournalførJsonMelding.behov(
-            JournalførJsonMelding.JournalførJson(
-                punsjetSøknad = søknad,
-                saksnummer = grunnlag.saksnummer
-            )
-        ))
 
         return true
     }

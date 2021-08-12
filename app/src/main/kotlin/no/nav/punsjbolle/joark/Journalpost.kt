@@ -16,7 +16,7 @@ internal data class Journalpost(
 
     init {
         if (sak == null && erJournalført()) {
-            logger.warn("Journalpost $journalpostId har status $journalpoststatus, men ingen sakskobling.")
+            logger.warn("Journalpost $journalpostId har status $journalpoststatus, men ingen sakskobling. Mest sannsynlig journalført mot generell sak.")
         }
     }
 

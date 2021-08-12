@@ -7,7 +7,7 @@ import no.nav.punsjbolle.Periode.Companion.somPeriode
 import no.nav.punsjbolle.PunsjetPleiepengerSyktBarnMappingTest.Companion.pleiepengerSyktBarnSøknad
 import no.nav.punsjbolle.testutils.ApplicationContextExtension
 import no.nav.punsjbolle.testutils.printSisteMelding
-import no.nav.punsjbolle.testutils.rapid.mockFerdigstillJournalføringForK9
+import no.nav.punsjbolle.testutils.rapid.mockFerdigstillJournalføringForK9OgJournalførJson
 import no.nav.punsjbolle.testutils.rapid.mockHentAktørIder
 import no.nav.punsjbolle.testutils.sisteMeldingHarLøsningPå
 import no.nav.punsjbolle.testutils.søknad.PunsjetSøknadVerktøy.punsjetSøknad
@@ -36,7 +36,9 @@ internal class PunsjetPleiepengerSyktBarnTest(
         )))
 
         rapid.mockHentAktørIder(setOf(søker, barn))
-        rapid.mockFerdigstillJournalføringForK9()
+        rapid.mockFerdigstillJournalføringForK9OgJournalførJson()
+
+        rapid.printSisteMelding()
 
         rapid.sisteMeldingHarLøsningPå("PunsjetSøknad")
 
