@@ -3,6 +3,7 @@ package no.nav.punsjbolle.meldinger
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.k9.rapid.behov.Behov
 import no.nav.punsjbolle.HentLøsning
 import no.nav.punsjbolle.JournalpostId
@@ -11,7 +12,7 @@ import no.nav.punsjbolle.K9Saksnummer
 import no.nav.punsjbolle.LeggTilBehov
 import no.nav.punsjbolle.søknad.PunsjetSøknadMelding
 
-internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.JournalførJson>, HentLøsning<JournalpostId> {
+internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.JournalførJson>, HentLøsning<JournalpostId?> {
 
     internal const val behovNavn = "JournalførJson@punsjInnsending"
     private val journalpostIdKey = "@løsninger.${behovNavn}.journalpostId"
@@ -52,5 +53,8 @@ internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.Jou
         packet.interestedIn(journalpostIdKey)
     }
 
-    override fun hentLøsning(packet: JsonMessage) = packet[journalpostIdKey].asText().somJournalpostId()
+    override fun hentLøsning(packet: JsonMessage) = when (packet[journalpostIdKey].isMissingOrNull()) {
+        true -> null
+        false -> packet[journalpostIdKey].asText().somJournalpostId()
+    }
 }

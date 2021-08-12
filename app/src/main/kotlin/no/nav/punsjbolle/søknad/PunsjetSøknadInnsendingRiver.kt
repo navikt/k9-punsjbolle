@@ -22,10 +22,7 @@ internal class PunsjetSøknadInnsendingRiver(
         River(rapidsConnection).apply {
             validate {
                 it.skalLøseBehov(SendPunsjetSøknadTilK9SakMelding.behovNavn)
-                it.harLøsningPåBehov(
-                    FerdigstillJournalføringForK9Melding.behovNavn,
-                    JournalførJsonMelding.behovNavn
-                )
+                it.harLøsningPåBehov(FerdigstillJournalføringForK9Melding.behovNavn)
                 SendPunsjetSøknadTilK9SakMelding.validateBehov(it)
                 PunsjetSøknadMelding.validateBehov(it)
                 JournalførJsonMelding.validateLøsning(it)
@@ -36,8 +33,15 @@ internal class PunsjetSøknadInnsendingRiver(
     override fun handlePacket(id: String, packet: JsonMessage): Boolean {
         val correlationId = packet.correlationId()
         val søknad = PunsjetSøknadMelding.hentBehov(packet)
-        val grunnlag = SendPunsjetSøknadTilK9SakMelding.hentBehov(packet)
-        val journalpostId = JournalførJsonMelding.hentLøsning(packet)
+        var grunnlag = SendPunsjetSøknadTilK9SakMelding.hentBehov(packet)
+
+        JournalførJsonMelding.hentLøsning(packet)?.also { journalførtJsonJournalpostId ->
+            logger.info("Innsending fra Punsj journalført med JournalpostId=[$journalførtJsonJournalpostId]")
+            grunnlag = grunnlag.copy(
+                journalpostId = journalførtJsonJournalpostId,
+                referanse = id
+            )
+        }
 
         runBlocking { k9SakClient.sendInnSøknad(
             søknad = søknad,
@@ -45,7 +49,7 @@ internal class PunsjetSøknadInnsendingRiver(
             correlationId = correlationId
         )}
 
-        logger.info("Søknad sendt OK til K9Sak med JournalpostId=[$journalpostId]")
+        logger.info("Søknad sendt OK til K9Sak")
 
         packet.leggTilLøsning(behov = SendPunsjetSøknadTilK9SakMelding.behovNavn)
         packet.leggTilLøsning(behov = PunsjetSøknadMelding.behovNavn)
