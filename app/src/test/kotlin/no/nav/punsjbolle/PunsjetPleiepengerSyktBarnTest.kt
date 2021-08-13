@@ -6,10 +6,11 @@ import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
 import no.nav.punsjbolle.Periode.Companion.somPeriode
 import no.nav.punsjbolle.PunsjetPleiepengerSyktBarnMappingTest.Companion.pleiepengerSyktBarnSøknad
 import no.nav.punsjbolle.testutils.ApplicationContextExtension
-import no.nav.punsjbolle.testutils.printSisteMelding
+import no.nav.punsjbolle.testutils.rapid.*
 import no.nav.punsjbolle.testutils.rapid.mockFerdigstillJournalføringForK9OgJournalførJson
 import no.nav.punsjbolle.testutils.rapid.mockHentAktørIder
-import no.nav.punsjbolle.testutils.sisteMeldingHarLøsningPå
+import no.nav.punsjbolle.testutils.rapid.printSisteMelding
+import no.nav.punsjbolle.testutils.rapid.sisteMeldingHarLøsningPå
 import no.nav.punsjbolle.testutils.søknad.PunsjetSøknadVerktøy.punsjetSøknad
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -41,7 +42,6 @@ internal class PunsjetPleiepengerSyktBarnTest(
         rapid.printSisteMelding()
 
         rapid.sisteMeldingHarLøsningPå("PunsjetSøknad")
-
-        rapid.printSisteMelding()
+        rapid.sisteMeldingErKlarForArkivering()
     }
 }
