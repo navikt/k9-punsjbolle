@@ -9,7 +9,7 @@ import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
 import no.nav.punsjbolle.testutils.ApplicationContextExtension
 import no.nav.punsjbolle.testutils.rapid.mockHentAktørIder
 import no.nav.punsjbolle.testutils.rapid.mockKopierJournalpostForK9
-import no.nav.punsjbolle.testutils.sisteMeldingSomJSONObject
+import no.nav.punsjbolle.testutils.rapid.sisteMeldingSomJSONObject
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

@@ -1,5 +1,6 @@
 package no.nav.punsjbolle.søknad
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.isMissingOrNull
@@ -21,7 +22,8 @@ internal object PunsjetSøknadMelding :
         internal val journalpostIder: Set<JournalpostId>,
         internal val periode: Periode,
         internal val mottatt: ZonedDateTime,
-        internal val søknadJson: ObjectNode) {
+        internal val søknadJson: ObjectNode,
+        internal val saksbehandler: String) {
         internal val identitetsnummer = setOfNotNull(søker, pleietrengende, annenPart)
         init {
             require(identitetsnummer.isNotEmpty()) { "Søknaden må gjelde minst en person." }
@@ -35,7 +37,8 @@ internal object PunsjetSøknadMelding :
     override fun validateBehov(packet: JsonMessage) {
         packet.interestedIn(
             VersjonKey,
-            SøknadKey
+            SøknadKey,
+            SaksbehandlerKey
         )
     }
 
@@ -44,6 +47,7 @@ internal object PunsjetSøknadMelding :
 
         return søknadJson.somPunsjetSøknad(
             versjon = packet[VersjonKey].asText(),
+            saksbehandler = packet[SaksbehandlerKey].saksbehandler(),
             saksnummer = when (packet[SaksnummerKey].isMissingOrNull()) {
                 true -> null
                 false -> packet[SaksnummerKey].asText().somK9Saksnummer()
@@ -51,9 +55,15 @@ internal object PunsjetSøknadMelding :
         )
     }
 
+    private fun JsonNode.saksbehandler() = when (isMissingOrNull()) {
+        true -> "n/a"
+        false -> asText()
+    }
+
     internal val behovNavn = "PunsjetSøknad"
     private val VersjonKey = "@behov.$behovNavn.versjon"
     private val SaksnummerKey = "@behov.$behovNavn.saksnummer"
+    private val SaksbehandlerKey = "@behov.$behovNavn.saksbehandler"
     private val SøknadKey = "@behov.$behovNavn.søknad"
     private val SøknadIdKey = "$SøknadKey.søknadId"
 

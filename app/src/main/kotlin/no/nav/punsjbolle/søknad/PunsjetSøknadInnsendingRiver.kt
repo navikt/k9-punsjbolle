@@ -8,6 +8,7 @@ import no.nav.k9.rapid.river.*
 import no.nav.punsjbolle.CorrelationId.Companion.correlationId
 import no.nav.punsjbolle.k9sak.K9SakClient
 import no.nav.punsjbolle.meldinger.FerdigstillJournalføringForK9Melding
+import no.nav.punsjbolle.meldinger.JournalførJsonMelding
 import no.nav.punsjbolle.meldinger.SendPunsjetSøknadTilK9SakMelding
 import org.slf4j.LoggerFactory
 
@@ -24,6 +25,7 @@ internal class PunsjetSøknadInnsendingRiver(
                 it.harLøsningPåBehov(FerdigstillJournalføringForK9Melding.behovNavn)
                 SendPunsjetSøknadTilK9SakMelding.validateBehov(it)
                 PunsjetSøknadMelding.validateBehov(it)
+                JournalførJsonMelding.validateLøsning(it)
             }
         }.register(this)
     }
@@ -31,7 +33,15 @@ internal class PunsjetSøknadInnsendingRiver(
     override fun handlePacket(id: String, packet: JsonMessage): Boolean {
         val correlationId = packet.correlationId()
         val søknad = PunsjetSøknadMelding.hentBehov(packet)
-        val grunnlag = SendPunsjetSøknadTilK9SakMelding.hentBehov(packet)
+        var grunnlag = SendPunsjetSøknadTilK9SakMelding.hentBehov(packet)
+
+        JournalførJsonMelding.hentLøsning(packet)?.also { journalførtJsonJournalpostId ->
+            logger.info("Innsending fra Punsj journalført med JournalpostId=[$journalførtJsonJournalpostId]")
+            grunnlag = grunnlag.copy(
+                journalpostId = journalførtJsonJournalpostId,
+                referanse = id
+            )
+        }
 
         runBlocking { k9SakClient.sendInnSøknad(
             søknad = søknad,

@@ -13,6 +13,7 @@ import no.nav.punsjbolle.k9sak.K9SakClient
 import no.nav.punsjbolle.meldinger.FerdigstillJournalføringForK9Melding
 import no.nav.punsjbolle.meldinger.HentAktørIderMelding
 import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
+import no.nav.punsjbolle.meldinger.JournalførJsonMelding
 import no.nav.punsjbolle.meldinger.SendPunsjetSøknadTilK9SakMelding
 import no.nav.punsjbolle.meldinger.SendPunsjetSøknadTilK9SakMelding.SendPunsjetSøknadTilK9SakGrunnlag.Companion.somSendSøknadTilK9SakGrunnlag
 import org.slf4j.LoggerFactory
@@ -55,11 +56,18 @@ internal class PunsjetSøknadTilK9Sak(
 
         logger.info("Brevkoder=${journalposter.map { it.brevkode }}")
 
-        val journalføringBehov = FerdigstillJournalføringForK9Melding.behov(
+        val ferdigstillJournalføringBehov = FerdigstillJournalføringForK9Melding.behov(
             Triple(søknad.søker, k9Saksnummer, journalpostIderSomSkalKnyttesTilSak(
                 journalposter = journalposter,
                 saksnummer = k9Saksnummer
             ))
+        )
+
+        val journalførJsonBehov = JournalførJsonMelding.behov(
+            JournalførJsonMelding.JournalførJson(
+                punsjetSøknad = søknad,
+                saksnummer = k9Saksnummer
+            )
         )
 
         val innsendingBehov = SendPunsjetSøknadTilK9SakMelding.behov(
@@ -69,9 +77,9 @@ internal class PunsjetSøknadTilK9Sak(
             )
         )
 
-        logger.info("Legger til behov for journalføring og innsending.")
+        logger.info("Legger til behov for ferdigstilling av journalpost, journalføring av JSON og innsending.")
         packet.leggTilBehov(PunsjetSøknadMelding.behovNavn,
-            journalføringBehov, innsendingBehov
+            ferdigstillJournalføringBehov, journalførJsonBehov, innsendingBehov
         )
 
         return true
