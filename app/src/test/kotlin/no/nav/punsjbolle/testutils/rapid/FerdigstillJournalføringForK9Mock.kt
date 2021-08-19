@@ -9,7 +9,7 @@ internal fun TestRapid.mockFerdigstillJournalføringForK9OgJournalførJson() {
 }
 
 private fun JsonMessage.mockFerdigstillJournalføringForK9() = leggTilLøsning(
-    behov = "FerdigstillJournalføringForK9"
+    behov = "FerdigstillJournalføring@punsjInnsending"
 )
 
 private fun JsonMessage.mockJournalførJson() = leggTilLøsning(
