@@ -14,9 +14,8 @@ private val hentJounralpostResponse = """
       "data": {
         "journalpost": {
           "journalposttype": "I",
-          "journalpoststatus": "",
-          "datoOpprettet": "2018-01-01T12:00:00",
           "journalstatus": "MOTTATT",
+          "datoOpprettet": "2018-01-01T12:00:00",
           "sak": null,
           "dokumenter": [{"brevkode": "NAV-123"}]
         }

@@ -89,7 +89,7 @@ internal class PunsjetSøknadTilK9Sak(
         private val logger = LoggerFactory.getLogger(PunsjetSøknadTilK9Sak::class.java)
 
         private fun journalpostIderSomSkalKnyttesTilSak(journalposter: Set<Journalpost>, saksnummer: K9Saksnummer) : Set<JournalpostId> {
-            val skalKnyttesTilSak = journalposter.filter { it.kanKnyttesTilSak() }.also { if (it.isNotEmpty()) {
+            val skalKnyttesTilSak = journalposter.filter { it.kanKnyttesTilSak }.also { if (it.isNotEmpty()) {
                 logger.info("Skal knyttes til sak. K9Saksnummer=[$saksnummer], JournalpostIder=${journalposter.map { journalpost -> journalpost.journalpostId }}")
             }}
 
