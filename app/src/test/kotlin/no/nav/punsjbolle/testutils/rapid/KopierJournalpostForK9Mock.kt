@@ -12,7 +12,7 @@ internal fun TestRapid.mockKopierJournalpostForK9(journalpostId: JournalpostId) 
 private fun JsonMessage.mockKopierJournalpostForK9(
     journalpostId: JournalpostId
 ) = leggTilLøsning(
-    behov = "KopierJournalpostForK9",
+    behov = "KopierJournalpost",
     løsning = mapOf(
         "journalpostId" to "$journalpostId"
     )
