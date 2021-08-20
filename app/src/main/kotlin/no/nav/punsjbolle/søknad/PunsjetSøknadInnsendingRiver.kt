@@ -33,19 +33,18 @@ internal class PunsjetSøknadInnsendingRiver(
     override fun handlePacket(id: String, packet: JsonMessage): Boolean {
         val correlationId = packet.correlationId()
         val søknad = PunsjetSøknadMelding.hentBehov(packet)
-        var grunnlag = SendPunsjetSøknadTilK9SakMelding.hentBehov(packet)
+        val saksnummer = SendPunsjetSøknadTilK9SakMelding.hentBehov(packet)
+        val journalpostId = JournalførJsonMelding.hentLøsning(packet)
 
-        JournalførJsonMelding.hentLøsning(packet)?.also { journalførtJsonJournalpostId ->
-            logger.info("Innsending fra Punsj journalført med JournalpostId=[$journalførtJsonJournalpostId]")
-            grunnlag = grunnlag.copy(
-                journalpostId = journalførtJsonJournalpostId,
-                referanse = id
-            )
-        }
+        logger.info("Innsending fra Punsj journalført med JournalpostId=[$journalpostId]")
 
         runBlocking { k9SakClient.sendInnSøknad(
             søknad = søknad,
-            grunnlag = grunnlag,
+            grunnlag = SendPunsjetSøknadTilK9SakMelding.SendPunsjetSøknadTilK9SakGrunnlag(
+                saksnummer = saksnummer,
+                journalpostId = journalpostId,
+                referanse = id
+            ),
             correlationId = correlationId
         )}
 

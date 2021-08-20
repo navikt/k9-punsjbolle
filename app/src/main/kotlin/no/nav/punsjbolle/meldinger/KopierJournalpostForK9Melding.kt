@@ -27,6 +27,7 @@ internal object KopierJournalpostForK9Melding :
     override fun behov(behovInput: KopierJournalpostForK9): Behov {
         return Behov(behovNavn, mapOf(
             "versjon" to "1.0.0",
+            "fagsystem" to "K9",
             "journalpostId" to "${behovInput.journalpostId}",
             "fra" to mapOf(
                 "identitetsnummer" to "${behovInput.fra.identitetsnummer}",
@@ -47,6 +48,6 @@ internal object KopierJournalpostForK9Melding :
         return packet[journalpostIdKey].asText().somJournalpostId()
     }
 
-    internal const val behovNavn = "KopierJournalpostForK9"
+    internal const val behovNavn = "KopierJournalpost"
     private const val journalpostIdKey = "@løsninger.$behovNavn.journalpostId"
 }

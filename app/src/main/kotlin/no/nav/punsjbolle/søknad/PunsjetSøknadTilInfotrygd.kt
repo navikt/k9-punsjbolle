@@ -35,7 +35,7 @@ internal class PunsjetSøknadTilInfotrygd(
         private val logger: Logger = LoggerFactory.getLogger(PunsjetSøknadTilInfotrygd::class.java)
 
         private fun Set<Journalpost>.journalpostIderSomDetSkalOpprettesGosysJournalføringsoppgaverFor() : Set<JournalpostId> {
-            val skalOpprettesGosysJournalføringsoppgaverFor = filter { it.kanKnyttesTilSak() }.also { if (it.isNotEmpty()) {
+            val skalOpprettesGosysJournalføringsoppgaverFor = filter { it.kanKnyttesTilSak }.also { if (it.isNotEmpty()) {
                 logger.info("Skal opprett Gosys journalføringsoppgaver, JournalpostIder=${map { journalpost -> journalpost.journalpostId }}")
             }}
 

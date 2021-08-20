@@ -20,7 +20,6 @@ internal object KopierPunsjbarJournalpostMelding : HentBehov<KopierPunsjbarJourn
         val søknadstype: Søknadstype) {
         internal val identitetsnummer = setOfNotNull(fra, til, pleietrengende, annenPart)
         init {
-            require(fra != til) { "Kan ikke kopiere til samme person."}
             require(pleietrengende != fra && pleietrengende != til) { "Pleietrengende kan ikke være samme person som fra/til." }
             require(fra != annenPart) { "Fra og annenPart kan ikke være samme person." }
         }

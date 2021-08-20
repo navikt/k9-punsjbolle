@@ -15,7 +15,6 @@ import no.nav.punsjbolle.meldinger.HentAktørIderMelding
 import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
 import no.nav.punsjbolle.meldinger.JournalførJsonMelding
 import no.nav.punsjbolle.meldinger.SendPunsjetSøknadTilK9SakMelding
-import no.nav.punsjbolle.meldinger.SendPunsjetSøknadTilK9SakMelding.SendPunsjetSøknadTilK9SakGrunnlag.Companion.somSendSøknadTilK9SakGrunnlag
 import org.slf4j.LoggerFactory
 
 internal class PunsjetSøknadTilK9Sak(
@@ -71,10 +70,7 @@ internal class PunsjetSøknadTilK9Sak(
         )
 
         val innsendingBehov = SendPunsjetSøknadTilK9SakMelding.behov(
-            journalposter.somSendSøknadTilK9SakGrunnlag(
-                saksnummer = k9Saksnummer,
-                behovssekvensId = id
-            )
+            behovInput = k9Saksnummer
         )
 
         logger.info("Legger til behov for ferdigstilling av journalpost, journalføring av JSON og innsending.")
@@ -89,7 +85,7 @@ internal class PunsjetSøknadTilK9Sak(
         private val logger = LoggerFactory.getLogger(PunsjetSøknadTilK9Sak::class.java)
 
         private fun journalpostIderSomSkalKnyttesTilSak(journalposter: Set<Journalpost>, saksnummer: K9Saksnummer) : Set<JournalpostId> {
-            val skalKnyttesTilSak = journalposter.filter { it.kanKnyttesTilSak() }.also { if (it.isNotEmpty()) {
+            val skalKnyttesTilSak = journalposter.filter { it.kanKnyttesTilSak }.also { if (it.isNotEmpty()) {
                 logger.info("Skal knyttes til sak. K9Saksnummer=[$saksnummer], JournalpostIder=${journalposter.map { journalpost -> journalpost.journalpostId }}")
             }}
 

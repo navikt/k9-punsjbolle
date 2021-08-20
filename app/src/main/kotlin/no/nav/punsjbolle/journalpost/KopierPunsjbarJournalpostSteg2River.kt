@@ -7,7 +7,6 @@ import no.nav.helse.rapids_rivers.River
 import no.nav.k9.rapid.river.*
 import no.nav.punsjbolle.CorrelationId.Companion.correlationId
 import no.nav.punsjbolle.Periode.Companion.somPeriode
-import no.nav.punsjbolle.joark.Journalpost.Companion.kanKopieres
 import no.nav.punsjbolle.joark.SafClient
 import no.nav.punsjbolle.k9sak.K9SakClient
 import no.nav.punsjbolle.meldinger.HentAktørIderMelding
@@ -47,19 +46,30 @@ internal class KopierPunsjbarJournalpostSteg2River(
             correlationId = correlationId
         )}
 
+        val kopiPåSammePerson = (kopierPunsjbarJournalpost.fra == kopierPunsjbarJournalpost.til).also { if (it) {
+            logger.info("Kopierer til samme person")
+        }}
+
+        check(journalpost.kanKopieres) {
+            "Kan ikke kopieres. $journalpost."
+        }
+
         val periode = journalpost.opprettet.toLocalDate().somPeriode()
 
         val destinasjon = runBlocking { rutingService.destinasjon(
             søker = kopierPunsjbarJournalpost.fra,
             pleietrengende = kopierPunsjbarJournalpost.pleietrengende,
-            annenPart = kopierPunsjbarJournalpost.til,
+            annenPart = when (kopiPåSammePerson) {
+                true -> null
+                false -> kopierPunsjbarJournalpost.til
+            },
             søknadstype = kopierPunsjbarJournalpost.søknadstype,
             aktørIder = aktørIder.values.toSet(),
             fraOgMed = periode.fom!!,
             correlationId = correlationId
         )}
 
-        require(RutingService.Destinasjon.K9Sak == destinasjon) {
+        check(RutingService.Destinasjon.K9Sak == destinasjon) {
             "Kan ikke kopiere journalpost. Partene har Destinasjon=[$destinasjon]"
         }
 
@@ -71,28 +81,24 @@ internal class KopierPunsjbarJournalpostSteg2River(
             annenPart = kopierPunsjbarJournalpost.annenPart?.let { aktørIder.getValue(it) }
         )
 
-        logger.info("Validerer at journalposten kan kopieres")
-        val kanKopieres = runBlocking { journalpost.kanKopieres {
-            k9SakClient.hentEksisterendeSaksnummer(
-                grunnlag = fraSaksnummerGrunnlag,
-                correlationId = correlationId
-            )
-        }}
-        require(kanKopieres) { "Kan ikke kopieres. $journalpost." }
-
         logger.info("Henter/Oppretter saksnummer for personen det kopieres fra, og personen det kopieres til.")
         val fraSaksnummer = runBlocking { k9SakClient.hentEllerOpprettSaksnummer(
             grunnlag = fraSaksnummerGrunnlag,
             correlationId = correlationId
         )}
 
-        val tilSaksnummer = runBlocking { k9SakClient.hentEllerOpprettSaksnummer(
-            grunnlag = fraSaksnummerGrunnlag.copy(
-                søker = aktørIder.getValue(kopierPunsjbarJournalpost.til)
-            ),
-            correlationId = correlationId
-        )}
+        val tilSaksnummer = when (kopiPåSammePerson) {
+            true -> fraSaksnummer
+            false -> runBlocking { k9SakClient.hentEllerOpprettSaksnummer(
+                grunnlag = fraSaksnummerGrunnlag.copy(
+                    søker = aktørIder.getValue(kopierPunsjbarJournalpost.til)
+                ),
+                correlationId = correlationId
+            )}
+        }
 
+        logger.info("Kopierer JournalpostId=[${kopierPunsjbarJournalpost.journalpostId}] fra Saksnummer=[${fraSaksnummer}] til Saksnummer=[$tilSaksnummer]")
+        
         logger.info("Legger til behov for å kopiere journalpost")
         packet.leggTilBehov(
             KopierPunsjbarJournalpostMelding.behovNavn,

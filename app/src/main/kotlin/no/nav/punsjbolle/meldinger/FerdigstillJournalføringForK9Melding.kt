@@ -11,11 +11,13 @@ internal object FerdigstillJournalføringForK9Melding :
 
     override fun behov(behovInput: Triple<Identitetsnummer, K9Saksnummer, Set<JournalpostId>>): Behov {
         return Behov(behovNavn, mapOf(
+            "versjon" to "1.0.0",
             "identitetsnummer" to "${behovInput.first}",
             "saksnummer" to "${behovInput.second}",
+            "fagsystem" to "K9",
             "journalpostIder" to behovInput.third.map { "$it" }
         ))
     }
 
-    internal val behovNavn = "FerdigstillJournalføringForK9"
+    internal val behovNavn = "FerdigstillJournalføring@punsjInnsending"
 }
