@@ -15,7 +15,6 @@ import no.nav.punsjbolle.meldinger.HentAktørIderMelding
 import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
 import no.nav.punsjbolle.meldinger.JournalførJsonMelding
 import no.nav.punsjbolle.meldinger.SendPunsjetSøknadTilK9SakMelding
-import no.nav.punsjbolle.meldinger.SendPunsjetSøknadTilK9SakMelding.SendPunsjetSøknadTilK9SakGrunnlag.Companion.somSendSøknadTilK9SakGrunnlag
 import org.slf4j.LoggerFactory
 
 internal class PunsjetSøknadTilK9Sak(
@@ -71,10 +70,7 @@ internal class PunsjetSøknadTilK9Sak(
         )
 
         val innsendingBehov = SendPunsjetSøknadTilK9SakMelding.behov(
-            journalposter.somSendSøknadTilK9SakGrunnlag(
-                saksnummer = k9Saksnummer,
-                behovssekvensId = id
-            )
+            behovInput = k9Saksnummer
         )
 
         logger.info("Legger til behov for ferdigstilling av journalpost, journalføring av JSON og innsending.")

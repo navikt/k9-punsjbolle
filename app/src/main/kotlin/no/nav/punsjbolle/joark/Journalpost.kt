@@ -40,9 +40,6 @@ internal data class Journalpost(
         private val logger = LoggerFactory.getLogger(Journalpost::class.java)
         private val ferdigstilteStatuser = listOf("JOURNALFOERT", "FERDIGSTILT")
 
-        internal fun Set<Journalpost>.tidligstOpprettetJournalpost() =
-            minByOrNull { it.opprettet }!!
-
         internal suspend fun Journalpost?.kanSendesTilK9Sak(eksisterendeSaksnummer: suspend () -> K9Saksnummer?) : Boolean {
             if (this == null || kanKnyttesTilSak) return true
             val saksnummer = eksisterendeSaksnummer().also {
