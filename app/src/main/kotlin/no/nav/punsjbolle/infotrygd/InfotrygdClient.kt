@@ -8,6 +8,9 @@ import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.punsjbolle.AzureAwareClient
 import no.nav.punsjbolle.CorrelationId
 import no.nav.punsjbolle.Identitetsnummer
+import no.nav.punsjbolle.Json.arrayOrEmptyArray
+import no.nav.punsjbolle.Json.objectOrEmptyObject
+import no.nav.punsjbolle.Json.stringOrNull
 import no.nav.punsjbolle.ruting.RutingGrunnlag
 import org.json.JSONArray
 import org.json.JSONObject
@@ -98,30 +101,41 @@ internal class InfotrygdClient(
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsjbolle"
         private const val CorrelationIdHeaderKey = "Nav-Callid"
-        private val relevanteBehandlingstema = listOf(
-            "OP", "PB", "PP", "PN"
-        )
 
-        private fun JSONObject.getJSONArrayOrEmptyArray(key: String) = when (has(key) && get(key) is JSONArray) {
-            true -> getJSONArray(key)
-            false -> JSONArray()
+        private enum class Behandlingstema(val infotrygdVerdi: String) {
+            PleiepengerSyktBarnGammelOrdning("PB"),
+            PleiepengerSyktBarnNyOrdning("PN"),
+            PleiepengerILivetsSluttfase("PP"),
+            Opplæringspenger("OP")
         }
 
-        private fun JSONObject.stringOrNull(key: String) = when (has(key) && get(key) is String) {
-            true -> getString(key)
-            else -> null
+        private enum class Tema(val infotrygdVerdi: String) {
+            BarnsSykdom("BS")
         }
 
-        private fun JSONObject.hasJSONObject(key: String) = has(key) && get(key) is JSONObject
+        private enum class Resultat(val infotrygdVerdi: String) {
+            HenlagtEllerBortfalt("HB")
+        }
+
+        private val relevanteBehandlingstemaer = listOf(
+            Behandlingstema.PleiepengerSyktBarnGammelOrdning,
+            Behandlingstema.PleiepengerSyktBarnNyOrdning,
+            Behandlingstema.PleiepengerILivetsSluttfase,
+            Behandlingstema.Opplæringspenger
+        ).map { it.infotrygdVerdi }
+
+        private val relevanteTemaer = listOf(
+            Tema.BarnsSykdom
+        ).map { it.infotrygdVerdi }
 
         private fun JSONObject.inneholderAktuelle(key: String) =
-            getJSONArrayOrEmptyArray(key)
+            arrayOrEmptyArray(key)
             .asSequence()
             .map { it as JSONObject }
-            .filter { it.hasJSONObject("tema") }
-            .filter { "BS" == it.getJSONObject("tema").stringOrNull("kode") }
-            .filter { it.hasJSONObject("behandlingstema") }
-            .filter { relevanteBehandlingstema.contains(it.getJSONObject("behandlingstema").stringOrNull("kode")) }
+            .filter { relevanteTemaer.contains(it.objectOrEmptyObject("tema").stringOrNull("kode")) }
+            .filter { relevanteBehandlingstemaer.contains(it.objectOrEmptyObject("behandlingstema").stringOrNull("kode")) }
+            // Om den er henlagt/bortfalt og ikke har noen opphørsdato er det aldri gjort noen utbetalinger
+            .filterNot { Resultat.HenlagtEllerBortfalt.infotrygdVerdi == it.objectOrEmptyObject("resultat").stringOrNull("kode") && it.stringOrNull("opphoerFom") == null }
             .toList()
             .isNotEmpty()
 

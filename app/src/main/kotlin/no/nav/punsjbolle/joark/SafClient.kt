@@ -14,6 +14,8 @@ import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.punsjbolle.AzureAwareClient
 import no.nav.punsjbolle.CorrelationId
 import no.nav.punsjbolle.JournalpostId
+import no.nav.punsjbolle.Json.objectOrEmptyObject
+import no.nav.punsjbolle.Json.stringOrNull
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
 import java.lang.IllegalStateException
@@ -116,26 +118,17 @@ internal class SafClient(
             }.toString()
         }
 
-        private fun JSONObject.getStringOrNull(key: String) = when (has(key) && get(key) is String) {
-            true -> getString(key)
-            else -> null
-        }
-
-        private fun JSONObject.getJSONObjectOrNull(key: String) = when (has(key) && get(key) is JSONObject) {
-            true -> getJSONObject(key)
-            else -> null
-        }
 
         internal fun JSONObject.somJournalpost(journalpostId: JournalpostId) = Journalpost(
             journalpostId = journalpostId,
             journalposttype = getString("journalposttype"),
             journalpoststatus = getString("journalstatus"),
-            eksternReferanse = getStringOrNull("eksternReferanseId"),
-            brevkode = getJSONArray("dokumenter").mapNotNull { (it as JSONObject).getStringOrNull("brevkode") }.firstOrNull(),
+            eksternReferanse = stringOrNull("eksternReferanseId"),
+            brevkode = getJSONArray("dokumenter").mapNotNull { (it as JSONObject).stringOrNull("brevkode") }.firstOrNull(),
             opprettet = LocalDateTime.parse(getString("datoOpprettet")),
-            sak = getJSONObjectOrNull("sak")?.let { sak ->
-                val fagsakId = sak.getStringOrNull("fagsakId")
-                val fagsaksystem = sak.getStringOrNull("fagsaksystem")
+            sak = objectOrEmptyObject("sak")?.let { sak ->
+                val fagsakId = sak.stringOrNull("fagsakId")
+                val fagsaksystem = sak.stringOrNull("fagsaksystem")
                 when {
                     fagsakId == null && fagsaksystem == null -> null
                     fagsakId != null && fagsaksystem != null -> Journalpost.Sak(fagsakId = fagsakId, fagsaksystem = fagsaksystem)

@@ -36,6 +36,65 @@ internal class InfotrygdMappingTest {
         assertFalse(sakerMinimalResponse(behandlingstemaSak = "PP", behandlingstemaVedtak = "Feil", temaSak = "BS2", temaVedtak = "BS2").inneholderAktuelleSakerEllerVedtak())
     }
 
+    @Test
+    fun `Vedtak og saker som er henlagt eller bortfalt uten opphørsdato bør filtreres bort`() {
+        @Language("JSON")
+        val henlagtEllerBortfaltUtenOpphørsdato = """
+            {
+              "saker": [{
+                "behandlingstema": {"kode": "PN"},
+                "tema": {"kode": "BS" },
+                "resultat": {"kode": "HB"}
+              }],
+              "vedtak": [{
+                "behandlingstema": {"kode": "PN"},
+                "tema": {"kode": "BS" },
+                "resultat": {"kode": "HB"}
+              }]
+            }
+        """.trimIndent()
+
+        @Language("JSON")
+        val henlagtEllerBortfaltMedOpphørsdato = """
+            {
+              "saker": [{
+                "behandlingstema": {"kode": "PN"},
+                "tema": {"kode": "BS" },
+                "resultat": {"kode": "HB"},
+                "opphoerFom": "2020-02-02"
+              }],
+              "vedtak": [{
+                "behandlingstema": {"kode": "PN"},
+                "tema": {"kode": "BS" },
+                "resultat": {"kode": "HB"},
+                "opphoerFom": "2020-02-02"
+              }]
+            }
+        """.trimIndent()
+
+        @Language("JSON")
+        val ikkeHenlagtEllerBortfalt = """
+            {
+              "saker": [{
+                "behandlingstema": {"kode": "PN"},
+                "tema": {"kode": "BS" },
+                "resultat": {"kode": "NOE"},
+                "opphoerFom": null
+              }],
+              "vedtak": [{
+                "behandlingstema": {"kode": "PN"},
+                "tema": {"kode": "BS" },
+                "resultat": {"kode": "ANNET"},
+                "opphoerFom": null
+              }]
+            }
+        """.trimIndent()
+
+        assertFalse(JSONObject(henlagtEllerBortfaltUtenOpphørsdato).inneholderAktuelleSakerEllerVedtak())
+        assertTrue(JSONObject(henlagtEllerBortfaltMedOpphørsdato).inneholderAktuelleSakerEllerVedtak())
+        assertTrue(JSONObject(ikkeHenlagtEllerBortfalt).inneholderAktuelleSakerEllerVedtak())
+    }
+
     private companion object {
         @Language("JSON")
         private val SakerEksempelResponse = """
