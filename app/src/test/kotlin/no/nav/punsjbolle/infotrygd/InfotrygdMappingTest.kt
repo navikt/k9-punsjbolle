@@ -26,13 +26,13 @@ internal class InfotrygdMappingTest {
         assertFalse(vedtakBarnMinimalResponse(behandlingstema = null, tema = null).inneholderAktuelleVedtak())
         assertFalse(vedtakBarnMinimalResponse(behandlingstema = "PN", tema = null).inneholderAktuelleVedtak())
         assertFalse(vedtakBarnMinimalResponse(behandlingstema = "Feil", tema = "BS").inneholderAktuelleVedtak())
-        assertTrue(vedtakBarnMinimalResponse(behandlingstema = "PP", tema = "BS").inneholderAktuelleVedtak())
+        assertTrue(vedtakBarnMinimalResponse(behandlingstema = "PN", tema = "BS").inneholderAktuelleVedtak())
     }
 
     @Test
-    fun `Vedtak og saker på søker under anent teama og behandlingstema`() {
+    fun `Vedtak og saker på søker under annet tema og behandlingstema`() {
         assertFalse(sakerMinimalResponse(behandlingstemaSak = "PP", behandlingstemaVedtak = "PP", temaSak = null, temaVedtak = null).inneholderAktuelleSakerEllerVedtak())
-        assertTrue(sakerMinimalResponse(behandlingstemaSak = "PP", behandlingstemaVedtak = "Feil", temaSak = "BS", temaVedtak = "BS").inneholderAktuelleSakerEllerVedtak())
+        assertTrue(sakerMinimalResponse(behandlingstemaSak = "PN", behandlingstemaVedtak = "Feil", temaSak = "BS", temaVedtak = "BS").inneholderAktuelleSakerEllerVedtak())
         assertFalse(sakerMinimalResponse(behandlingstemaSak = "PP", behandlingstemaVedtak = "Feil", temaSak = "BS2", temaVedtak = "BS2").inneholderAktuelleSakerEllerVedtak())
     }
 

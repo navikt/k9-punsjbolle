@@ -106,7 +106,8 @@ internal class InfotrygdClient(
             PleiepengerSyktBarnGammelOrdning("PB"),
             PleiepengerSyktBarnNyOrdning("PN"),
             PleiepengerILivetsSluttfase("PP"),
-            Opplæringspenger("OP")
+            Opplæringspenger("OP"),
+            Omsorgspenger("OM")
         }
 
         private enum class Tema(val infotrygdVerdi: String) {
@@ -118,10 +119,7 @@ internal class InfotrygdClient(
         }
 
         private val relevanteBehandlingstemaer = listOf(
-            Behandlingstema.PleiepengerSyktBarnGammelOrdning,
             Behandlingstema.PleiepengerSyktBarnNyOrdning,
-            Behandlingstema.PleiepengerILivetsSluttfase,
-            Behandlingstema.Opplæringspenger
         ).map { it.infotrygdVerdi }
 
         private val relevanteTemaer = listOf(
