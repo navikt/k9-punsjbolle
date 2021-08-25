@@ -262,8 +262,8 @@ internal class SaksnummerApiTest(
     }
 
     private fun assertInfotrygdKalt(forventet:Boolean) = when (forventet) {
-        true -> coVerify(exactly = 1) { infotrygdClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any()) }
-        false -> coVerify { infotrygdClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any()) wasNot Called }
+        true -> coVerify(exactly = 1) { infotrygdClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }
+        false -> coVerify { infotrygdClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) wasNot Called }
     }
 
     private fun assertK9SakKalt(forventet:Boolean) = when (forventet) {
@@ -275,7 +275,7 @@ internal class SaksnummerApiTest(
         coVerify { safClientMock.hentJournalpost(any(), any()) wasNot Called }
 
     private fun mockInfotrygd(søker: Boolean = false, pleietrengende: Boolean = false, annenPart: Boolean = false)  = coEvery {
-        infotrygdClientMock.harLøpendeSakSomInvolvererEnAv(any(),any(), any(), any(), any()) }.returns(
+        infotrygdClientMock.harLøpendeSakSomInvolvererEnAv(any(),any(), any(), any(), any(), any()) }.returns(
             RutingGrunnlag(søker = søker, pleietrengende = pleietrengende, annenPart = annenPart)
         )
 
