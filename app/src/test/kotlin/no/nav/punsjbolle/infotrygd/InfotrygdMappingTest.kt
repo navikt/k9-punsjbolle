@@ -189,7 +189,7 @@ internal class InfotrygdMappingTest {
                 "vedtak": [
                   {
                     "behandlingstema": {
-                      "kode": "PN",
+                      "kode": "PB",
                       "termnavn": "string"
                     },
                     "iverksatt": "2020-01-01",
