@@ -8,6 +8,11 @@ import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.punsjbolle.AzureAwareClient
 import no.nav.punsjbolle.CorrelationId
 import no.nav.punsjbolle.Identitetsnummer
+import no.nav.punsjbolle.Json.arrayOrEmptyArray
+import no.nav.punsjbolle.Json.objectOrEmptyObject
+import no.nav.punsjbolle.Json.stringOrNull
+import no.nav.punsjbolle.Søknadstype
+import no.nav.punsjbolle.infotrygd.InfotrygdClient.Companion.Behandlingstema.Companion.relevanteBehandlingstemaer
 import no.nav.punsjbolle.ruting.RutingGrunnlag
 import org.json.JSONArray
 import org.json.JSONObject
@@ -33,24 +38,26 @@ internal class InfotrygdClient(
         søker: Identitetsnummer,
         pleietrengende: Identitetsnummer?,
         annenPart: Identitetsnummer?,
-        correlationId: CorrelationId
+        søknadstype: Søknadstype,
+        correlationId: CorrelationId,
     ) : RutingGrunnlag {
-        if (harSakSomSøker(søker, fraOgMed, correlationId)) {
+        if (harSakSomSøker(søker, fraOgMed, søknadstype, correlationId)) {
             return RutingGrunnlag(søker = true)
         }
-        if (pleietrengende?.let { harSakSomPleietrengende(it, fraOgMed, correlationId) } == true) {
+        if (pleietrengende?.let { harSakSomPleietrengende(it, fraOgMed, søknadstype, correlationId) } == true) {
             return RutingGrunnlag(søker = false, pleietrengende = true)
         }
         return RutingGrunnlag(
             søker = false,
             pleietrengende = false,
-            annenPart = annenPart?.let { harSakSomSøker(it, fraOgMed, correlationId) } ?: false
+            annenPart = annenPart?.let { harSakSomSøker(it, fraOgMed, søknadstype, correlationId) } ?: false
         )
     }
 
     private suspend fun harSakSomSøker(
         identitetsnummer: Identitetsnummer,
         fraOgMed: LocalDate,
+        søknadstype: Søknadstype,
         correlationId: CorrelationId) : Boolean {
         val url = URI("$HentSakerUrl?fnr=$identitetsnummer&fom=$fraOgMed")
 
@@ -65,7 +72,7 @@ internal class InfotrygdClient(
             "Feil fra Infotrygd. URL=[$HentSakerUrl], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
         }
 
-        return JSONObject(response).inneholderAktuelleSakerEllerVedtak().also { if (it) {
+        return JSONObject(response).inneholderAktuelleSakerEllerVedtak(søknadstype).also { if (it) {
             secureLogger.info("Fant saker/vedtak i Infotrygd som søker for Identitetsnummer=[$identitetsnummer], FraOgMed=[$fraOgMed], Response=[$response]")
         }}
     }
@@ -73,6 +80,7 @@ internal class InfotrygdClient(
     private suspend fun harSakSomPleietrengende(
         identitetsnummer: Identitetsnummer,
         fraOgMed: LocalDate,
+        søknadstype: Søknadstype,
         correlationId: CorrelationId) : Boolean {
 
         val url = URI("$HentVedtakForPleietrengende?fnr=$identitetsnummer&fom=$fraOgMed")
@@ -88,7 +96,7 @@ internal class InfotrygdClient(
             "Feil fra Infotrygd. URL=[$HentVedtakForPleietrengende], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
         }
 
-        return JSONArray(response).inneholderAktuelleVedtak().also { if (it) {
+        return JSONArray(response).inneholderAktuelleVedtak(søknadstype).also { if (it) {
             secureLogger.info("Fant vedtak i Infotrygd som pleietrengende for Identitetsnummer=[$identitetsnummer], FraOgMed=[$fraOgMed], Response=[$response]")
         }}
     }
@@ -98,39 +106,55 @@ internal class InfotrygdClient(
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
         private const val ConsumerIdHeaderValue = "k9-punsjbolle"
         private const val CorrelationIdHeaderKey = "Nav-Callid"
-        private val relevanteBehandlingstema = listOf(
-            "OP", "PB", "PP", "PN"
-        )
 
-        private fun JSONObject.getJSONArrayOrEmptyArray(key: String) = when (has(key) && get(key) is JSONArray) {
-            true -> getJSONArray(key)
-            false -> JSONArray()
+        private enum class Behandlingstema(val infotrygdVerdi: String) {
+            PleiepengerSyktBarnGammelOrdning("PB"),
+            PleiepengerSyktBarnNyOrdning("PN"),
+            PleiepengerILivetsSluttfase("PP"),
+            Opplæringspenger("OP"),
+            Omsorgspenger("OM");
+
+            companion object {
+                fun Søknadstype.relevanteBehandlingstemaer() = when (this) {
+                    Søknadstype.PleiepengerSyktBarn -> listOf(PleiepengerSyktBarnNyOrdning, PleiepengerSyktBarnGammelOrdning)
+                    Søknadstype.OmsorgspengerUtbetaling -> listOf(Omsorgspenger)
+                    Søknadstype.OmsorgspengerKroniskSyktBarn -> listOf(Omsorgspenger)
+                    Søknadstype.OmsorgspengerMidlertidigAlene -> listOf(Omsorgspenger)
+                }.map { it.infotrygdVerdi }
+            }
         }
 
-        private fun JSONObject.stringOrNull(key: String) = when (has(key) && get(key) is String) {
-            true -> getString(key)
-            else -> null
+        private enum class Tema(val infotrygdVerdi: String) {
+            BarnsSykdom("BS");
+
+            companion object {
+                internal val relevanteTemaer = listOf(
+                    BarnsSykdom
+                ).map { it.infotrygdVerdi }
+            }
         }
 
-        private fun JSONObject.hasJSONObject(key: String) = has(key) && get(key) is JSONObject
+        private enum class Resultat(val infotrygdVerdi: String) {
+            HenlagtEllerBortfalt("HB")
+        }
 
-        private fun JSONObject.inneholderAktuelle(key: String) =
-            getJSONArrayOrEmptyArray(key)
+        private fun JSONObject.inneholderAktuelle(key: String, søknadstype: Søknadstype) =
+            arrayOrEmptyArray(key)
             .asSequence()
             .map { it as JSONObject }
-            .filter { it.hasJSONObject("tema") }
-            .filter { "BS" == it.getJSONObject("tema").stringOrNull("kode") }
-            .filter { it.hasJSONObject("behandlingstema") }
-            .filter { relevanteBehandlingstema.contains(it.getJSONObject("behandlingstema").stringOrNull("kode")) }
+            .filter { Tema.relevanteTemaer.contains(it.objectOrEmptyObject("tema").stringOrNull("kode")) }
+            .filter { søknadstype.relevanteBehandlingstemaer().contains(it.objectOrEmptyObject("behandlingstema").stringOrNull("kode")) }
+            // Om den er henlagt/bortfalt og ikke har noen opphørsdato er det aldri gjort noen utbetalinger
+            .filterNot { Resultat.HenlagtEllerBortfalt.infotrygdVerdi == it.objectOrEmptyObject("resultat").stringOrNull("kode") && it.stringOrNull("opphoerFom") == null }
             .toList()
             .isNotEmpty()
 
-        internal fun JSONObject.inneholderAktuelleSakerEllerVedtak() =
-            inneholderAktuelle("saker") || inneholderAktuelle("vedtak")
+        internal fun JSONObject.inneholderAktuelleSakerEllerVedtak(søknadstype: Søknadstype) =
+            inneholderAktuelle("saker", søknadstype) || inneholderAktuelle("vedtak", søknadstype)
 
-        internal fun JSONArray.inneholderAktuelleVedtak() =
+        internal fun JSONArray.inneholderAktuelleVedtak(søknadstype: Søknadstype) =
             map { it as JSONObject }
-            .map { it.inneholderAktuelle("vedtak") }
+            .map { it.inneholderAktuelle("vedtak", søknadstype) }
             .any { it }
     }
 }

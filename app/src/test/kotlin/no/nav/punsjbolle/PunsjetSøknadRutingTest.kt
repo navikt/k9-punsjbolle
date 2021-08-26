@@ -99,7 +99,7 @@ internal class PunsjetSøknadRutingTest(
     }
 
     private fun mock(infotrygd: RutingGrunnlag, k9sak: RutingGrunnlag, inngårIUnntaksliste: Boolean = false) {
-        coEvery { infotrygdClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any()) }.returns(infotrygd)
+        coEvery { infotrygdClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }.returns(infotrygd)
         coEvery { k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }.returns(k9sak)
         coEvery { k9SakClientMock.inngårIUnntaksliste(any(), any(), any()) }.returns(inngårIUnntaksliste)
     }

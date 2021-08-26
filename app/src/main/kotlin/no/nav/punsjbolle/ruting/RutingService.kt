@@ -77,6 +77,7 @@ internal class RutingService(
             fraOgMed = input.fraOgMed.minusYears(2),
             pleietrengende = input.pleietrengende,
             annenPart = input.annenPart,
+            søknadstype = input.søknadstype,
             correlationId = correlationId
         )
 

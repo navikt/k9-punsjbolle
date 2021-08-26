@@ -56,7 +56,7 @@ internal class PunsjetSøknadJournalføringRiver(
 
         return when (destinasjon) {
             RutingService.Destinasjon.Infotrygd -> punsjetSøknadTilInfotrygd.handlePacket(packet)
-            RutingService.Destinasjon.K9Sak ->  punsjetSøknadTilK9Sak.handlePacket(id, packet)
+            RutingService.Destinasjon.K9Sak ->  punsjetSøknadTilK9Sak.handlePacket(packet)
         }
     }
 
