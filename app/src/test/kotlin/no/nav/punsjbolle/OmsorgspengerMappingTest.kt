@@ -11,7 +11,7 @@ import no.nav.punsjbolle.søknad.somPunsjetSøknad
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import java.time.ZonedDateTime
-import kotlin.test.assertEquals
+import org.junit.jupiter.api.Assertions.assertEquals
 
 internal class OmsorgspengerMappingTest {
     @Test

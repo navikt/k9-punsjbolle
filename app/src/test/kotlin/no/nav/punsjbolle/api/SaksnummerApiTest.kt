@@ -26,8 +26,8 @@ import org.junit.jupiter.api.extension.ExtendWith
 import java.net.URI
 import java.time.LocalDate
 import java.util.*
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 
 @ExtendWith(ApplicationContextExtension::class)
 internal class SaksnummerApiTest(

@@ -6,7 +6,7 @@ import org.intellij.lang.annotations.Language
 import org.json.JSONObject
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
-import kotlin.test.assertEquals
+import org.junit.jupiter.api.Assertions.assertEquals
 
 internal class SafMappingTest {
 

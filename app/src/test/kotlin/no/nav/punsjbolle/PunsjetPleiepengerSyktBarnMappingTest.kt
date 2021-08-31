@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test
 import org.skyscreamer.jsonassert.JSONAssert
 import java.time.ZonedDateTime
 import java.util.*
-import kotlin.test.assertEquals
+import org.junit.jupiter.api.Assertions.assertEquals
 
 internal class PunsjetPleiepengerSyktBarnMappingTest {
 
