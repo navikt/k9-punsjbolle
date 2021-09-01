@@ -9,16 +9,12 @@ import no.nav.punsjbolle.JournalpostId
 import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
 import no.nav.punsjbolle.Søknadstype
 import no.nav.punsjbolle.k9sak.K9SakClient
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.assertThrows
 import java.lang.IllegalStateException
 import java.time.LocalDate
 import java.util.*
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class RutingServiceTest {
 
     private val journalpostOverstyrtTilK9Sak1 = "789789788".somJournalpostId()
@@ -36,7 +32,7 @@ internal class RutingServiceTest {
         )
     )
 
-    @BeforeAll
+    @BeforeEach
     internal fun reset() {
         clearMocks(k9SakClientMock)
         coEvery { k9SakClientMock.inngårIUnntaksliste(setOf(aktørIdIUnntaksliste), Søknadstype.PleiepengerSyktBarn, any()) }.returns(true)
