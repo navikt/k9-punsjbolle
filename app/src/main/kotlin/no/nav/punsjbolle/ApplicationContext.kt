@@ -9,6 +9,7 @@ import no.nav.k9.rapid.river.KafkaBuilder.kafkaProducer
 import no.nav.k9.rapid.river.RapidsStateListener
 import no.nav.k9.rapid.river.csvTilSet
 import no.nav.k9.rapid.river.hentRequiredEnv
+import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
 import no.nav.punsjbolle.infotrygd.InfotrygdClient
 import no.nav.punsjbolle.joark.SafClient
 import no.nav.punsjbolle.journalpost.PunsjbarJournalpostClient
@@ -96,7 +97,12 @@ internal class ApplicationContext(
                 onStop = onStop,
                 rutingService = rutingService ?: RutingService(
                     k9SakClient = benyttetK9SakClient,
-                    infotrygdClient = benyttetInfotrygdClient
+                    infotrygdClient = benyttetInfotrygdClient,
+                    overstyrTilK9SakJournalpostIds = benyttetEnv.hentRequiredEnv("OVERSTYR_RUTING_TIL_K9_SAK_JOURNALPOST_IDS")
+                        .csvTilSet()
+                        .filter { it.isNotBlank() }
+                        .map { it.somJournalpostId() }
+                        .toSet()
                 ),
                 sakClient = benyttetSakClient,
                 punsjbarJournalpostClient = benyttetPunsjbarJournalpostClient

@@ -5,6 +5,7 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import no.nav.punsjbolle.AktørId
 import no.nav.punsjbolle.CorrelationId
 import no.nav.punsjbolle.Identitetsnummer
+import no.nav.punsjbolle.JournalpostId
 import no.nav.punsjbolle.Søknadstype
 import no.nav.punsjbolle.infotrygd.InfotrygdClient
 import no.nav.punsjbolle.k9sak.K9SakClient
@@ -14,7 +15,12 @@ import java.time.LocalDate
 
 internal class RutingService(
     private val k9SakClient: K9SakClient,
-    private val infotrygdClient: InfotrygdClient) {
+    private val infotrygdClient: InfotrygdClient,
+    private val overstyrTilK9SakJournalpostIds: Set<JournalpostId>) {
+
+    init {
+        logger.info("JournalpostIder som overstyres til K9Sak=$overstyrTilK9SakJournalpostIds")
+    }
 
     private val cache: Cache<DestinasjonInput, Destinasjon> = Caffeine.newBuilder()
         .expireAfterWrite(Duration.ofMinutes(2))
@@ -28,6 +34,7 @@ internal class RutingService(
         annenPart: Identitetsnummer? = null,
         søknadstype: Søknadstype,
         aktørIder: Set<AktørId>,
+        journalpostIds: Set<JournalpostId>,
         correlationId: CorrelationId) : Destinasjon {
 
         val input = DestinasjonInput(
@@ -36,7 +43,8 @@ internal class RutingService(
             pleietrengende = pleietrengende,
             annenPart = annenPart,
             søknadstype = søknadstype,
-            aktørIder = aktørIder
+            aktørIder = aktørIder,
+            journalpostIds = journalpostIds
         )
 
         return when (val cacheValue = cache.getIfPresent(input)) {
@@ -56,6 +64,16 @@ internal class RutingService(
         if (k9SakClient.inngårIUnntaksliste(aktørIder = input.aktørIder, søknadstype = input.søknadstype, correlationId = correlationId)) {
             logger.info("Rutes til Infotrygd ettersom minst en part er lagt til i unntakslisten i K9Sak.")
             return Destinasjon.Infotrygd
+        }
+
+        val overstyresTilK9Sak = input.journalpostIds.intersect(overstyrTilK9SakJournalpostIds)
+        if (overstyresTilK9Sak.isNotEmpty()) {
+            if (overstyresTilK9Sak == input.journalpostIds) {
+                logger.info("Rutes til K9Sak da alle journalpostIdene er overstyrt til K9Sak.")
+                return Destinasjon.K9Sak
+            } else {
+                throw IllegalStateException("Et subset av journalpostIdene er overstyrt til K9Sak. Må enten være ingen, eller alle. JournalpostIds=${input.journalpostIds}, OverstyresTilK9Sak=$overstyresTilK9Sak")
+            }
         }
 
         val k9SakGrunnlag = k9SakClient.harLøpendeSakSomInvolvererEnAv(
@@ -105,7 +123,8 @@ internal class RutingService(
             val pleietrengende: Identitetsnummer?,
             val annenPart: Identitetsnummer?,
             val søknadstype: Søknadstype,
-            val aktørIder: Set<AktørId>
+            val aktørIder: Set<AktørId>,
+            val journalpostIds: Set<JournalpostId>
         )
     }
 }

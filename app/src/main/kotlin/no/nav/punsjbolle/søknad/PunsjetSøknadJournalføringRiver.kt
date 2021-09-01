@@ -51,7 +51,8 @@ internal class PunsjetSøknadJournalføringRiver(
             annenPart = søknad.annenPart,
             søknadstype = søknad.søknadstype,
             aktørIder = aktørIder.values.toSet(),
-            correlationId = packet.correlationId()
+            correlationId = packet.correlationId(),
+            journalpostIds = søknad.journalpostIder
         )}.also { logger.info("Destinasjon=[${it.name}]") }
 
         return when (destinasjon) {
