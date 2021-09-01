@@ -18,6 +18,10 @@ internal class RutingService(
     private val infotrygdClient: InfotrygdClient,
     private val overstyrTilK9SakJournalpostIds: Set<JournalpostId>) {
 
+    init {
+        logger.info("JournalpostIder som overstyres til K9Sak=$overstyrTilK9SakJournalpostIds")
+    }
+
     private val cache: Cache<DestinasjonInput, Destinasjon> = Caffeine.newBuilder()
         .expireAfterWrite(Duration.ofMinutes(2))
         .maximumSize(100)
