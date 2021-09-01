@@ -100,7 +100,7 @@ internal class ApplicationContext(
                     infotrygdClient = benyttetInfotrygdClient,
                     overstyrTilK9SakJournalpostIds = benyttetEnv.hentRequiredEnv("OVERSTYR_RUTING_TIL_K9_SAK_JOURNALPOST_IDS")
                         .csvTilSet()
-                        .filter { it.isNotBlank() }
+                        .filterNot { it.isBlank() || "EOL" == it }
                         .map { it.somJournalpostId() }
                         .toSet()
                 ),

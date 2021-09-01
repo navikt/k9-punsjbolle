@@ -65,4 +65,4 @@ spec:
     - name: KAFKA_CONSUMER_GROUP_ID
       value: k9-punsjbolle
     - name: OVERSTYR_RUTING_TIL_K9_SAK_JOURNALPOST_IDS
-      value: {{#each overstyrRutingTilK9SakJournalpostIds as |journalpostId|}}{{journalpostId}},{{/each}},
+      value: {{#each overstyrRutingTilK9SakJournalpostIds as |journalpostId|}}{{journalpostId}},{{/each}}EOL
