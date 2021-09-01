@@ -1,9 +1,6 @@
 package no.nav.punsjbolle.ruting
 
-import io.mockk.Called
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.mockk
+import io.mockk.*
 import kotlinx.coroutines.runBlocking
 import no.nav.punsjbolle.AktørId.Companion.somAktørId
 import no.nav.punsjbolle.CorrelationId.Companion.somCorrelationId
@@ -13,12 +10,15 @@ import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
 import no.nav.punsjbolle.Søknadstype
 import no.nav.punsjbolle.k9sak.K9SakClient
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import java.lang.IllegalStateException
 import java.time.LocalDate
 import java.util.*
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class RutingServiceTest {
 
     private val journalpostOverstyrtTilK9Sak1 = "789789788".somJournalpostId()
@@ -26,17 +26,7 @@ internal class RutingServiceTest {
     private val journalpostIkkeOverstyrtTilK9Sak = "894894894".somJournalpostId()
     private val aktørIdIUnntaksliste = "11111111111".somAktørId()
     private val aktørIdIkkeIUnntaksliste = "2222222222".somAktørId()
-
-    private val k9SakClientMock = mockk<K9SakClient>().also {
-        coEvery { it.inngårIUnntaksliste(setOf(aktørIdIUnntaksliste), Søknadstype.PleiepengerSyktBarn, any()) }.returns(true)
-        coEvery { it.inngårIUnntaksliste(setOf(aktørIdIkkeIUnntaksliste), Søknadstype.PleiepengerSyktBarn, any()) }.returns(false)
-        coEvery { it.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }.returns(
-            RutingGrunnlag(
-            søker = true
-        )
-        )
-    }
-
+    private val k9SakClientMock = mockk<K9SakClient>()
     private val rutingService = RutingService(
         k9SakClient = k9SakClientMock,
         infotrygdClient = mockk(),
@@ -46,6 +36,13 @@ internal class RutingServiceTest {
         )
     )
 
+    @BeforeAll
+    internal fun reset() {
+        clearMocks(k9SakClientMock)
+        coEvery { k9SakClientMock.inngårIUnntaksliste(setOf(aktørIdIUnntaksliste), Søknadstype.PleiepengerSyktBarn, any()) }.returns(true)
+        coEvery { k9SakClientMock.inngårIUnntaksliste(setOf(aktørIdIkkeIUnntaksliste), Søknadstype.PleiepengerSyktBarn, any()) }.returns(false)
+        coEvery { k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }.returns(RutingGrunnlag(søker = true))
+    }
 
     @Test
     fun `I unntaksliste og overstyrt til K9Sak skal rutes til Infotrygd`() {
@@ -81,6 +78,21 @@ internal class RutingServiceTest {
             iUnntaksliste = false
         ))
         coVerify(exactly = 1) { k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }
+    }
+
+
+    @Test
+    fun `Tom liste med journalposter går rett på normal ruting`() {
+        coVerify { k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) wasNot Called }
+        assertEquals(RutingService.Destinasjon.K9Sak, hentDestinasjon(
+            journalpostIds = emptySet(),
+            iUnntaksliste = false
+        ))
+        coVerify(exactly = 1) { k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }
+        assertEquals(RutingService.Destinasjon.Infotrygd, hentDestinasjon(
+            journalpostIds = emptySet(),
+            iUnntaksliste = true
+        ))
     }
 
     private fun hentDestinasjon(
