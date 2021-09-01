@@ -66,7 +66,8 @@ internal class KopierPunsjbarJournalpostSteg2River(
             søknadstype = kopierPunsjbarJournalpost.søknadstype,
             aktørIder = aktørIder.values.toSet(),
             fraOgMed = periode.fom!!,
-            correlationId = correlationId
+            correlationId = correlationId,
+            journalpostIds = setOf(kopierPunsjbarJournalpost.journalpostId)
         )}
 
         check(RutingService.Destinasjon.K9Sak == destinasjon) {

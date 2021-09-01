@@ -20,5 +20,6 @@
     "SAK_SCOPES": "e816bb42-bf62-4be9-a1cc-a9be70fe4403/.default",
     "INFOTRYGD_GRUNNLAG_PAAROERENDE_SYKDOM_BASE_URL": "https://omsorgspenger-proxy.prod-fss-pub.nais.io/infotrygd-grunnlag-paaroerende-sykdom",
     "INFOTRYGD_GRUNNLAG_PAAROERENDE_SYKDOM_SCOPES": "fadafa61-0d49-43d4-b256-8a589b215da5/.default"
-  }
+  },
+  "overstyrRutingTilK9SakJournalpostIds": []
 }

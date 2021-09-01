@@ -51,7 +51,8 @@ internal fun Route.SaksnummerApi(
             fraOgMed = periode.fom!!,
             søknadstype = request.søknadstype,
             correlationId = request.correlationId,
-            aktørIder = request.aktørIder
+            aktørIder = request.aktørIder,
+            journalpostIds = setOfNotNull(request.journalpostId)
         )
         logger.info("Ruting for JournalpostId=[${request.journalpostId}], Periode=[$periode], Søknadstype=[${request.søknadstype.name}], Destinasjon=[${destinasjon.name}]")
         when (destinasjon) {
