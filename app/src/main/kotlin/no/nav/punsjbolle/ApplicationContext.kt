@@ -3,12 +3,9 @@ package no.nav.punsjbolle
 import no.nav.helse.dusseldorf.ktor.health.HealthCheck
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.ClientSecretAccessTokenClient
+import no.nav.k9.rapid.river.*
 
-import no.nav.k9.rapid.river.Environment
 import no.nav.k9.rapid.river.KafkaBuilder.kafkaProducer
-import no.nav.k9.rapid.river.RapidsStateListener
-import no.nav.k9.rapid.river.csvTilSet
-import no.nav.k9.rapid.river.hentRequiredEnv
 import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
 import no.nav.punsjbolle.infotrygd.InfotrygdClient
 import no.nav.punsjbolle.joark.SafClient
@@ -98,11 +95,12 @@ internal class ApplicationContext(
                 rutingService = rutingService ?: RutingService(
                     k9SakClient = benyttetK9SakClient,
                     infotrygdClient = benyttetInfotrygdClient,
-                    overstyrTilK9SakJournalpostIds = benyttetEnv.hentRequiredEnv("OVERSTYR_RUTING_TIL_K9_SAK_JOURNALPOST_IDS")
-                        .csvTilSet()
-                        .filterNot { it.isBlank() || "EOL" == it }
-                        .map { it.somJournalpostId() }
-                        .toSet()
+                    overstyrTilK9SakJournalpostIds = benyttetEnv.hentOptionalEnv("OVERSTYR_RUTING_TIL_K9_SAK_JOURNALPOST_IDS")
+                        ?.csvTilSet()
+                        ?.filterNot { it.isBlank()  }
+                        ?.map { it.somJournalpostId() }
+                        ?.toSet()
+                        ?: emptySet()
                 ),
                 sakClient = benyttetSakClient,
                 punsjbarJournalpostClient = benyttetPunsjbarJournalpostClient
