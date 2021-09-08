@@ -143,6 +143,46 @@ internal class PunsjetPleiepengerSyktBarnMappingTest {
         assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null, saksbehandler = "n/a"))
     }
 
+    @Test
+    fun `Perioder som skal trekkes`() {
+        val søknadId = "1e7652a9-d834-42a1-997b-b29b93c58b66"
+        val journalpostIder = setOf(journalpostId)
+        val trekkKravPerioder = setOf("2021-01-01/2021-01-02".somPeriode(), "2021-02-01/2021-02-02".somPeriode())
+
+        val søknadJson = pleiepengerSyktBarnSøknad(
+            søknadId = søknadId,
+            journalpostIder = journalpostIder,
+            søker = søker,
+            trekkKravPerioder = trekkKravPerioder
+        )
+
+        @Language("JSON")
+        val forventetJson = """
+          {"ytelse":{"type":"PLEIEPENGER_SYKT_BARN","trekkKravPerioder":["2021-01-01/2021-01-02", "2021-02-01/2021-02-02"]},"journalposter":[{"journalpostId":"22222222222"}],"søknadId":"1e7652a9-d834-42a1-997b-b29b93c58b66","mottattDato":"$mottatt","søker":{"norskIdentitetsnummer":"11111111111"}}
+        """.trimIndent()
+
+        JSONAssert.assertEquals(forventetJson, søknadJson.toString(), true)
+
+        val jacksonSøknad = søknadJson.jackson()
+
+        val forventetPunsjetSøknad = PunsjetSøknadMelding.PunsjetSøknad(
+            versjon = "1.0.0",
+            søknadId = søknadId,
+            saksnummer = null,
+            søknadstype = Søknadstype.PleiepengerSyktBarn,
+            journalpostIder = journalpostIder,
+            periode = "2021-01-01/2021-02-02".somPeriode(),
+            søker = søker,
+            annenPart = null,
+            pleietrengende = null,
+            søknadJson = jacksonSøknad,
+            mottatt = ZonedDateTime.parse(mottatt),
+            saksbehandler = "ABC123"
+        )
+
+        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null, saksbehandler = "ABC123"))
+    }
+
     internal companion object {
         private val mottatt = "2021-05-03T16:08:45.800Z"
         private val søker = "11111111111".somIdentitetsnummer()
@@ -153,9 +193,10 @@ internal class PunsjetPleiepengerSyktBarnMappingTest {
             søknadId: String = "${UUID.randomUUID()}",
             journalpostIder: Set<JournalpostId>,
             søker: Identitetsnummer,
-            barn: Identitetsnummer?,
-            søknadsperioder: Set<Periode>?,
-            endringsperioder: Set<Periode>?) : JSONObject {
+            barn: Identitetsnummer? = null,
+            søknadsperioder: Set<Periode>? = null,
+            endringsperioder: Set<Periode>? = null,
+            trekkKravPerioder: Set<Periode>? = null) : JSONObject {
 
             val ytelse = JSONObject(mapOf(
                 "type" to "PLEIEPENGER_SYKT_BARN"
@@ -165,6 +206,9 @@ internal class PunsjetPleiepengerSyktBarnMappingTest {
             }
             endringsperioder?.also {
                 ytelse.put("endringsperiode", it.map { periode -> "$periode" })
+            }
+            trekkKravPerioder?.also {
+                ytelse.put("trekkKravPerioder", it.map { periode -> "$periode" })
             }
             barn?.also {
                 ytelse.put(

@@ -92,7 +92,10 @@ private fun ObjectNode.objectPerioder(navn: String) =
     (get("ytelse").get(navn)?.let { array -> (array as ArrayNode).map { it as ObjectNode }.map { obj -> obj.get("periode").asText().somPeriode() } }) ?: emptyList()
 
 private fun ObjectNode.pleiepengerSyktBarnPeriode() =
-    arrayPerioder("søknadsperiode").plus(arrayPerioder("endringsperiode")).somEnPeriode()
+    arrayPerioder("søknadsperiode")
+    .plus(arrayPerioder("endringsperiode"))
+    .plus(arrayPerioder("trekkKravPerioder"))
+    .somEnPeriode()
 
 private fun ObjectNode.omsorgspengerUtbetalingPeriode() =
     objectPerioder("fraværsperioder").somEnPeriode()
