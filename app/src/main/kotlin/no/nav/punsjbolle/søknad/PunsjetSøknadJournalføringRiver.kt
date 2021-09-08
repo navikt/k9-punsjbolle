@@ -11,7 +11,6 @@ import no.nav.punsjbolle.k9sak.K9SakClient
 import no.nav.punsjbolle.meldinger.HentAktørIderMelding
 import no.nav.punsjbolle.ruting.RutingService
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 
 internal class PunsjetSøknadJournalføringRiver(
     rapidsConnection: RapidsConnection,
@@ -46,7 +45,7 @@ internal class PunsjetSøknadJournalføringRiver(
 
         val destinasjon = runBlocking { rutingService.destinasjon(
             søker = søknad.søker,
-            fraOgMed = søknad.periode.fom ?: LocalDate.now(),
+            fraOgMed = søknad.periode.fom ?: søknad.mottatt.toLocalDate(),
             pleietrengende = søknad.pleietrengende,
             annenPart = søknad.annenPart,
             søknadstype = søknad.søknadstype,
