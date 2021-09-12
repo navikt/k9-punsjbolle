@@ -26,7 +26,7 @@ internal fun ObjectNode.somPunsjetSøknad(
             versjon = versjon,
             saksnummer = saksnummer,
             pleietrengende = barn(),
-            periode = pleiepengerSyktBarnPeriode(),
+            periode = pleiepengerSyktBarnPeriode(mottatt = mottatt()),
             saksbehandler = saksbehandler
         )
         Søknadstype.OmsorgspengerUtbetaling -> map(
@@ -91,11 +91,15 @@ private fun ObjectNode.arrayPerioder(navn: String) =
 private fun ObjectNode.objectPerioder(navn: String) =
     (get("ytelse").get(navn)?.let { array -> (array as ArrayNode).map { it as ObjectNode }.map { obj -> obj.get("periode").asText().somPeriode() } }) ?: emptyList()
 
-private fun ObjectNode.pleiepengerSyktBarnPeriode() =
+private fun ObjectNode.pleiepengerSyktBarnPeriode(mottatt: ZonedDateTime) =
     arrayPerioder("søknadsperiode")
     .plus(arrayPerioder("endringsperiode"))
     .plus(arrayPerioder("trekkKravPerioder"))
     .somEnPeriode()
+    .let { periode -> when (periode.erÅpenPeriode()) {
+        true -> Periode(fom = mottatt.toLocalDate(), tom = null)
+        false -> periode
+    }}
 
 private fun ObjectNode.omsorgspengerUtbetalingPeriode() =
     objectPerioder("fraværsperioder").somEnPeriode()
