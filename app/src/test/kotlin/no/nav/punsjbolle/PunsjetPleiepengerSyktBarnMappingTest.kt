@@ -15,6 +15,7 @@ import org.skyscreamer.jsonassert.JSONAssert
 import java.time.ZonedDateTime
 import java.util.*
 import org.junit.jupiter.api.Assertions.assertEquals
+import java.time.LocalDate
 
 internal class PunsjetPleiepengerSyktBarnMappingTest {
 
@@ -131,7 +132,7 @@ internal class PunsjetPleiepengerSyktBarnMappingTest {
             saksnummer = null,
             søknadstype = Søknadstype.PleiepengerSyktBarn,
             journalpostIder = journalpostIder,
-            periode = ÅpenPeriode,
+            periode = Periode(fom = LocalDate.parse("2021-05-03"), tom = null), // Dato for mottak
             søker = søker,
             annenPart = null,
             pleietrengende = barn,

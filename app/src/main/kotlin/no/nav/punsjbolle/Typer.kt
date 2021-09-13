@@ -52,6 +52,7 @@ internal data class CorrelationId private constructor(private val value: String)
 
 internal data class Periode(internal val fom: LocalDate?, internal val tom: LocalDate?) {
     override fun toString() = "${fom.iso8601()}/${tom.iso8601()}"
+    internal fun erÅpenPeriode() = this == ÅpenPeriode
 
     internal companion object {
         private const val Åpen = ".."
