@@ -67,5 +67,9 @@ internal object PunsjetSøknadMelding :
     private val SøknadKey = "@behov.$behovNavn.søknad"
     private val SøknadIdKey = "$SøknadKey.søknadId"
 
-    override val mdcPaths = mapOf("soknad_id" to SøknadIdKey, "k9_saksnummer" to SaksnummerKey)
+    override val mdcPaths = mapOf(
+        "soknad_id" to SøknadIdKey,
+        "k9_saksnummer" to SaksnummerKey,
+        "saksbehandler" to SaksbehandlerKey
+    )
 }
