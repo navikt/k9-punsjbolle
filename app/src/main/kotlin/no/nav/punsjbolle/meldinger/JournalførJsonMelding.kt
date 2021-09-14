@@ -1,5 +1,6 @@
 package no.nav.punsjbolle.meldinger
 
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -22,7 +23,8 @@ internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.Jou
     )
 
     override fun behov(behovInput: JournalførJson): Behov {
-        val søknad : Map<String, *> = jacksonObjectMapper().convertValue(behovInput.punsjetSøknad.søknadJson)
+        val søknad = behovInput.punsjetSøknad.manipulerSøknad()
+
         return Behov(
             navn = behovNavn,
             input = mapOf(
@@ -42,6 +44,16 @@ internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.Jou
                 )
             )
         )
+    }
+
+    private fun PunsjetSøknadMelding.PunsjetSøknad.manipulerSøknad() : Map<String, *> {
+        val søknad = søknadJson.deepCopy()
+        søknad.remove(setOf("versjon", "spårk"))
+        val ytelse = søknad.get("ytelse") as ObjectNode
+        ytelse.remove("type")
+        check(!søknad.has(søknadstype.name)) { "Inneholder allerede et felt som heter ${søknadstype.name}" }
+        søknad.replace(søknadstype.name, ytelse)
+        return jacksonObjectMapper().convertValue(søknad)
     }
 
     override fun validateLøsning(packet: JsonMessage) {
