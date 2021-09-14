@@ -60,7 +60,6 @@ private fun WireMockServer.mockMatchFagsak(): WireMockServer {
             .withNavPostHeaders()
             .withRequestBody(WireMock.matchingJsonPath("$.ytelseType.kode"))
             .withRequestBody(WireMock.matchingJsonPath("$.ytelseType.kodeverk", WireMock.equalTo("FAGSAK_YTELSE")))
-            .withRequestBody(WireMock.matchingJsonPath("$.periode.fom"))
             .willReturn(WireMock.aResponse().withJson("[]")))
     return this
 }
