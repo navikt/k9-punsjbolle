@@ -10,6 +10,7 @@ import no.nav.punsjbolle.JournalpostId
 import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
 import no.nav.punsjbolle.K9Saksnummer
 import no.nav.punsjbolle.LeggTilBehov
+import no.nav.punsjbolle.Søknadstype
 import no.nav.punsjbolle.søknad.PunsjetSøknadMelding
 
 internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.JournalførJson>, HentLøsning<JournalpostId?> {
@@ -23,8 +24,11 @@ internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.Jou
     )
 
     override fun behov(behovInput: JournalførJson): Behov {
-        val søknad = behovInput.punsjetSøknad.manipulerSøknad()
-
+        val søknad: Map<String, *> = jacksonObjectMapper().convertValue(
+            behovInput.punsjetSøknad.søknadJson.manipulerSøknadsJson(
+                søknadstype = behovInput.punsjetSøknad.søknadstype
+            )
+        )
         return Behov(
             navn = behovNavn,
             input = mapOf(
@@ -46,14 +50,31 @@ internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.Jou
         )
     }
 
-    private fun PunsjetSøknadMelding.PunsjetSøknad.manipulerSøknad() : Map<String, *> {
-        val søknad = søknadJson.deepCopy()
-        søknad.remove(setOf("versjon", "spårk"))
+    private fun String.renameKeys(fra: String, til: String) = replace(oldValue = """"$fra":""", newValue = """"$til":""", ignoreCase = false)
+
+    internal fun ObjectNode.manipulerSøknadsJson(søknadstype: Søknadstype) : ObjectNode {
+        val søknad = deepCopy()
+        // Fjerner informasjon på toppnivå
+        søknad.remove(setOf("versjon", "språk"))
+        // Renamer "ytelse" til søknadstypen og fjerner "ytelse.type"
         val ytelse = søknad.get("ytelse") as ObjectNode
         ytelse.remove("type")
-        check(!søknad.has(søknadstype.name)) { "Inneholder allerede et felt som heter ${søknadstype.name}" }
         søknad.replace(søknadstype.name, ytelse)
-        return jacksonObjectMapper().convertValue(søknad)
+        søknad.remove("ytelse")
+        // Renamer diverse felt i søknaden
+        return søknad.toString()
+            .renameKeys("mottattDato", "mottatt")
+            .renameKeys("søknadsperiode", "søknadsperioder")
+            .renameKeys("endringsperiode", "endringsperioder")
+            .renameKeys("norskIdentitetsnummer", "identitetsnummer")
+            .renameKeys("arbeidstakerList", "arbeidstakere")
+            .renameKeys("frilanserArbeidstidInfo", "frilanser")
+            .renameKeys("jobberFortsattSomFrilans", "jobberFortsattSomFrilanser")
+            .renameKeys("selvstendigNæringsdrivendeArbeidstidInfo", "selvstendigNæringsdrivende")
+            .renameKeys("arbeidstidInfo", "arbeidstid")
+            .renameKeys("arbeidAktivitet", "arbeid")
+            .renameKeys("virksomhetNavn", "virksomhetsnavn")
+            .let { jacksonObjectMapper().readTree(it) as ObjectNode }
     }
 
     override fun validateLøsning(packet: JsonMessage) {
