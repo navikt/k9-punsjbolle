@@ -8,7 +8,6 @@ import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.readTextOrThrow
 import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.stringBody
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.punsjbolle.*
-import no.nav.punsjbolle.Json.objectOrEmptyObject
 import no.nav.punsjbolle.Json.stringOrNull
 import no.nav.punsjbolle.K9Saksnummer.Companion.somK9Saksnummer
 import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
@@ -163,7 +162,6 @@ internal class K9SakClient(
         søknadstype: Søknadstype,
         correlationId: CorrelationId
     ) : RutingGrunnlag {
-        logger.info("MatchendeFagsak: Slår opp matchende fagsaker med Søknadstype=[$søknadstype], FraOgMed=[$fraOgMed]")
         if (finnesMatchendeFagsak(søker = søker, fraOgMed = fraOgMed, correlationId = correlationId, søknadstype = søknadstype)) {
             return RutingGrunnlag(søker = true)
         }
@@ -194,9 +192,7 @@ internal class K9SakClient(
                 "kode": "${søknadstype.k9YtelseType}",
                 "kodeverk": "FAGSAK_YTELSE"
             },
-            "periode": {
-                "fom": "$fraOgMed"
-            },
+            "periode": {},
             "bruker": ${søker?.let { """"$it"""" }},
             "pleietrengendeIdenter": ${pleietrengende.jsonArray()},
             "relatertPersonIdenter": ${annenPart.jsonArray()}
@@ -268,9 +264,6 @@ internal class K9SakClient(
         private fun String.saksnummer() = JSONObject(this).getString("saksnummer").somK9Saksnummer()
 
         internal fun String.inneholderMatchendeFagsak() = JSONArray(this)
-            .also { jsonArray -> if (jsonArray.isEmpty) {
-                logger.info("MatchendeFagsak: Ingen matcher i K9-Sak.")
-            }}
             .asSequence()
             .map { it as JSONObject }
             .filterNot { (it.getString("status") == "OPPR").also { erStatusOpprettet -> if (erStatusOpprettet) {
