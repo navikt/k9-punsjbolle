@@ -9,6 +9,7 @@ import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.stringBody
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.punsjbolle.*
 import no.nav.punsjbolle.Json.objectOrEmptyObject
+import no.nav.punsjbolle.Json.stringOrNull
 import no.nav.punsjbolle.K9Saksnummer.Companion.somK9Saksnummer
 import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
 import no.nav.punsjbolle.meldinger.SendPunsjetSøknadTilK9SakMelding
@@ -273,7 +274,7 @@ internal class K9SakClient(
             .asSequence()
             .map { it as JSONObject }
             .filterNot { (it.getString("status") == "OPPR").also { erStatusOpprettet -> if (erStatusOpprettet) {
-                logger.info("MatchendeFagsak: Filtrerer bort Saksnummer=${it.objectOrEmptyObject("saksnummer")} i Status=OPPR")
+                logger.info("MatchendeFagsak: Filtrerer bort Saksnummer=${it.stringOrNull("saksnummer")} i Status=OPPR")
             }}}
             .toSet()    
             .isNotEmpty()
