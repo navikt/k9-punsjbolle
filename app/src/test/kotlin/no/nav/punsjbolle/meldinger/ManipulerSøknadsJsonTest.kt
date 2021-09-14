@@ -14,7 +14,24 @@ internal class ManipulerSøknadsJsonTest {
     fun `manupulere søknad for pleiepenger sykt barn`() {
         val søknad = jacksonObjectMapper().readTree(før) as ObjectNode
         val manipulert = søknad.manipulerSøknadsJson(søknadstype = Søknadstype.PleiepengerSyktBarn)
-        JSONAssert.assertEquals(forventetEtter, manipulert.toString(), true)
+        JSONAssert.assertEquals(forventetEtter, "$manipulert", true)
+    }
+
+    @Test
+    fun `søknad uten manipulerte felter forblir uendret`() {
+        @Language("JSON")
+        val json = """
+        {
+            "foo": "bar",
+            "bar": {
+                "MottattDato": "2020-01-01",
+                "virksomhetsnavn": "Virksomhet"
+            }
+        }
+        """.trimIndent()
+        val søknad = jacksonObjectMapper().readTree(json) as ObjectNode
+        val manipulert = søknad.manipulerSøknadsJson(søknadstype = Søknadstype.PleiepengerSyktBarn)
+        JSONAssert.assertEquals(json, "$manipulert", true)
     }
 
 
@@ -180,7 +197,7 @@ internal class ManipulerSøknadsJsonTest {
             "PleiepengerSyktBarn": {
                 "søknadsperioder": ["2018-12-30/2019-10-20"],
                 "endringsperioder": [],
-                "dataBruktTilUtledning": {
+                "overordnet": {
                     "harForståttRettigheterOgPlikter": true,
                     "harBekreftetOpplysninger": true,
                     "samtidigHjemme": false,
@@ -232,13 +249,13 @@ internal class ManipulerSøknadsJsonTest {
                 "tilsynsordning": {
                     "perioder": {
                         "2019-01-01/2019-01-01": {
-                            "etablertTilsynTimerPerDag": "PT7H30M"
+                            "etablertTilsynPerDag": "PT7H30M"
                         },
                         "2019-01-02/2019-01-02": {
-                            "etablertTilsynTimerPerDag": "PT7H30M"
+                            "etablertTilsynPerDag": "PT7H30M"
                         },
                         "2019-01-03/2019-01-09": {
-                            "etablertTilsynTimerPerDag": "PT7H30M"
+                            "etablertTilsynPerDag": "PT7H30M"
                         }
                     }
                 },
@@ -249,8 +266,8 @@ internal class ManipulerSøknadsJsonTest {
                         "arbeidstid": {
                             "perioder": {
                                 "2018-12-30/2019-10-20": {
-                                    "jobberNormaltTimerPerDag": "PT7H30M",
-                                    "faktiskArbeidTimerPerDag": "PT7H30M"
+                                    "jobberNormaltPerDag": "PT7H30M",
+                                    "faktiskArbeidPerDag": "PT7H30M"
                                 }
                             }
                         }
@@ -261,7 +278,7 @@ internal class ManipulerSøknadsJsonTest {
                 "uttak": {
                     "perioder": {
                         "2018-12-30/2019-10-20": {
-                            "timerPleieAvBarnetPerDag": "PT7H30M"
+                            "pleieAvBarnetPerDag": "PT7H30M"
                         }
                     }
                 },

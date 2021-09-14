@@ -50,19 +50,27 @@ internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.Jou
         )
     }
 
-    private fun String.renameKeys(fra: String, til: String) = replace(oldValue = """"$fra":""", newValue = """"$til":""", ignoreCase = false)
+    private fun ObjectNode.objectNodeOrNull(key: String) = when (hasNonNull(key) && get(key) is ObjectNode) {
+        true -> get(key) as ObjectNode
+        false -> null
+    }
+
+    private fun String.renameKeys(fra: String, til: String) = replace(
+        oldValue = """"$fra":""",
+        newValue = """"$til":""",
+        ignoreCase = false
+    )
 
     internal fun ObjectNode.manipulerSøknadsJson(søknadstype: Søknadstype) : ObjectNode {
-        val søknad = deepCopy()
         // Fjerner informasjon på toppnivå
+        val søknad = deepCopy()
         søknad.remove(setOf("versjon", "språk"))
-        // Renamer "ytelse" til søknadstypen og fjerner "ytelse.type"
-        val ytelse = søknad.get("ytelse") as ObjectNode
-        ytelse.remove("type")
-        søknad.replace(søknadstype.name, ytelse)
-        søknad.remove("ytelse")
-        // Renamer diverse felt i søknaden
-        return søknad.toString()
+        // Fjerner informasjon i "ytelse"
+        søknad.objectNodeOrNull("ytelse")?.also { ytelse ->
+            ytelse.remove(setOf("type"))
+        }
+        return "$søknad"
+            .renameKeys("ytelse", søknadstype.name)
             .renameKeys("mottattDato", "mottatt")
             .renameKeys("søknadsperiode", "søknadsperioder")
             .renameKeys("endringsperiode", "endringsperioder")
@@ -74,6 +82,11 @@ internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.Jou
             .renameKeys("arbeidstidInfo", "arbeidstid")
             .renameKeys("arbeidAktivitet", "arbeid")
             .renameKeys("virksomhetNavn", "virksomhetsnavn")
+            .renameKeys("dataBruktTilUtledning", "overordnet")
+            .renameKeys("etablertTilsynTimerPerDag", "etablertTilsynPerDag")
+            .renameKeys("jobberNormaltTimerPerDag", "jobberNormaltPerDag")
+            .renameKeys("faktiskArbeidTimerPerDag", "faktiskArbeidPerDag")
+            .renameKeys("timerPleieAvBarnetPerDag", "pleieAvBarnetPerDag")
             .let { jacksonObjectMapper().readTree(it) as ObjectNode }
     }
 
