@@ -179,7 +179,7 @@ internal class K9SakClient(
         søker: Identitetsnummer? = null,
         pleietrengende: Identitetsnummer? = null,
         annenPart: Identitetsnummer? = null,
-        fraOgMed: LocalDate,
+        @Suppress("UNUSED_PARAMETER") fraOgMed: LocalDate,
         søknadstype: Søknadstype,
         correlationId: CorrelationId
     ): Boolean {
