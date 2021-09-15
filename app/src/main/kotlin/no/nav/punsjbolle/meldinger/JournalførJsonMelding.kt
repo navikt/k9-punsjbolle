@@ -61,6 +61,18 @@ internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.Jou
         ignoreCase = false
     )
 
+    private fun String.renameValues(fraKey: String, fraValue: String, tilValue: String) = replace(
+        oldValue = """"$fraKey":"$fraValue"""",
+        newValue = """"$fraKey":"$tilValue"""",
+        ignoreCase = false
+    )
+
+    private fun String.renameLand() : String {
+        var current = this
+        Land.values().forEach { land -> current = current.renameValues("land", land.name, land.navn) }
+        return current
+    }
+
     internal fun ObjectNode.manipulerSøknadsJson(søknadstype: Søknadstype) : ObjectNode {
         // Fjerner informasjon på toppnivå
         val søknad = deepCopy()
@@ -87,6 +99,7 @@ internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.Jou
             .renameKeys("jobberNormaltTimerPerDag", "jobberNormaltPerDag")
             .renameKeys("faktiskArbeidTimerPerDag", "faktiskArbeidPerDag")
             .renameKeys("timerPleieAvBarnetPerDag", "pleieAvBarnetPerDag")
+            .renameLand()
             .let { jacksonObjectMapper().readTree(it) as ObjectNode }
     }
 
