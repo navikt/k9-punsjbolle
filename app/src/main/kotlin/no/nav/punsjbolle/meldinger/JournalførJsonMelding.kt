@@ -73,6 +73,8 @@ internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.Jou
         return current
     }
 
+    private fun String.lowercaseFirst() = "${get(0).lowercase()}${substring(1)}"
+
     internal fun ObjectNode.manipulerSøknadsJson(søknadstype: Søknadstype) : ObjectNode {
         // Fjerner informasjon på toppnivå
         val søknad = deepCopy()
@@ -82,7 +84,7 @@ internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.Jou
             ytelse.remove(setOf("type"))
         }
         return "$søknad"
-            .renameKeys("ytelse", søknadstype.name)
+            .renameKeys("ytelse", søknadstype.name.lowercaseFirst())
             .renameKeys("mottattDato", "mottatt")
             .renameKeys("søknadsperiode", "søknadsperioder")
             .renameKeys("endringsperiode", "endringsperioder")

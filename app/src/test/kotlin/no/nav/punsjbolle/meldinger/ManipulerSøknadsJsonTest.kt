@@ -190,7 +190,7 @@ internal class ManipulerSøknadsJsonTest {
                 "inneholderMedisinskeOpplysninger": false,
                 "journalpostId": "sajhdasd83724234"
             }],
-            "PleiepengerSyktBarn": {
+            "pleiepengerSyktBarn": {
                 "søknadsperioder": ["2018-12-30/2019-10-20"],
                 "endringsperioder": [],
                 "overordnet": {
