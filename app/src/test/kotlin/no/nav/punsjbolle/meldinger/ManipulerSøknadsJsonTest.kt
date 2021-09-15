@@ -267,13 +267,6 @@ internal class ManipulerSøknadsJsonTest {
                     "frilanser": null,
                     "selvstendigNæringsdrivende": null
                 },
-                "uttak": {
-                    "perioder": {
-                        "2018-12-30/2019-10-20": {
-                            "pleieAvBarnetPerDag": "PT7H30M"
-                        }
-                    }
-                },
                 "omsorg": {
                     "relasjonTilBarnet": "MOR",
                     "beskrivelseAvOmsorgsrollen": "Noe tilleggsinformasjon. Lorem ipsum æÆøØåÅ."

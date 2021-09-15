@@ -81,7 +81,7 @@ internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.Jou
         søknad.remove(setOf("versjon", "språk"))
         // Fjerner informasjon i "ytelse"
         søknad.objectNodeOrNull("ytelse")?.also { ytelse ->
-            ytelse.remove(setOf("type"))
+            ytelse.remove(setOf("type", "uttak"))
         }
         return "$søknad"
             .renameKeys("ytelse", søknadstype.name.lowercaseFirst())
@@ -100,7 +100,6 @@ internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.Jou
             .renameKeys("etablertTilsynTimerPerDag", "etablertTilsynPerDag")
             .renameKeys("jobberNormaltTimerPerDag", "normalArbeidstidPerDag")
             .renameKeys("faktiskArbeidTimerPerDag", "faktiskArbeidstidPerDag")
-            .renameKeys("timerPleieAvBarnetPerDag", "pleieAvBarnetPerDag")
             .renameKeys("inneholderInfomasjonSomIkkeKanPunsjes", "inneholderInformasjonSomIkkeKanPunsjes")
             .renameLand()
             .let { jacksonObjectMapper().readTree(it) as ObjectNode }
