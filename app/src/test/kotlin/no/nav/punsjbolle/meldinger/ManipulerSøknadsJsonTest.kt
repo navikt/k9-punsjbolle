@@ -170,6 +170,10 @@ internal class ManipulerSøknadsJsonTest {
                 "2018-12-30/2019-10-20": {
                   "land": "DNK",
                   "årsak": "barnetInnlagtIHelseinstitusjonForNorskOffentligRegning"
+                },
+                "2019-10-21/2020-01-01": {
+                  "land": "ITA",
+                  "årsak": "barnetInnlagtIHelseinstitusjonDekketEtterAvtaleMedEtAnnetLandOmTrygd"
                 }
               }
             }
@@ -287,7 +291,11 @@ internal class ManipulerSøknadsJsonTest {
                     "perioder": {
                         "2018-12-30/2019-10-20": {
                             "land": "Danmark",
-                            "årsak": "barnetInnlagtIHelseinstitusjonForNorskOffentligRegning"
+                            "årsak": "Barnet innlagt på helseinstitusjon for norsk offentelig regning"
+                        },
+                        "2019-10-21/2020-01-01": {
+                            "land": "Italia",
+                            "årsak": "Barnet innlagt på helseinstitusjon dekket etter avtale med annet land"
                         }
                     }
                 }

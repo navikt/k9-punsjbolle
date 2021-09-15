@@ -101,6 +101,8 @@ internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.Jou
             .renameKeys("jobberNormaltTimerPerDag", "normalArbeidstidPerDag")
             .renameKeys("faktiskArbeidTimerPerDag", "faktiskArbeidstidPerDag")
             .renameKeys("inneholderInfomasjonSomIkkeKanPunsjes", "inneholderInformasjonSomIkkeKanPunsjes")
+            .renameValues("årsak", "barnetInnlagtIHelseinstitusjonForNorskOffentligRegning", "Barnet innlagt på helseinstitusjon for norsk offentelig regning")
+            .renameValues("årsak", "barnetInnlagtIHelseinstitusjonDekketEtterAvtaleMedEtAnnetLandOmTrygd", "Barnet innlagt på helseinstitusjon dekket etter avtale med annet land")
             .renameLand()
             .let { jacksonObjectMapper().readTree(it) as ObjectNode }
     }
