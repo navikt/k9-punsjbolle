@@ -1,5 +1,8 @@
 package no.nav.punsjbolle.meldinger
 
+import org.slf4j.LoggerFactory
+import java.util.*
+
 // https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3
 internal enum class Land(internal val navn: String) {
     ABW("Aruba"),
@@ -83,6 +86,7 @@ internal enum class Land(internal val navn: String) {
     GAB("Gabon"),
     GBR("Storbritannia"),
     GEO("Georgia"),
+    GGY("Guernsey"),
     GHA("Ghana"),
     GIB("Gibraltar"),
     GIN("Guinea"),
@@ -249,5 +253,18 @@ internal enum class Land(internal val navn: String) {
     YEM("Jemen"),
     ZAF("Sør-Afrika"),
     ZMB("Zambia"),
-    ZWE("Zimbabwe")
+    ZWE("Zimbabwe");
+
+    internal companion object {
+        private val logger = LoggerFactory.getLogger(Land::class.java)
+        init {
+            val alleLand = Locale.getISOCountries(Locale.IsoCountryCode.PART1_ALPHA3)
+            val harMapping = values().map { it.name }
+            val manglerMapping = alleLand.minus(harMapping)
+            check(manglerMapping.isEmpty()) { "Mangler mapping av landkoder=$manglerMapping" }
+            harMapping.minus(alleLand).takeIf { it.isNotEmpty() }?.also { ugyldigeLandkoder ->
+                logger.warn("Inneholder mapping av ugyldige landkoder=$ugyldigeLandkoder")
+            }
+        }
+    }
 }
