@@ -161,14 +161,14 @@ internal class ManipulerSøknadsJsonTest {
             "bosteder": {
               "perioder": {
                 "2018-12-30/2019-10-20": {
-                  "land": "Danmark"
+                  "land": "GGY"
                 }
               }
             },
             "utenlandsopphold": {
               "perioder": {
                 "2018-12-30/2019-10-20": {
-                  "land": "Danmark",
+                  "land": "DNK",
                   "årsak": "barnetInnlagtIHelseinstitusjonForNorskOffentligRegning"
                 }
               }
@@ -279,7 +279,7 @@ internal class ManipulerSøknadsJsonTest {
                 "bosteder": {
                     "perioder": {
                         "2018-12-30/2019-10-20": {
-                            "land": "Danmark"
+                            "land": "Guernsey"
                         }
                     }
                 },
