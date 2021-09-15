@@ -67,10 +67,6 @@ internal class ManipulerSøknadsJsonTest {
               "harMedsøker": false,
               "bekrefterPeriodeOver8Uker": true
             },
-            "infoFraPunsj": {
-              "søknadenInneholderInfomasjonSomIkkeKanPunsjes": false,
-              "inneholderMedisinskeOpplysninger": false
-            },
             "barn": {
               "norskIdentitetsnummer": "22111111111",
               "fødselsdato": null
@@ -190,7 +186,7 @@ internal class ManipulerSøknadsJsonTest {
                 "identitetsnummer": "11111111111"
             },
             "journalposter": [{
-                "inneholderInfomasjonSomIkkeKanPunsjes": false,
+                "inneholderInformasjonSomIkkeKanPunsjes": false,
                 "inneholderMedisinskeOpplysninger": false,
                 "journalpostId": "sajhdasd83724234"
             }],
@@ -203,10 +199,6 @@ internal class ManipulerSøknadsJsonTest {
                     "samtidigHjemme": false,
                     "harMedsøker": false,
                     "bekrefterPeriodeOver8Uker": true
-                },
-                "infoFraPunsj": {
-                    "søknadenInneholderInfomasjonSomIkkeKanPunsjes": false,
-                    "inneholderMedisinskeOpplysninger": false
                 },
                 "barn": {
                     "identitetsnummer": "22111111111",
@@ -266,8 +258,8 @@ internal class ManipulerSøknadsJsonTest {
                         "arbeidstid": {
                             "perioder": {
                                 "2018-12-30/2019-10-20": {
-                                    "jobberNormaltPerDag": "PT7H30M",
-                                    "faktiskArbeidPerDag": "PT7H30M"
+                                    "normalArbeidstidPerDag": "PT7H30M",
+                                    "faktiskArbeidstidPerDag": "PT7H30M"
                                 }
                             }
                         }

@@ -96,9 +96,10 @@ internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.Jou
             .renameKeys("virksomhetNavn", "virksomhetsnavn")
             .renameKeys("dataBruktTilUtledning", "overordnet")
             .renameKeys("etablertTilsynTimerPerDag", "etablertTilsynPerDag")
-            .renameKeys("jobberNormaltTimerPerDag", "jobberNormaltPerDag")
-            .renameKeys("faktiskArbeidTimerPerDag", "faktiskArbeidPerDag")
+            .renameKeys("jobberNormaltTimerPerDag", "normalArbeidstidPerDag")
+            .renameKeys("faktiskArbeidTimerPerDag", "faktiskArbeidstidPerDag")
             .renameKeys("timerPleieAvBarnetPerDag", "pleieAvBarnetPerDag")
+            .renameKeys("inneholderInfomasjonSomIkkeKanPunsjes", "inneholderInformasjonSomIkkeKanPunsjes")
             .renameLand()
             .let { jacksonObjectMapper().readTree(it) as ObjectNode }
     }
