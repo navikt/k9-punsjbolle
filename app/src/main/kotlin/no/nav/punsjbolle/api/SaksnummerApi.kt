@@ -14,6 +14,7 @@ import no.nav.punsjbolle.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
 import no.nav.punsjbolle.Periode.Companion.forsikreLukketPeriode
 import no.nav.punsjbolle.Periode.Companion.somPeriode
+import no.nav.punsjbolle.api.Request.Companion.fraSøknadRequest
 import no.nav.punsjbolle.api.Request.Companion.request
 import no.nav.punsjbolle.joark.Journalpost
 import no.nav.punsjbolle.joark.Journalpost.Companion.kanSendesTilK9Sak
@@ -22,6 +23,8 @@ import no.nav.punsjbolle.k9sak.K9SakClient
 import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
 import no.nav.punsjbolle.ruting.RutingService
 import no.nav.punsjbolle.sak.SakClient
+import no.nav.punsjbolle.søknad.periode
+import no.nav.punsjbolle.søknad.søknadstype
 import org.slf4j.LoggerFactory
 
 internal fun Route.SaksnummerApi(
@@ -104,6 +107,22 @@ internal fun Route.SaksnummerApi(
             )
         }
     )}
+
+    post("/saksnummer-fra-søknad") {
+        val request = call.fraSøknadRequest()
+        val (periode, _) = periodeOgJournalpost(request)
+
+        val saksnummer = k9SakClient.hentEllerOpprettSaksnummer(
+            correlationId = request.correlationId,
+            grunnlag = request.hentSaksnummerGrunnlag(periode)
+        )
+
+        call.respondText(
+            contentType = ContentType.Application.Json,
+            text = """{"saksnummer": "$saksnummer"}""",
+            status = HttpStatusCode.OK
+        )
+    }
 }
 
 private val logger = LoggerFactory.getLogger("no.nav.punsjbolle.api.SaksnummerApi")
@@ -180,16 +199,34 @@ internal data class Request(
             aktørId = part.stringOrNull("aktørId")?.somAktørId() ?: throw IllegalStateException("Mangler aktørId på $key")
         )}
 
+        private fun ApplicationRequest.correlationId() =
+            header(HttpHeaders.XCorrelationId)?.somCorrelationId() ?: throw IllegalStateException("Mangler correlationId")
+
         internal suspend fun ApplicationCall.request() : Request {
             val json = receive<ObjectNode>()
             return Request(
-                correlationId = request.header(HttpHeaders.XCorrelationId)?.somCorrelationId() ?: throw IllegalStateException("Mangler correlationId"),
+                correlationId = request.correlationId(),
                 journalpostId = json.stringOrNull("journalpostId")?.somJournalpostId(),
                 søknadstype = json.stringOrNull("søknadstype")?.let { Søknadstype.valueOf(it) } ?: throw IllegalStateException("Mangler søknadstype"),
                 søker = json.partOrNull("søker") ?: throw IllegalStateException("Mangler søker"),
                 pleietrengende = json.partOrNull("pleietrengende"),
                 annenPart = json.partOrNull("annenPart"),
                 periode = json.stringOrNull("periode")?.somPeriode()
+            )
+        }
+
+        internal suspend fun ApplicationCall.fraSøknadRequest() : Request {
+            val json = receive<ObjectNode>()
+            val søknad = json.get("søknad") as ObjectNode
+            val søknadstype = søknad.søknadstype()
+            return Request(
+                correlationId = request.correlationId(),
+                journalpostId = null,
+                søknadstype = søknadstype,
+                søker = json.partOrNull("søker") ?: throw IllegalStateException("Mangler søker"),
+                pleietrengende = json.partOrNull("pleietrengende"),
+                annenPart = json.partOrNull("annenPart"),
+                periode = søknad.periode(søknadstype)
             )
         }
     }
