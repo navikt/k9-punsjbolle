@@ -12,13 +12,23 @@ import no.nav.punsjbolle.Periode.Companion.ÅpenPeriode
 import no.nav.punsjbolle.Søknadstype
 import java.time.ZonedDateTime
 
+internal fun ObjectNode.søknadstype() =
+    Søknadstype.fraK9FormatYtelsetype((get("ytelse") as ObjectNode).get("type").asText())
+
+internal fun ObjectNode.periode(søknadstype: Søknadstype) = when (søknadstype) {
+    Søknadstype.PleiepengerSyktBarn -> pleiepengerSyktBarnPeriode(mottatt = mottatt())
+    Søknadstype.OmsorgspengerKroniskSyktBarn -> ÅpenPeriode
+    Søknadstype.OmsorgspengerMidlertidigAlene -> omsorgspengerMidlertidigAlenePeriode()
+    Søknadstype.OmsorgspengerUtbetaling -> omsorgspengerUtbetalingPeriode()
+}
+
 internal fun ObjectNode.somPunsjetSøknad(
     versjon: String,
     saksbehandler: String,
     saksnummer: K9Saksnummer?) : PunsjetSøknadMelding.PunsjetSøknad {
 
-    val ytelse = get("ytelse") as ObjectNode
-    val søknadstype = Søknadstype.fraK9FormatYtelsetype(ytelse.get("type").asText())
+    val søknadstype = søknadstype()
+    val periode = periode(søknadstype = søknadstype)
 
     return when (søknadstype) {
         Søknadstype.PleiepengerSyktBarn -> map(
@@ -26,14 +36,14 @@ internal fun ObjectNode.somPunsjetSøknad(
             versjon = versjon,
             saksnummer = saksnummer,
             pleietrengende = barn(),
-            periode = pleiepengerSyktBarnPeriode(mottatt = mottatt()),
+            periode = periode,
             saksbehandler = saksbehandler
         )
         Søknadstype.OmsorgspengerUtbetaling -> map(
             søknadstype = søknadstype,
             versjon = versjon,
             saksnummer = saksnummer,
-            periode = omsorgspengerUtbetalingPeriode(),
+            periode = periode,
             saksbehandler = saksbehandler
         )
         Søknadstype.OmsorgspengerKroniskSyktBarn -> map(
@@ -41,7 +51,7 @@ internal fun ObjectNode.somPunsjetSøknad(
             versjon = versjon,
             saksnummer = saksnummer,
             pleietrengende = barn(),
-            periode = ÅpenPeriode,
+            periode = periode,
             saksbehandler = saksbehandler
         )
         Søknadstype.OmsorgspengerMidlertidigAlene -> map(
@@ -49,7 +59,7 @@ internal fun ObjectNode.somPunsjetSøknad(
             versjon = versjon,
             saksnummer = saksnummer,
             annenPart = annenForelder(),
-            periode = omsorgspengerMidlertidigAlenePeriode(),
+            periode = periode,
             saksbehandler = saksbehandler
         )
     }
