@@ -1,5 +1,6 @@
 package no.nav.punsjbolle.meldinger
 
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -9,6 +10,7 @@ import no.nav.punsjbolle.JournalpostId
 import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
 import no.nav.punsjbolle.K9Saksnummer
 import no.nav.punsjbolle.LeggTilBehov
+import no.nav.punsjbolle.Søknadstype
 import no.nav.punsjbolle.søknad.PunsjetSøknadMelding
 
 internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.JournalførJson>, HentLøsning<JournalpostId?> {
@@ -22,7 +24,11 @@ internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.Jou
     )
 
     override fun behov(behovInput: JournalførJson): Behov {
-        val søknad : Map<String, *> = jacksonObjectMapper().convertValue(behovInput.punsjetSøknad.søknadJson)
+        val søknad: Map<String, *> = jacksonObjectMapper().convertValue(
+            behovInput.punsjetSøknad.søknadJson.manipulerSøknadsJson(
+                søknadstype = behovInput.punsjetSøknad.søknadstype
+            )
+        )
         return Behov(
             navn = behovNavn,
             input = mapOf(
@@ -42,6 +48,63 @@ internal object JournalførJsonMelding : LeggTilBehov<JournalførJsonMelding.Jou
                 )
             )
         )
+    }
+
+    private fun ObjectNode.objectNodeOrNull(key: String) = when (hasNonNull(key) && get(key) is ObjectNode) {
+        true -> get(key) as ObjectNode
+        false -> null
+    }
+
+    private fun String.renameKeys(fra: String, til: String) = replace(
+        oldValue = """"$fra":""",
+        newValue = """"$til":""",
+        ignoreCase = false
+    )
+
+    private fun String.renameValues(fraKey: String, fraValue: String, tilValue: String) = replace(
+        oldValue = """"$fraKey":"$fraValue"""",
+        newValue = """"$fraKey":"$tilValue"""",
+        ignoreCase = false
+    )
+
+    private fun String.renameLand() : String {
+        var current = this
+        Land.values().forEach { land -> current = current.renameValues("land", land.name, land.navn) }
+        return current
+    }
+
+    private fun String.lowercaseFirst() = "${get(0).lowercase()}${substring(1)}"
+
+    internal fun ObjectNode.manipulerSøknadsJson(søknadstype: Søknadstype) : ObjectNode {
+        // Fjerner informasjon på toppnivå
+        val søknad = deepCopy()
+        søknad.remove(setOf("versjon", "språk"))
+        // Fjerner informasjon i "ytelse"
+        søknad.objectNodeOrNull("ytelse")?.also { ytelse ->
+            ytelse.remove(setOf("type", "uttak"))
+        }
+        return "$søknad"
+            .renameKeys("ytelse", søknadstype.name.lowercaseFirst())
+            .renameKeys("mottattDato", "mottatt")
+            .renameKeys("søknadsperiode", "søknadsperioder")
+            .renameKeys("endringsperiode", "endringsperioder")
+            .renameKeys("norskIdentitetsnummer", "identitetsnummer")
+            .renameKeys("arbeidstakerList", "arbeidstakere")
+            .renameKeys("frilanserArbeidstidInfo", "frilanser")
+            .renameKeys("jobberFortsattSomFrilans", "jobberFortsattSomFrilanser")
+            .renameKeys("selvstendigNæringsdrivendeArbeidstidInfo", "selvstendigNæringsdrivende")
+            .renameKeys("arbeidstidInfo", "arbeidstid")
+            .renameKeys("arbeidAktivitet", "arbeid")
+            .renameKeys("virksomhetNavn", "virksomhetsnavn")
+            .renameKeys("dataBruktTilUtledning", "overordnet")
+            .renameKeys("etablertTilsynTimerPerDag", "etablertTilsynPerDag")
+            .renameKeys("jobberNormaltTimerPerDag", "normalArbeidstidPerDag")
+            .renameKeys("faktiskArbeidTimerPerDag", "faktiskArbeidstidPerDag")
+            .renameKeys("inneholderInfomasjonSomIkkeKanPunsjes", "inneholderInformasjonSomIkkeKanPunsjes")
+            .renameValues("årsak", "barnetInnlagtIHelseinstitusjonForNorskOffentligRegning", "Barnet innlagt på helseinstitusjon for norsk offentelig regning")
+            .renameValues("årsak", "barnetInnlagtIHelseinstitusjonDekketEtterAvtaleMedEtAnnetLandOmTrygd", "Barnet innlagt på helseinstitusjon dekket etter avtale med annet land")
+            .renameLand()
+            .let { jacksonObjectMapper().readTree(it) as ObjectNode }
     }
 
     override fun validateLøsning(packet: JsonMessage) {
