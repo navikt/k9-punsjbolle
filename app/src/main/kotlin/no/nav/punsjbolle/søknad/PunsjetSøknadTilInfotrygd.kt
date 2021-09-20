@@ -36,7 +36,7 @@ internal class PunsjetSøknadTilInfotrygd(
 
         private fun Set<Journalpost>.journalpostIderSomDetSkalOpprettesGosysJournalføringsoppgaverFor() : Set<JournalpostId> {
             val skalOpprettesGosysJournalføringsoppgaverFor = filter { it.kanKnyttesTilSak }.also { if (it.isNotEmpty()) {
-                logger.info("Skal opprett Gosys journalføringsoppgaver, JournalpostIder=${map { journalpost -> journalpost.journalpostId }}")
+                logger.info("Skal opprett Gosys journalføringsoppgaver, JournalpostIder=${it.map { journalpost -> journalpost.journalpostId }}")
             }}
 
             minus(skalOpprettesGosysJournalføringsoppgaverFor).also { if (it.isNotEmpty()) {
