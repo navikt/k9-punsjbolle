@@ -90,7 +90,7 @@ internal class PunsjetSøknadTilK9Sak(
             }}
 
             val erKnyttetMotSakIkkeFerdigstilt = journalposter.filter { it.erKnyttetTil(saksnummer)}.filterNot { it.erFerdigstilt }.also { if (it.isNotEmpty()) {
-                logger.info("Allerede knyttet mot sak, men mangler ferdigstilling. K9Saksnummer=[$saksnummer], Journalposter=${it}}")
+                logger.info("Allerede knyttet mot sak, men mangler ferdigstilling. K9Saksnummer=[$saksnummer], Journalposter=$it")
             }}
 
             val erMottattInngåndeJournalpostSomMåFerdigstilles = journalposter.filter { it.kanKnyttesTilSak }.also { if (it.isNotEmpty()) {
