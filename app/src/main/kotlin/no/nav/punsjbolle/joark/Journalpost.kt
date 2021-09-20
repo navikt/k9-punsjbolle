@@ -16,7 +16,7 @@ internal data class Journalpost(
 
     private val erInngående = journalposttype == "I"
     private val erNotat = journalposttype == "N"
-    private val erFerdigstilt = ferdigstilteStatuser.contains(journalpoststatus)
+    internal val erFerdigstilt = ferdigstilteStatuser.contains(journalpoststatus)
     private val erMottatt = journalpoststatus == "MOTTATT"
     internal val kanKnyttesTilSak = erInngående && erMottatt
     internal val kanKopieres = erInngående || erNotat

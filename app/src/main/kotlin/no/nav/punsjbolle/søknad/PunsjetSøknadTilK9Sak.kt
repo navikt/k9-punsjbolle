@@ -56,7 +56,7 @@ internal class PunsjetSøknadTilK9Sak(
         logger.info("Brevkoder=${journalposter.map { it.brevkode }}")
 
         val ferdigstillJournalføringBehov = FerdigstillJournalføringForK9Melding.behov(
-            Triple(søknad.søker, k9Saksnummer, journalpostIderSomSkalKnyttesTilSak(
+            Triple(søknad.søker, k9Saksnummer, journalpostIderSomMåFerdigstilles(
                 journalposter = journalposter,
                 saksnummer = k9Saksnummer
             ))
@@ -81,23 +81,27 @@ internal class PunsjetSøknadTilK9Sak(
         return true
     }
 
-    private companion object {
+    internal companion object {
         private val logger = LoggerFactory.getLogger(PunsjetSøknadTilK9Sak::class.java)
 
-        private fun journalpostIderSomSkalKnyttesTilSak(journalposter: Set<Journalpost>, saksnummer: K9Saksnummer) : Set<JournalpostId> {
-            val skalKnyttesTilSak = journalposter.filter { it.kanKnyttesTilSak }.also { if (it.isNotEmpty()) {
-                logger.info("Skal knyttes til sak. K9Saksnummer=[$saksnummer], JournalpostIder=${journalposter.map { journalpost -> journalpost.journalpostId }}")
+        internal fun journalpostIderSomMåFerdigstilles(journalposter: Set<Journalpost>, saksnummer: K9Saksnummer) : Set<JournalpostId> {
+            val erFerdigstiltMotSak = journalposter.filter { it.erKnyttetTil(saksnummer)}.filter { it.erFerdigstilt }.also { if (it.isNotEmpty()) {
+                logger.info("Allerede ferdigstilt mot sak. K9Saksnummer=[$saksnummer], JournalpostIder=${it.map { journalpost ->  journalpost.journalpostId }}")
             }}
 
-            val erKnyttetTilSak = journalposter.filter { it.erKnyttetTil(saksnummer) }.also { if (it.isNotEmpty()) {
-                logger.info("Allerede knyttet til sak. K9Saksnummer=[$saksnummer], JournalpostIder=${journalposter.map { journalpost ->  journalpost.journalpostId }}")
+            val erKnyttetMotSakIkkeFerdigstilt = journalposter.filter { it.erKnyttetTil(saksnummer)}.filterNot { it.erFerdigstilt }.also { if (it.isNotEmpty()) {
+                logger.info("Allerede knyttet mot sak, men mangler ferdigstilling. K9Saksnummer=[$saksnummer], Journalposter=${it}}")
             }}
 
-            journalposter.minus(skalKnyttesTilSak).minus(erKnyttetTilSak).also { if (it.isNotEmpty()) {
-                throw IllegalStateException("Inneholder journalposter som ikke støttes. Journalposter=$it")
+            val erMottattInngåndeJournalpostSomMåFerdigstilles = journalposter.filter { it.kanKnyttesTilSak }.also { if (it.isNotEmpty()) {
+                logger.info("Mottatt inngående journalposter som må ferdigstilles. K9Saksnummer=[$saksnummer], JournalpostIder=${it.map { journalpost -> journalpost.journalpostId }}")
             }}
 
-            return skalKnyttesTilSak.map { it.journalpostId }.toSet()
+            journalposter.minus(erMottattInngåndeJournalpostSomMåFerdigstilles).minus(erKnyttetMotSakIkkeFerdigstilt).minus(erFerdigstiltMotSak).also { if (it.isNotEmpty()) {
+                throw IllegalStateException("Inneholder journalposter som ikke støttes for K9Saksnummer=[$saksnummer]. Journalposter=$it")
+            }}
+
+            return erKnyttetMotSakIkkeFerdigstilt.plus(erMottattInngåndeJournalpostSomMåFerdigstilles).map { it.journalpostId }.toSet()
         }
     }
 }
