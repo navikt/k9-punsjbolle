@@ -137,6 +137,7 @@ internal class K9SakClient(
                 "type": "${søknad.søknadstype.k9Type}",
                 "forsendelseMottattTidspunkt": "$forsendelseMottattTidspunkt",
                 "forsendelseMottatt": "${forsendelseMottattTidspunkt.toLocalDate()}",
+                "søknadsperiode": "${søknad.periode}",
                 "payload": "${Base64.getUrlEncoder().encodeToString(søknad.søknadJson.toString().toByteArray())}"
             }]
         """.trimIndent()
