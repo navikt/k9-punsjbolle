@@ -39,7 +39,7 @@ internal class OmsorgspengerMappingTest {
             versjon = "1.0.0",
             søknadId = søknadId,
             saksnummer = null,
-            søknadstype = Søknadstype.OmsorgspengerUtbetaling,
+            søknadstype = Søknadstype.OmsorgspengerUtbetaling_Korrigering,
             journalpostIder = setOf(journalpostId),
             periode = "2020-01-01/2020-01-11".somPeriode(),
             søker = søker,
