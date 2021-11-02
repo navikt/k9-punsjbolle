@@ -112,7 +112,7 @@ private fun ObjectNode.pleiepengerSyktBarnPeriode(mottatt: ZonedDateTime) =
     }}
 
 private fun ObjectNode.omsorgspengerUtbetalingPeriode() =
-    objectPerioder("fraværsperioder").somEnPeriode()
+    objectPerioder("fraværsperioderKorrigeringIm").somEnPeriode()
 
 private fun ObjectNode.omsorgspengerMidlertidigAlenePeriode() =
     get("ytelse").get("annenForelder").get("periode")?.asText()?.somPeriode() ?: ÅpenPeriode

@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 
 internal class OmsorgspengerMappingTest {
     @Test
-    fun `Utbetaling`() {
+    fun `Utbetaling korrigering im`() {
         @Language("JSON")
         val json = """
         {
@@ -25,9 +25,26 @@ internal class OmsorgspengerMappingTest {
             "norskIdentitetsnummer": "$søker"
           },
           "ytelse": {
-            "type": "OMP_UT",
-            "fraværsperioder": [{"periode": "2020-01-01/2020-01-11"}]
-          },
+		"type": "OMP_UT",
+		"fosterbarn": null,
+		"aktivitet": null,
+		"fraværsperioder": null,
+		"fraværsperioderKorrigeringIm": [
+			{
+				"periode": "2021-11-08/2021-11-08",
+				"duration": "PT0S",
+				"årsak": null,
+				"søknadÅrsak": null,
+				"aktivitetFravær": [
+					"ARBEIDSTAKER"
+				],
+				"arbeidsforholdId": "",
+				"arbeidsgiverOrgNr": "979312059"
+			}
+			],
+		"bosteder": null,
+		"utenlandsopphold": null
+	},
           "journalposter": [{"journalpostId": "$journalpostId"}] 
         }
         """.trimIndent()
@@ -41,7 +58,7 @@ internal class OmsorgspengerMappingTest {
             saksnummer = null,
             søknadstype = Søknadstype.OmsorgspengerUtbetaling_Korrigering,
             journalpostIder = setOf(journalpostId),
-            periode = "2020-01-01/2020-01-11".somPeriode(),
+            periode = "2021-11-08/2021-11-08".somPeriode(),
             søker = søker,
             annenPart = null,
             pleietrengende = null,
