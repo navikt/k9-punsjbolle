@@ -92,8 +92,7 @@ internal enum class Søknadstype(
     internal val k9Type: String,
     internal val journalpostType: String) {
     PleiepengerSyktBarn("PSB", "PLEIEPENGER_SOKNAD", "PleiepengerSyktBarn"),
-    //TODO(OJR) støtter ikke denne
-//    OmsorgspengerUtbetaling("OMP", "SØKNAD_UTBETALING_OMS", "UtbetaleOmsorgspenger"),
+    Omsorgspenger("OMP", "SØKNAD_UTBETALING_OMS", "UtbetaleOmsorgspenger"),
     OmsorgspengerUtbetaling_Korrigering("OMP", "FRAVÆRSKORRIGERING_IM_OMS", "UtbetaleOmsorgspenger"),
     OmsorgspengerKroniskSyktBarn("OMP_KS", "SØKNAD_OMS_UTVIDETRETT_KS", "KroniskSyktBarn"),
     OmsorgspengerMidlertidigAlene("OMS_MA", "SØKNAD_OMS_UTVIDETRETT_MA", "MidlertidigAlene");
@@ -104,6 +103,7 @@ internal enum class Søknadstype(
             "OMP_UT" -> OmsorgspengerUtbetaling_Korrigering
             "OMP_UTV_KS" -> OmsorgspengerKroniskSyktBarn
             "OMP_UTV_MA" -> OmsorgspengerMidlertidigAlene
+            "OMP" -> Omsorgspenger
             else -> throw IllegalStateException("Ukjent ytelsestype $ytelsetype")
         }
     }
