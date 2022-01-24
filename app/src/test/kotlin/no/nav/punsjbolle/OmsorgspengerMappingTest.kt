@@ -5,13 +5,12 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.punsjbolle.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
 import no.nav.punsjbolle.Periode.Companion.somPeriode
-import no.nav.punsjbolle.Periode.Companion.ÅpenPeriode
 import no.nav.punsjbolle.søknad.PunsjetSøknadMelding
 import no.nav.punsjbolle.søknad.somPunsjetSøknad
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.ZonedDateTime
-import org.junit.jupiter.api.Assertions.assertEquals
 
 internal class OmsorgspengerMappingTest {
     @Test
@@ -99,7 +98,7 @@ internal class OmsorgspengerMappingTest {
             saksnummer = null,
             søknadstype = Søknadstype.OmsorgspengerKroniskSyktBarn,
             journalpostIder = setOf(journalpostId),
-            periode = ÅpenPeriode,
+            periode = "2021-05-03/..".somPeriode(),
             søker = søker,
             annenPart = null,
             pleietrengende = barn,

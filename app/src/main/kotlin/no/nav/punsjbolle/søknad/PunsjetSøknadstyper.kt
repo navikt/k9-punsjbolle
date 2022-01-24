@@ -17,7 +17,7 @@ internal fun ObjectNode.søknadstype() =
 
 internal fun ObjectNode.periode(søknadstype: Søknadstype) = when (søknadstype) {
     Søknadstype.PleiepengerSyktBarn -> pleiepengerSyktBarnPeriode(mottatt = mottatt())
-    Søknadstype.OmsorgspengerKroniskSyktBarn -> ÅpenPeriode
+    Søknadstype.OmsorgspengerKroniskSyktBarn -> omsorgspengerKroniskSyktBarnPeriode(mottatt = mottatt())
     Søknadstype.OmsorgspengerMidlertidigAlene -> omsorgspengerMidlertidigAlenePeriode()
     Søknadstype.OmsorgspengerUtbetaling_Korrigering -> omsorgspengerUtbetalingPeriode()
     Søknadstype.Omsorgspenger -> ÅpenPeriode
@@ -113,6 +113,14 @@ private fun ObjectNode.pleiepengerSyktBarnPeriode(mottatt: ZonedDateTime) =
     arrayPerioder("søknadsperiode")
     .plus(arrayPerioder("endringsperiode"))
     .plus(arrayPerioder("trekkKravPerioder"))
+    .somEnPeriode()
+    .let { periode -> when (periode.erÅpenPeriode()) {
+        true -> Periode(fom = mottatt.toLocalDate(), tom = null)
+        false -> periode
+    }}
+
+private fun ObjectNode.omsorgspengerKroniskSyktBarnPeriode(mottatt: ZonedDateTime) =
+    arrayPerioder("søknadsperiode")
     .somEnPeriode()
     .let { periode -> when (periode.erÅpenPeriode()) {
         true -> Periode(fom = mottatt.toLocalDate(), tom = null)
