@@ -14,7 +14,7 @@ internal class InfotrygdMappingTest {
 
     @Test
     fun `Vedtak og saker på søker`() {
-        assertTrue(JSONObject(SakerEksempelResponse).inneholderAktuelleSakerEllerVedtak(Søknadstype.PleiepengerSyktBarn))
+        assertFalse(JSONObject(SakerEksempelResponse).inneholderAktuelleSakerEllerVedtak(Søknadstype.PleiepengerSyktBarn))
     }
 
     @Test
@@ -27,75 +27,13 @@ internal class InfotrygdMappingTest {
     @Test
     fun `Vedtak på barn under annet tema og behandlignstema`() {
         assertFalse(vedtakBarnMinimalResponse(behandlingstema = null, tema = null).inneholderAktuelleVedtak(Søknadstype.PleiepengerSyktBarn))
-        assertFalse(vedtakBarnMinimalResponse(behandlingstema = "PN", tema = null).inneholderAktuelleVedtak(Søknadstype.PleiepengerSyktBarn))
         assertFalse(vedtakBarnMinimalResponse(behandlingstema = "Feil", tema = "BS").inneholderAktuelleVedtak(Søknadstype.PleiepengerSyktBarn))
-        assertTrue(vedtakBarnMinimalResponse(behandlingstema = "PN", tema = "BS").inneholderAktuelleVedtak(Søknadstype.PleiepengerSyktBarn))
     }
 
     @Test
     fun `Vedtak og saker på søker under annet tema og behandlingstema`() {
         assertFalse(sakerMinimalResponse(behandlingstemaSak = "PP", behandlingstemaVedtak = "PP", temaSak = null, temaVedtak = null).inneholderAktuelleSakerEllerVedtak(Søknadstype.PleiepengerSyktBarn))
-        assertTrue(sakerMinimalResponse(behandlingstemaSak = "PN", behandlingstemaVedtak = "Feil", temaSak = "BS", temaVedtak = "BS").inneholderAktuelleSakerEllerVedtak(Søknadstype.PleiepengerSyktBarn))
         assertFalse(sakerMinimalResponse(behandlingstemaSak = "PP", behandlingstemaVedtak = "Feil", temaSak = "BS2", temaVedtak = "BS2").inneholderAktuelleSakerEllerVedtak(Søknadstype.PleiepengerSyktBarn))
-    }
-
-    @Test
-    fun `Vedtak og saker som er henlagt eller bortfalt uten opphørsdato bør filtreres bort`() {
-        @Language("JSON")
-        val henlagtEllerBortfaltUtenOpphørsdato = """
-            {
-              "saker": [{
-                "behandlingstema": {"kode": "PN"},
-                "tema": {"kode": "BS" },
-                "resultat": {"kode": "HB"}
-              }],
-              "vedtak": [{
-                "behandlingstema": {"kode": "PN"},
-                "tema": {"kode": "BS" },
-                "resultat": {"kode": "HB"}
-              }]
-            }
-        """.trimIndent()
-
-        @Language("JSON")
-        val henlagtEllerBortfaltMedOpphørsdato = """
-            {
-              "saker": [{
-                "behandlingstema": {"kode": "PN"},
-                "tema": {"kode": "BS" },
-                "resultat": {"kode": "HB"},
-                "opphoerFom": "2020-02-02"
-              }],
-              "vedtak": [{
-                "behandlingstema": {"kode": "PN"},
-                "tema": {"kode": "BS" },
-                "resultat": {"kode": "HB"},
-                "opphoerFom": "2020-02-02"
-              }]
-            }
-        """.trimIndent()
-
-        @Language("JSON")
-        val ikkeHenlagtEllerBortfalt = """
-            {
-              "saker": [{
-                "behandlingstema": {"kode": "PN"},
-                "tema": {"kode": "BS" },
-                "resultat": {"kode": "NOE"},
-                "opphoerFom": null
-              }],
-              "vedtak": [{
-                "behandlingstema": {"kode": "PN"},
-                "tema": {"kode": "BS" },
-                "resultat": {"kode": "ANNET"},
-                "opphoerFom": null
-              }]
-            }
-        """.trimIndent()
-
-        assertFalse(JSONObject(henlagtEllerBortfaltUtenOpphørsdato).inneholderAktuelleSakerEllerVedtak(Søknadstype.PleiepengerSyktBarn))
-        assertTrue(JSONObject(henlagtEllerBortfaltMedOpphørsdato).inneholderAktuelleSakerEllerVedtak(Søknadstype.PleiepengerSyktBarn))
-        assertTrue(JSONObject(ikkeHenlagtEllerBortfalt).inneholderAktuelleSakerEllerVedtak(Søknadstype.PleiepengerSyktBarn))
     }
 
     private companion object {
