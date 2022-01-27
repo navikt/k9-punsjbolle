@@ -20,7 +20,6 @@ internal class RutingServiceTest {
     private val journalpostOverstyrtTilK9Sak1 = "789789788".somJournalpostId()
     private val journalpostOverstyrtTilK9Sak2 = "789789789".somJournalpostId()
     private val journalpostIkkeOverstyrtTilK9Sak = "894894894".somJournalpostId()
-    private val aktørIdIUnntaksliste = "11111111111".somAktørId()
     private val aktørIdIkkeIUnntaksliste = "2222222222".somAktørId()
     private val k9SakClientMock = mockk<K9SakClient>()
     private val rutingService = RutingService(
@@ -39,18 +38,9 @@ internal class RutingServiceTest {
     }
 
     @Test
-    fun `I unntaksliste og overstyrt til K9Sak skal rutes til Infotrygd`() {
-        assertEquals(RutingService.Destinasjon.Infotrygd, hentDestinasjon(
-            journalpostIds = setOf(journalpostOverstyrtTilK9Sak1, journalpostOverstyrtTilK9Sak2),
-            iUnntaksliste = true
-        ))
-    }
-
-    @Test
     fun `Ikke i unntaksliste og overstyrt til K9Sak skal rutes til K9Sak`() {
         assertEquals(RutingService.Destinasjon.K9Sak, hentDestinasjon(
-            journalpostIds = setOf(journalpostOverstyrtTilK9Sak1, journalpostOverstyrtTilK9Sak2),
-            iUnntaksliste = false
+            journalpostIds = setOf(journalpostOverstyrtTilK9Sak1, journalpostOverstyrtTilK9Sak2)
         ))
     }
 
@@ -58,8 +48,7 @@ internal class RutingServiceTest {
     fun `Feiler om et subset av journalpostene er overstyrt til K9Sak`() {
         assertThrows<IllegalStateException> {
             hentDestinasjon(
-                journalpostIds = setOf(journalpostOverstyrtTilK9Sak1, journalpostIkkeOverstyrtTilK9Sak),
-                iUnntaksliste = false
+                journalpostIds = setOf(journalpostOverstyrtTilK9Sak1, journalpostIkkeOverstyrtTilK9Sak)
             )
         }
     }
@@ -68,8 +57,7 @@ internal class RutingServiceTest {
     fun `Ikke i unntaksliste eller overstyrt til K9Sak gir normal ruting`() {
         coVerify { k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) wasNot Called }
         assertEquals(RutingService.Destinasjon.K9Sak, hentDestinasjon(
-            journalpostIds = setOf(journalpostIkkeOverstyrtTilK9Sak),
-            iUnntaksliste = false
+            journalpostIds = setOf(journalpostIkkeOverstyrtTilK9Sak)
         ))
         coVerify(exactly = 1) { k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }
     }
@@ -79,27 +67,21 @@ internal class RutingServiceTest {
     fun `Tom liste med journalposter går rett på normal ruting`() {
         coVerify { k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) wasNot Called }
         assertEquals(RutingService.Destinasjon.K9Sak, hentDestinasjon(
-            journalpostIds = emptySet(),
-            iUnntaksliste = false
+            journalpostIds = emptySet()
         ))
         coVerify(exactly = 1) { k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }
         assertEquals(RutingService.Destinasjon.Infotrygd, hentDestinasjon(
-            journalpostIds = emptySet(),
-            iUnntaksliste = true
+            journalpostIds = emptySet()
         ))
     }
 
     private fun hentDestinasjon(
-        journalpostIds: Set<JournalpostId>,
-        iUnntaksliste: Boolean
+        journalpostIds: Set<JournalpostId>
     ) = runBlocking { rutingService.destinasjon(
         søker = "12345678911".somIdentitetsnummer(),
         fraOgMed = LocalDate.now(),
         søknadstype = Søknadstype.PleiepengerSyktBarn,
-        aktørIder = when (iUnntaksliste) {
-            true -> setOf(aktørIdIUnntaksliste)
-            false -> setOf(aktørIdIkkeIUnntaksliste)
-        },
+        aktørIder = setOf(aktørIdIkkeIUnntaksliste),
         journalpostIds = journalpostIds,
         correlationId = "${UUID.randomUUID()}".somCorrelationId()
     )}
