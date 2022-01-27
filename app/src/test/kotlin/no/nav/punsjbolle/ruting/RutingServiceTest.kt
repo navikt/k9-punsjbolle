@@ -35,8 +35,6 @@ internal class RutingServiceTest {
     @BeforeEach
     internal fun reset() {
         clearMocks(k9SakClientMock)
-        coEvery { k9SakClientMock.inngårIUnntaksliste(setOf(aktørIdIUnntaksliste), Søknadstype.PleiepengerSyktBarn, any()) }.returns(true)
-        coEvery { k9SakClientMock.inngårIUnntaksliste(setOf(aktørIdIkkeIUnntaksliste), Søknadstype.PleiepengerSyktBarn, any()) }.returns(false)
         coEvery { k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }.returns(RutingGrunnlag(søker = true))
     }
 

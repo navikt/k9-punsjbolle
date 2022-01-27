@@ -61,10 +61,6 @@ internal class RutingService(
     private suspend fun slåOppDestinasjon(
         input: DestinasjonInput,
         correlationId: CorrelationId) : Destinasjon {
-        if (k9SakClient.inngårIUnntaksliste(aktørIder = input.aktørIder, søknadstype = input.søknadstype, correlationId = correlationId)) {
-            logger.info("Rutes til Infotrygd ettersom minst en part er lagt til i unntakslisten i K9Sak.")
-            return Destinasjon.Infotrygd
-        }
 
         val overstyresTilK9Sak = input.journalpostIds.intersect(overstyrTilK9SakJournalpostIds)
         if (overstyresTilK9Sak.isNotEmpty()) {
