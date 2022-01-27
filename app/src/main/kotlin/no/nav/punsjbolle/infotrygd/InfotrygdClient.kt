@@ -121,6 +121,7 @@ internal class InfotrygdClient(
                     Søknadstype.OmsorgspengerKroniskSyktBarn -> listOf(Omsorgspenger)
                     Søknadstype.OmsorgspengerMidlertidigAlene -> listOf(Omsorgspenger)
                     Søknadstype.Omsorgspenger -> listOf(Omsorgspenger)
+                    Søknadstype.PleiepengerLivetsSluttfase -> listOf(PleiepengerILivetsSluttfase)
                 }.map { it.infotrygdVerdi }
             }
         }
