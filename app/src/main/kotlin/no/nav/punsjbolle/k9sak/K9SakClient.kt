@@ -198,7 +198,7 @@ internal class K9SakClient(
             "relatertPersonIdenter": ${annenPart.jsonArray()}
         }
         """.trimIndent()
-        
+
         val (httpStatusCode, response) = MatchFagsakUrl.httpPost {
             it.header(HttpHeaders.Authorization, authorizationHeader())
             it.header(CorrelationIdHeaderKey, "$correlationId")
@@ -212,37 +212,6 @@ internal class K9SakClient(
         }
 
         return response.inneholderMatchendeFagsak()
-    }
-
-    internal suspend fun inngårIUnntaksliste(
-        aktørIder: Set<AktørId>,
-        søknadstype: Søknadstype,
-        correlationId: CorrelationId) : Boolean {
-
-        if (Søknadstype.PleiepengerSyktBarn != søknadstype) {
-            logger.info("Finnes inngen unntaksliste for ${søknadstype.name}")
-            return false
-        }
-
-        // https://github.com/navikt/k9-sak/tree/3.2.7/web/src/main/java/no/nav/k9/sak/web/app/tjenester/fordeling/FordelRestTjeneste.java#L164
-        // https://github.com/navikt/k9-sak/tree/3.2.7/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/Akt%C3%B8rListeDto.java#L19
-        val dto = JSONObject().also {
-            it.put("aktører", JSONArray(aktørIder.map { aktørId ->  "$aktørId" }))
-        }.toString()
-
-        val (httpStatusCode, response) = PleiepengerSyktBarnUnntakslisteUrl.httpPost {
-            it.header(HttpHeaders.Authorization, authorizationHeader())
-            it.header(CorrelationIdHeaderKey, "$correlationId")
-            it.header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-            it.accept(ContentType.Application.Json)
-            it.jsonBody(dto)
-        }.readTextOrThrow()
-
-        require(httpStatusCode.isSuccess() && (response == "true" || response == "false")) {
-            "Feil fra K9Sak. URL=[$PleiepengerSyktBarnUnntakslisteUrl], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
-        }
-
-        return "true" == response
     }
 
     internal companion object {
@@ -269,7 +238,7 @@ internal class K9SakClient(
             .filterNot { (it.getString("status") == "OPPR").also { erStatusOpprettet -> if (erStatusOpprettet) {
                 logger.info("MatchendeFagsak: Filtrerer bort Saksnummer=${it.stringOrNull("saksnummer")} i Status=OPPR")
             }}}
-            .toSet()    
+            .toSet()
             .isNotEmpty()
     }
 }

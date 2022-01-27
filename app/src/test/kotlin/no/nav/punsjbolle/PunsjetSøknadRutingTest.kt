@@ -47,10 +47,9 @@ internal class PunsjetSøknadRutingTest(
     @Test
     fun `Barnet har en løpende sak i Infotrygd`() {
         mock(
-            k9sak = RutingGrunnlag(søker = false, pleietrengende = false, annenPart = false),
-            infotrygd = RutingGrunnlag(søker = false, pleietrengende = true, annenPart = false)
+            infotrygd = RutingGrunnlag(søker = false, pleietrengende = true, annenPart = false),
+            k9sak = RutingGrunnlag(søker = false, pleietrengende = false, annenPart = false)
         )
-
         rapid.sendPunsjetSøknad()
         rapid.mockHentAktørIder(setOf(søker, barn))
         rapid.assertGosysJournalføringsoppgave()
@@ -60,10 +59,9 @@ internal class PunsjetSøknadRutingTest(
     @Test
     fun `Søker har en løpende sak i Infotrygd`() {
         mock(
-            k9sak = RutingGrunnlag(søker = false, pleietrengende = false, annenPart = false),
-            infotrygd = RutingGrunnlag(søker = true, pleietrengende = false, annenPart = false)
+            infotrygd = RutingGrunnlag(søker = true, pleietrengende = false, annenPart = false),
+            k9sak = RutingGrunnlag(søker = false, pleietrengende = false, annenPart = false)
         )
-
         rapid.sendPunsjetSøknad()
         rapid.mockHentAktørIder(setOf(søker, barn))
         rapid.assertGosysJournalføringsoppgave()
@@ -73,8 +71,8 @@ internal class PunsjetSøknadRutingTest(
     @Test
     fun `Barn har en løpende sak i Infotrygd, søker i K9Sak`() {
         mock(
-            k9sak = RutingGrunnlag(søker = true, pleietrengende = false, annenPart = false),
-            infotrygd = RutingGrunnlag(søker = false, pleietrengende = true, annenPart = false)
+            infotrygd = RutingGrunnlag(søker = false, pleietrengende = true, annenPart = false),
+            k9sak = RutingGrunnlag(søker = true, pleietrengende = false, annenPart = false)
         )
         coEvery { k9SakClientMock.hentEllerOpprettSaksnummer(any(),any()) }.returns("123SAK".somK9Saksnummer())
         coEvery { k9SakClientMock.sendInnSøknad(any(), any(), any()) }.returns(Unit)
@@ -85,23 +83,9 @@ internal class PunsjetSøknadRutingTest(
         rapid.sisteMeldingHarLøsningPå("PunsjetSøknad")
     }
 
-    @Test
-    fun `Ingen har sak hverken i K9Sak eller Infotrygd, men inngårt i unntaksliste`() {
-        mock(
-            k9sak = RutingGrunnlag(søker = false, pleietrengende = false, annenPart = false),
-            infotrygd = RutingGrunnlag(søker = false, pleietrengende = false, annenPart = false),
-            inngårIUnntaksliste = true
-        )
-        rapid.sendPunsjetSøknad()
-        rapid.mockHentAktørIder(setOf(søker, barn))
-        rapid.assertGosysJournalføringsoppgave()
-        rapid.printSisteMelding()
-    }
-
-    private fun mock(infotrygd: RutingGrunnlag, k9sak: RutingGrunnlag, inngårIUnntaksliste: Boolean = false) {
+    private fun mock(infotrygd: RutingGrunnlag, k9sak: RutingGrunnlag) {
         coEvery { infotrygdClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }.returns(infotrygd)
         coEvery { k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }.returns(k9sak)
-        coEvery { k9SakClientMock.inngårIUnntaksliste(any(), any(), any()) }.returns(inngårIUnntaksliste)
     }
 
     private companion object {

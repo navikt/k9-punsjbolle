@@ -109,14 +109,13 @@ internal class InfotrygdClient(
 
         private enum class Behandlingstema(val infotrygdVerdi: String) {
             PleiepengerSyktBarnGammelOrdning("PB"),
-            PleiepengerSyktBarnNyOrdning("PN"),
             PleiepengerILivetsSluttfase("PP"),
             Opplæringspenger("OP"),
             Omsorgspenger("OM");
 
             companion object {
                 fun Søknadstype.relevanteBehandlingstemaer() = when (this) {
-                    Søknadstype.PleiepengerSyktBarn -> listOf(PleiepengerSyktBarnNyOrdning, PleiepengerSyktBarnGammelOrdning)
+                    Søknadstype.PleiepengerSyktBarn -> listOf(PleiepengerSyktBarnGammelOrdning)
                     Søknadstype.OmsorgspengerUtbetaling_Korrigering -> listOf(Omsorgspenger)
                     Søknadstype.OmsorgspengerKroniskSyktBarn -> listOf(Omsorgspenger)
                     Søknadstype.OmsorgspengerMidlertidigAlene -> listOf(Omsorgspenger)

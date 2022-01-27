@@ -284,7 +284,6 @@ internal class SaksnummerApiTest(
             k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(),any(), any(), any(), any(), any()) }.returns(
             RutingGrunnlag(søker = søker, pleietrengende = pleietrengende, annenPart = annenPart)
         )
-        coEvery { k9SakClientMock.inngårIUnntaksliste(any(), any(), any()) }.returns(false)
     }
 
     private fun mockHentSaksnummer() {
