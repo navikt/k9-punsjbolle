@@ -92,6 +92,7 @@ internal enum class Søknadstype(
     internal val k9Type: String,
     internal val journalpostType: String) {
     PleiepengerSyktBarn("PSB", "PLEIEPENGER_SOKNAD", "PleiepengerSyktBarn"),
+    PleiepengerLivetsSluttfase("PPN", "PLEIEPENGER_LIVETS_SLUTTFASE_SOKNAD", "PleiepengerLivetsSluttfase"),
     Omsorgspenger("OMP", "SØKNAD_UTBETALING_OMS", "UtbetaleOmsorgspenger"),
     OmsorgspengerUtbetaling_Korrigering("OMP", "FRAVÆRSKORRIGERING_IM_OMS", "UtbetaleOmsorgspenger"),
     OmsorgspengerKroniskSyktBarn("OMP_KS", "SØKNAD_OMS_UTVIDETRETT_KS", "KroniskSyktBarn"),
@@ -100,6 +101,7 @@ internal enum class Søknadstype(
     internal companion object {
         internal fun fraK9FormatYtelsetype(ytelsetype: String) = when (ytelsetype) {
             "PLEIEPENGER_SYKT_BARN" -> PleiepengerSyktBarn
+            "PLEIEPENGER_LIVETS_SLUTTFASE" -> PleiepengerLivetsSluttfase
             "OMP_UT" -> OmsorgspengerUtbetaling_Korrigering
             "OMP_UTV_KS" -> OmsorgspengerKroniskSyktBarn
             "OMP_UTV_MA" -> OmsorgspengerMidlertidigAlene

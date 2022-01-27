@@ -17,6 +17,7 @@ internal fun ObjectNode.søknadstype() =
 
 internal fun ObjectNode.periode(søknadstype: Søknadstype) = when (søknadstype) {
     Søknadstype.PleiepengerSyktBarn -> pleiepengerSyktBarnPeriode(mottatt = mottatt())
+    Søknadstype.PleiepengerLivetsSluttfase -> omsorgspengerKroniskSyktBarnPeriode(mottatt = mottatt())
     Søknadstype.OmsorgspengerKroniskSyktBarn -> omsorgspengerKroniskSyktBarnPeriode(mottatt = mottatt())
     Søknadstype.OmsorgspengerMidlertidigAlene -> omsorgspengerMidlertidigAlenePeriode()
     Søknadstype.OmsorgspengerUtbetaling_Korrigering -> omsorgspengerUtbetalingPeriode()
@@ -37,6 +38,14 @@ internal fun ObjectNode.somPunsjetSøknad(
             versjon = versjon,
             saksnummer = saksnummer,
             pleietrengende = barn(),
+            periode = periode,
+            saksbehandler = saksbehandler
+        )
+        Søknadstype.PleiepengerLivetsSluttfase -> map(
+            søknadstype = søknadstype,
+            versjon = versjon,
+            saksnummer = saksnummer,
+            pleietrengende = pleietrengende(),
             periode = periode,
             saksbehandler = saksbehandler
         )
@@ -102,6 +111,7 @@ private fun ObjectNode.mottatt() = ZonedDateTime.parse(get("mottattDato").asText
 private fun ObjectNode.journalpostIder() = get("journalposter")?.let { (it as ArrayNode).map { it as ObjectNode }.map { it.get("journalpostId").asText().somJournalpostId() }.toSet() } ?: emptySet()
 private fun ObjectNode.søker() = get("søker").get("norskIdentitetsnummer").asText().somIdentitetsnummer()
 private fun ObjectNode.barn() = get("ytelse").get("barn")?.get("norskIdentitetsnummer")?.asText()?.somIdentitetsnummer()
+private fun ObjectNode.pleietrengende() = get("ytelse").get("pleietrengende")?.get("norskIdentitetsnummer")?.asText()?.somIdentitetsnummer()
 private fun ObjectNode.annenForelder() = get("ytelse").get("annenForelder").get("norskIdentitetsnummer").asText().somIdentitetsnummer()
 
 private fun ObjectNode.arrayPerioder(navn: String) =
