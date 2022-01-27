@@ -70,7 +70,7 @@ internal class RutingServiceTest {
             journalpostIds = emptySet()
         ))
         coVerify(exactly = 1) { k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }
-        assertEquals(RutingService.Destinasjon.Infotrygd, hentDestinasjon(
+        assertEquals(RutingService.Destinasjon.K9Sak, hentDestinasjon(
             journalpostIds = emptySet()
         ))
     }
