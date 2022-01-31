@@ -20,6 +20,7 @@ internal fun ObjectNode.periode(søknadstype: Søknadstype) = when (søknadstype
     Søknadstype.PleiepengerLivetsSluttfase -> omsorgspengerKroniskSyktBarnPeriode(mottatt = mottatt())
     Søknadstype.OmsorgspengerKroniskSyktBarn -> omsorgspengerKroniskSyktBarnPeriode(mottatt = mottatt())
     Søknadstype.OmsorgspengerMidlertidigAlene -> omsorgspengerMidlertidigAlenePeriode()
+    Søknadstype.OmsorgspengerAleneOmsorg -> omsorgspengerAleneOmsorgPeriode()
     Søknadstype.OmsorgspengerUtbetaling_Korrigering -> omsorgspengerUtbetalingPeriode()
     Søknadstype.Omsorgspenger -> ÅpenPeriode
 }
@@ -69,6 +70,14 @@ internal fun ObjectNode.somPunsjetSøknad(
             versjon = versjon,
             saksnummer = saksnummer,
             annenPart = annenForelder(),
+            periode = periode,
+            saksbehandler = saksbehandler
+        )
+        Søknadstype.OmsorgspengerAleneOmsorg -> map(
+            søknadstype = søknadstype,
+            versjon = versjon,
+            saksnummer = saksnummer,
+            pleietrengende = barn(),
             periode = periode,
             saksbehandler = saksbehandler
         )
@@ -142,6 +151,9 @@ private fun ObjectNode.omsorgspengerUtbetalingPeriode() =
 
 private fun ObjectNode.omsorgspengerMidlertidigAlenePeriode() =
     get("ytelse").get("annenForelder").get("periode")?.asText()?.somPeriode() ?: ÅpenPeriode
+
+private fun ObjectNode.omsorgspengerAleneOmsorgPeriode() =
+    get("ytelse").get("periode")?.asText()?.somPeriode() ?: ÅpenPeriode
 
 private fun List<Periode>.somEnPeriode() : Periode {
     val fraOgMedDatoer = map { it.fom }

@@ -96,6 +96,7 @@ internal enum class Søknadstype(
     Omsorgspenger("OMP", "SØKNAD_UTBETALING_OMS", "UtbetaleOmsorgspenger"),
     OmsorgspengerUtbetaling_Korrigering("OMP", "FRAVÆRSKORRIGERING_IM_OMS", "UtbetaleOmsorgspenger"),
     OmsorgspengerKroniskSyktBarn("OMP_KS", "SØKNAD_OMS_UTVIDETRETT_KS", "KroniskSyktBarn"),
+    OmsorgspengerAleneOmsorg("OMP_AO", "SØKNAD_OMS_UTVIDETRETT_AO", "AleneOmsorg"),
     OmsorgspengerMidlertidigAlene("OMS_MA", "SØKNAD_OMS_UTVIDETRETT_MA", "MidlertidigAlene");
 
     internal companion object {
@@ -105,6 +106,7 @@ internal enum class Søknadstype(
             "OMP_UT" -> OmsorgspengerUtbetaling_Korrigering
             "OMP_UTV_KS" -> OmsorgspengerKroniskSyktBarn
             "OMP_UTV_MA" -> OmsorgspengerMidlertidigAlene
+            "OMP_UTV_AO" -> OmsorgspengerAleneOmsorg
             "OMP" -> Omsorgspenger
             else -> throw IllegalStateException("Ukjent ytelsestype $ytelsetype")
         }
