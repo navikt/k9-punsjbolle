@@ -37,7 +37,6 @@ internal class K9SakClient(
     private val HentSaksnummerUrl = URI("$baseUrl/api/fagsak/siste")
     private val SendInnSøknadUrl = URI("$baseUrl/api/fordel/journalposter")
     private val MatchFagsakUrl = URI("$baseUrl/api/fagsak/match")
-    private val PleiepengerSyktBarnUnntakslisteUrl = URI("$baseUrl/api/fordel/psb-infotrygd/finnes")
 
     internal suspend fun hentEllerOpprettSaksnummer(
         grunnlag: HentK9SaksnummerMelding.HentK9SaksnummerGrunnlag,
