@@ -12,7 +12,7 @@ updates:
       interval: daily
     open-pull-requests-limit: 10
   - package-ecosystem: gradle
-    directory: "/"
+    directory: "/app"
     schedule:
       interval: daily
     open-pull-requests-limit: 10
