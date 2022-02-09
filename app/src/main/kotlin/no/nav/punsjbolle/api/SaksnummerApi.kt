@@ -108,6 +108,22 @@ internal fun Route.SaksnummerApi(
         }
     )}
 
+    post("/saksnummer-fra-soknad") {
+        val request = call.fraSøknadRequest()
+        val (periode, _) = periodeOgJournalpost(request)
+
+        val saksnummer = k9SakClient.hentEllerOpprettSaksnummer(
+            correlationId = request.correlationId,
+            grunnlag = request.hentSaksnummerGrunnlag(periode)
+        )
+
+        call.respondText(
+            contentType = ContentType.Application.Json,
+            text = """{"saksnummer": "$saksnummer"}""",
+            status = HttpStatusCode.OK
+        )
+    }
+
     post("/saksnummer-fra-søknad") {
         val request = call.fraSøknadRequest()
         val (periode, _) = periodeOgJournalpost(request)
