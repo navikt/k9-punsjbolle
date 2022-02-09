@@ -112,7 +112,7 @@
 }
 ```
 
-### POST @ /api/saksnummer-fra-søknad
+### POST @ /api/saksnummer-fra-soknad
 #### Request
 ```json
 {
