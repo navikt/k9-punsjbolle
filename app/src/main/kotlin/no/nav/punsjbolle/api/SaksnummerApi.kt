@@ -123,22 +123,6 @@ internal fun Route.SaksnummerApi(
             status = HttpStatusCode.OK
         )
     }
-
-    post("/saksnummer-fra-søknad") {
-        val request = call.fraSøknadRequest()
-        val (periode, _) = periodeOgJournalpost(request)
-
-        val saksnummer = k9SakClient.hentEllerOpprettSaksnummer(
-            correlationId = request.correlationId,
-            grunnlag = request.hentSaksnummerGrunnlag(periode)
-        )
-
-        call.respondText(
-            contentType = ContentType.Application.Json,
-            text = """{"saksnummer": "$saksnummer"}""",
-            status = HttpStatusCode.OK
-        )
-    }
 }
 
 private val logger = LoggerFactory.getLogger("no.nav.punsjbolle.api.SaksnummerApi")
