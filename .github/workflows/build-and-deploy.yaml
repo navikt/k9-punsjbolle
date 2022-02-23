@@ -29,14 +29,6 @@ jobs:
           java-version: 17
           distribution: temurin
           cache: gradle
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle.kts') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
 
       - name: Bygge JAR
         run: |
