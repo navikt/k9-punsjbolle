@@ -39,7 +39,7 @@ internal class InfotrygdMappingTest {
     private companion object {
         @Language("JSON")
         private val SakerEksempelResponse = """
-            {
+            [{
               "saker": [
                 {
                   "behandlingstema": {
@@ -98,7 +98,7 @@ internal class InfotrygdMappingTest {
                   "vedtatt": "2020-01-01"
                 }
               ]
-            }
+            }]
         """.trimIndent()
 
         @Language("JSON")
@@ -106,7 +106,7 @@ internal class InfotrygdMappingTest {
             behandlingstemaSak: String?, temaSak: String?,
             behandlingstemaVedtak: String?, temaVedtak: String?) = JSONObject(
             """
-                {
+                [{
                   "saker": [{
                     "behandlingstema": {"kode": ${behandlingstemaSak?.let { """"$it"""" }}},
                     "tema": {"kode": ${temaSak?.let { """"$it"""" }} }
@@ -115,7 +115,7 @@ internal class InfotrygdMappingTest {
                     "behandlingstema": {"kode": ${behandlingstemaVedtak?.let { """"$it"""" }}},
                     "tema": {"kode": ${temaVedtak?.let { """"$it"""" }} }
                   }]
-                }
+                }]
             """.trimIndent()
         )
 
