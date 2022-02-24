@@ -64,7 +64,7 @@ internal class InfotrygdClient(
     ): Boolean {
 
         val url = URI("$HentSakerUrl")
-        val jsonPayload = fnrFomjsonPayload(identitetsnummer, fraOgMed)
+        val jsonPayload = jsonPayloadFraFnrOgFom(identitetsnummer, fraOgMed)
 
         val (httpStatusCode, response) = url.httpPost {
             it.header(HttpHeaders.Authorization, authorizationHeader())
@@ -91,7 +91,7 @@ internal class InfotrygdClient(
     ): Boolean {
 
         val url = URI("$HentVedtakForPleietrengende")
-        val jsonPayload = fnrFomjsonPayload(identitetsnummer, fraOgMed)
+        val jsonPayload = jsonPayloadFraFnrOgFom(identitetsnummer, fraOgMed)
 
         val (httpStatusCode, response) = url.httpPost {
             it.header(HttpHeaders.Authorization, authorizationHeader())
@@ -174,13 +174,12 @@ internal class InfotrygdClient(
                 .map { it.inneholderAktuelle("vedtak", søknadstype) }
                 .any { it }
 
-        internal fun fnrFomjsonPayload(identitetsnummer: Identitetsnummer, fraOgMed: LocalDate): String {
-            return """
+        internal fun jsonPayloadFraFnrOgFom(identitetsnummer: Identitetsnummer, fraOgMed: LocalDate) =
+            """
             {
-              "fnr": "$identitetsnummer",
+              "fnr": ["$identitetsnummer"],
               "fom": "$fraOgMed"
             }
-            """.trimIndent()
-        }
+           """.trimIndent()
     }
 }
