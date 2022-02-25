@@ -22,7 +22,7 @@ private fun WireMockServer.mockSaker(): WireMockServer {
     WireMock.stubFor(
         WireMock.post(WireMock.urlPathMatching(".*$path/saker.*"))
             .withNavPostHeaders().withRequestBody(AnythingPattern())
-            .willReturn(WireMock.aResponse().withJson("""{"saker":[], "vedtak":[]}""")))
+            .willReturn(WireMock.aResponse().withJson("""[{"saker":[], "vedtak":[]}]""")))
     return this
 }
 
