@@ -14,7 +14,7 @@ internal class InfotrygdMappingTest {
 
     @Test
     fun `Vedtak og saker på søker`() {
-        assertFalse(JSONObject(SakerEksempelResponse).inneholderAktuelleSakerEllerVedtak(Søknadstype.PleiepengerSyktBarn))
+        assertFalse(JSONArray(SakerEksempelResponse).inneholderAktuelleSakerEllerVedtak(Søknadstype.PleiepengerSyktBarn))
     }
 
     @Test
@@ -104,7 +104,7 @@ internal class InfotrygdMappingTest {
         @Language("JSON")
         private fun sakerMinimalResponse(
             behandlingstemaSak: String?, temaSak: String?,
-            behandlingstemaVedtak: String?, temaVedtak: String?) = JSONObject(
+            behandlingstemaVedtak: String?, temaVedtak: String?) = JSONArray(
             """
                 [{
                   "saker": [{

@@ -78,7 +78,7 @@ internal class InfotrygdClient(
             "Feil fra Infotrygd. URL=[$HentSakerUrl], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
         }
 
-        return JSONObject(response).inneholderAktuelleSakerEllerVedtak(søknadstype).also { if (it) {
+        return JSONArray(response).inneholderAktuelleSakerEllerVedtak(søknadstype).also { if (it) {
             secureLogger.info("Fant saker/vedtak i Infotrygd som søker for Identitetsnummer=[$identitetsnummer], FraOgMed=[$fraOgMed], Response=[$response]")
         }}
     }
@@ -166,8 +166,10 @@ internal class InfotrygdClient(
                 .toList()
                 .isNotEmpty()
 
-        internal fun JSONObject.inneholderAktuelleSakerEllerVedtak(søknadstype: Søknadstype) =
-            inneholderAktuelle("saker", søknadstype) || inneholderAktuelle("vedtak", søknadstype)
+        internal fun JSONArray.inneholderAktuelleSakerEllerVedtak(søknadstype: Søknadstype) =
+            map { it as JSONObject }
+                .map { it.inneholderAktuelle("saker", søknadstype) || it.inneholderAktuelle("vedtak", søknadstype) }
+                .any { it }
 
         internal fun JSONArray.inneholderAktuelleVedtak(søknadstype: Søknadstype) =
             map { it as JSONObject }
