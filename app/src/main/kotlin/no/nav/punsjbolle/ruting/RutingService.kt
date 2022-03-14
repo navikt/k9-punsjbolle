@@ -18,6 +18,11 @@ internal class RutingService(
     private val infotrygdClient: InfotrygdClient,
     private val overstyrTilK9SakJournalpostIds: Set<JournalpostId>) {
 
+    val søknadsTyperSomRutesTilInfotrygd = listOf(
+        Søknadstype.PleiepengerLivetsSluttfase,
+        Søknadstype.PleiepengerSyktBarn
+    )
+
     init {
         logger.info("JournalpostIder som overstyres til K9Sak=$overstyrTilK9SakJournalpostIds")
     }
@@ -83,6 +88,12 @@ internal class RutingService(
 
         if (k9SakGrunnlag.minstEnPart) {
             logger.info("Rutes til K9Sak ettersom minst en part er involvert i løpende sak. K9Sak=[$k9SakGrunnlag]")
+            return Destinasjon.K9Sak
+        }
+
+        // Endast PSB & PPN skall rutes til Infotrygd
+        if(!søknadsTyperSomRutesTilInfotrygd.contains(input.søknadstype)) {
+            logger.info("Søknadstype ${input.søknadstype} rutes alltid til K9Sak")
             return Destinasjon.K9Sak
         }
 

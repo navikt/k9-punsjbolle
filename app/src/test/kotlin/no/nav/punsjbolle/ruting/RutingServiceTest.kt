@@ -8,9 +8,11 @@ import no.nav.punsjbolle.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.punsjbolle.JournalpostId
 import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
 import no.nav.punsjbolle.Søknadstype
+import no.nav.punsjbolle.infotrygd.InfotrygdClient
 import no.nav.punsjbolle.k9sak.K9SakClient
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import java.lang.IllegalStateException
 import java.time.LocalDate
 import java.util.*
@@ -22,9 +24,10 @@ internal class RutingServiceTest {
     private val journalpostIkkeOverstyrtTilK9Sak = "894894894".somJournalpostId()
     private val aktørIdIkkeIUnntaksliste = "2222222222".somAktørId()
     private val k9SakClientMock = mockk<K9SakClient>()
+    private val infotrygdClientMock = mockk<InfotrygdClient>()
     private val rutingService = RutingService(
         k9SakClient = k9SakClientMock,
-        infotrygdClient = mockk(),
+        infotrygdClient = infotrygdClientMock,
         overstyrTilK9SakJournalpostIds = setOf(
             journalpostOverstyrtTilK9Sak1,
             journalpostOverstyrtTilK9Sak2
@@ -35,6 +38,8 @@ internal class RutingServiceTest {
     internal fun reset() {
         clearMocks(k9SakClientMock)
         coEvery { k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }.returns(RutingGrunnlag(søker = true))
+        clearMocks(infotrygdClientMock)
+        coEvery { infotrygdClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }.returns(RutingGrunnlag(søker = true))
     }
 
     @Test
@@ -60,6 +65,7 @@ internal class RutingServiceTest {
             journalpostIds = setOf(journalpostIkkeOverstyrtTilK9Sak)
         ))
         coVerify(exactly = 1) { k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }
+        coVerify { infotrygdClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) wasNot Called }
     }
 
 
@@ -73,14 +79,34 @@ internal class RutingServiceTest {
         assertEquals(RutingService.Destinasjon.K9Sak, hentDestinasjon(
             journalpostIds = emptySet()
         ))
+        coVerify { infotrygdClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) wasNot Called }
+    }
+
+    @Test
+    fun `PSB & PILS søknad med sak i infotrygd rutes til Infotrygd, OMS til K9sak`() {
+        coEvery { k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }.returns(RutingGrunnlag(søker = false, pleietrengende = false, annenPart = false))
+        coEvery { infotrygdClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }.returns(RutingGrunnlag(søker = true))
+        assertEquals(RutingService.Destinasjon.Infotrygd, hentDestinasjon(
+            journalpostIds = emptySet(),
+            søknadsType = Søknadstype.PleiepengerSyktBarn
+        ))
+        assertEquals(RutingService.Destinasjon.Infotrygd, hentDestinasjon(
+            journalpostIds = emptySet(),
+            søknadsType = Søknadstype.PleiepengerLivetsSluttfase
+        ))
+        assertEquals(RutingService.Destinasjon.K9Sak, hentDestinasjon(
+            journalpostIds = emptySet(),
+            søknadsType = Søknadstype.Omsorgspenger
+        ))
     }
 
     private fun hentDestinasjon(
-        journalpostIds: Set<JournalpostId>
+        journalpostIds: Set<JournalpostId>,
+        søknadsType: Søknadstype = Søknadstype.PleiepengerSyktBarn
     ) = runBlocking { rutingService.destinasjon(
         søker = "12345678911".somIdentitetsnummer(),
         fraOgMed = LocalDate.now(),
-        søknadstype = Søknadstype.PleiepengerSyktBarn,
+        søknadstype = søknadsType,
         aktørIder = setOf(aktørIdIkkeIUnntaksliste),
         journalpostIds = journalpostIds,
         correlationId = "${UUID.randomUUID()}".somCorrelationId()
