@@ -28,7 +28,13 @@ internal data class Journalpost(
     }
 
     internal fun erKnyttetTil(saksnummer: K9Saksnummer) : Boolean {
-        return sak?.let { "K9" == it.fagsaksystem && "$saksnummer" == it.fagsakId } ?: false
+        val erKnyttetSak = sak?.let {
+            val knyttetSak = "K9" == it.fagsaksystem && "$saksnummer" == it.fagsakId
+            logger.info("K9 == ${it.fagsaksystem} && $saksnummer == ${it.fagsakId}")
+            knyttetSak
+        } ?: false
+        logger.info("Er saksnummer($saksnummer) knyttet {}? {}", sak, if (erKnyttetSak) "ja" else "nei")
+        return erKnyttetSak
     }
 
     internal data class Sak (
@@ -43,7 +49,7 @@ internal data class Journalpost(
         internal suspend fun Journalpost?.kanSendesTilK9Sak(eksisterendeSaksnummer: suspend () -> K9Saksnummer?) : Boolean {
             if (this == null || kanKnyttesTilSak) return true
             val saksnummer = eksisterendeSaksnummer().also {
-                logger.info("Eksisterende K9Saksnummer=[$it]")
+                logger.info("Saknummer på journalposten: {}, eksisterende saksnummer fra k9: {}", this.sak, it)
             }
             return saksnummer != null && erKnyttetTil(saksnummer)
         }
