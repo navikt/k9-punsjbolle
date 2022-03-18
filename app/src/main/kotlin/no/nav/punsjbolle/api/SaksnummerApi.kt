@@ -61,9 +61,13 @@ internal fun Route.SaksnummerApi(
         when (destinasjon) {
             RutingService.Destinasjon.Infotrygd -> onInfotrygd()
             RutingService.Destinasjon.K9Sak -> {
-                val kanSendesTilK9Sak = journalpost.kanSendesTilK9Sak { k9SakClient.hentEksisterendeSaksnummer(
-                    grunnlag = request.hentSaksnummerGrunnlag(periode),
-                    correlationId = request.correlationId)
+                val kanSendesTilK9Sak = journalpost.kanSendesTilK9Sak {
+                    val saksnummerGrunnlag = request.hentSaksnummerGrunnlag(periode)
+                    logger.info("Saksnummergrunnlag: {}", saksnummerGrunnlag)
+                    k9SakClient.hentEksisterendeSaksnummer(
+                        grunnlag = saksnummerGrunnlag,
+                        correlationId = request.correlationId
+                    )
                 }
                 when (kanSendesTilK9Sak) {
                     true -> onK9Sak(request, periode)
