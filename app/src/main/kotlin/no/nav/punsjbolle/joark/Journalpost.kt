@@ -28,11 +28,7 @@ internal data class Journalpost(
     }
 
     internal fun erKnyttetTil(saksnummer: K9Saksnummer) : Boolean {
-        val erKnyttetSak = sak?.let {
-            val knyttetSak = "K9" == it.fagsaksystem && "$saksnummer" == it.fagsakId
-            logger.info("K9 == ${it.fagsaksystem} && $saksnummer == ${it.fagsakId}")
-            knyttetSak
-        } ?: false
+        val erKnyttetSak = sak?.let { "K9" == it.fagsaksystem && "$saksnummer" == it.fagsakId } == true
         logger.info("Er saksnummer($saksnummer) knyttet {}? {}", sak, if (erKnyttetSak) "ja" else "nei")
         return erKnyttetSak
     }
