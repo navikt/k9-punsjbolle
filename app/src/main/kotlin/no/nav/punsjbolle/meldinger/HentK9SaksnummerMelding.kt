@@ -18,7 +18,11 @@ internal object HentK9SaksnummerMelding :
         internal val pleietrengende: AktørId?,
         internal val annenPart: AktørId?,
         internal val periode: Periode
-    )
+    ) {
+        override fun toString(): String {
+            return "HentK9SaksnummerGrunnlag(søknadstype=$søknadstype, søker=***, pleietrengende=${pleietrengende?.let { "***" }}, annenPart=${annenPart?.let { "***" }}, periode=$periode)"
+        }
+    }
 
     internal enum class K9SaksnummerKilde {
         ManueltValgtIPunsj,
