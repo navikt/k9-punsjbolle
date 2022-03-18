@@ -64,12 +64,10 @@ internal fun Route.SaksnummerApi(
                 val kanSendesTilK9Sak = journalpost.kanSendesTilK9Sak {
                     val saksnummerGrunnlag = request.hentSaksnummerGrunnlag(periode)
                     logger.info("Saksnummergrunnlag: {}", saksnummerGrunnlag)
-                    val eksisterendeSaksnummer = k9SakClient.hentEksisterendeSaksnummer(
+                    k9SakClient.hentEksisterendeSaksnummer(
                         grunnlag = saksnummerGrunnlag,
                         correlationId = request.correlationId
                     )
-                    logger.info("Hentet eksisterende saksnummer: {}", eksisterendeSaksnummer)
-                    eksisterendeSaksnummer
                 }
                 when (kanSendesTilK9Sak) {
                     true -> onK9Sak(request, periode)
