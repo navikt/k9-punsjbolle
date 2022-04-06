@@ -64,7 +64,7 @@ internal class SaksnummerApiTest(
         assertEquals(saksnummer, k9Saksnummer)
         assertEquals(RutingService.Destinasjon.K9Sak, requestDestinasjon())
 
-        assertInfotrygdKalt(true)
+        assertInfotrygdKalt(false)
         assertK9SakKalt(true)
     }
 
@@ -77,28 +77,27 @@ internal class SaksnummerApiTest(
         mockForsikreSakskobling()
 
         val (httpStatus, errorType) = requestSaksnummer()
-        assertEquals(HttpStatusCode.Conflict, httpStatus)
-        assertEquals(URI("punsjbolle://må-behandles-i-infotrygd"), errorType)
-        assertEquals(RutingService.Destinasjon.Infotrygd, requestDestinasjon())
+        assertEquals(HttpStatusCode.OK, httpStatus)
+        assertEquals(RutingService.Destinasjon.K9Sak, requestDestinasjon())
 
 
-        assertInfotrygdKalt(true)
+        assertInfotrygdKalt(false)
         assertK9SakKalt(true)
     }
 
 
     @Test
     fun `pleietrengende har vedtak i Infotrygd, ingenting i K9Sak`() {
-        mockInfotrygd(pleietrengende = true)
         mockK9Sak()
+        mockHentSaksnummer()
         mockHentJournalpost()
+        mockForsikreSakskobling()
 
         val (httpStatus, errorType) = requestSaksnummer()
-        assertEquals(HttpStatusCode.Conflict, httpStatus)
-        assertEquals(URI("punsjbolle://må-behandles-i-infotrygd"), errorType)
-        assertEquals(RutingService.Destinasjon.Infotrygd, requestDestinasjon())
+        assertEquals(HttpStatusCode.OK, httpStatus)
+        assertEquals(RutingService.Destinasjon.K9Sak, requestDestinasjon())
 
-        assertInfotrygdKalt(true)
+        assertInfotrygdKalt(false)
         assertK9SakKalt(true)
     }
 
