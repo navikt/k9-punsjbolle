@@ -83,10 +83,10 @@ internal class RutingServiceTest {
     }
 
     @Test
-    fun `PSB & PILS søknad med sak i infotrygd rutes til Infotrygd, OMS til K9sak`() {
+    fun `PILS søknad med sak i infotrygd rutes til Infotrygd, OMS & PSB til K9sak`() {
         coEvery { k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }.returns(RutingGrunnlag(søker = false, pleietrengende = false, annenPart = false))
         coEvery { infotrygdClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }.returns(RutingGrunnlag(søker = true))
-        assertEquals(RutingService.Destinasjon.Infotrygd, hentDestinasjon(
+        assertEquals(RutingService.Destinasjon.K9Sak, hentDestinasjon(
             journalpostIds = emptySet(),
             søknadsType = Søknadstype.PleiepengerSyktBarn
         ))

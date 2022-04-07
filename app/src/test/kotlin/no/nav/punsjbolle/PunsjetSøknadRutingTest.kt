@@ -50,10 +50,13 @@ internal class PunsjetSøknadRutingTest(
             infotrygd = RutingGrunnlag(søker = false, pleietrengende = true, annenPart = false),
             k9sak = RutingGrunnlag(søker = false, pleietrengende = false, annenPart = false)
         )
+        coEvery { k9SakClientMock.hentEllerOpprettSaksnummer(any(),any()) }.returns("123SAK".somK9Saksnummer())
+        coEvery { k9SakClientMock.sendInnSøknad(any(), any(), any()) }.returns(Unit)
+
         rapid.sendPunsjetSøknad()
         rapid.mockHentAktørIder(setOf(søker, barn))
-        rapid.assertGosysJournalføringsoppgave()
-        rapid.printSisteMelding()
+        rapid.mockFerdigstillJournalføringForK9OgJournalførJson()
+        rapid.sisteMeldingHarLøsningPå("PunsjetSøknad")
     }
 
     @Test
@@ -62,10 +65,13 @@ internal class PunsjetSøknadRutingTest(
             infotrygd = RutingGrunnlag(søker = true, pleietrengende = false, annenPart = false),
             k9sak = RutingGrunnlag(søker = false, pleietrengende = false, annenPart = false)
         )
+        coEvery { k9SakClientMock.hentEllerOpprettSaksnummer(any(),any()) }.returns("123SAK".somK9Saksnummer())
+        coEvery { k9SakClientMock.sendInnSøknad(any(), any(), any()) }.returns(Unit)
+
         rapid.sendPunsjetSøknad()
         rapid.mockHentAktørIder(setOf(søker, barn))
-        rapid.assertGosysJournalføringsoppgave()
-        rapid.printSisteMelding()
+        rapid.mockFerdigstillJournalføringForK9OgJournalførJson()
+        rapid.sisteMeldingHarLøsningPå("PunsjetSøknad")
     }
 
     @Test
