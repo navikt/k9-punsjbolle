@@ -14,7 +14,7 @@ internal class InfotrygdMappingTest {
 
     @Test
     fun `Vedtak og saker på søker`() {
-        assertFalse(JSONObject(SakerEksempelResponse).inneholderAktuelleSakerEllerVedtak(Søknadstype.PleiepengerSyktBarn))
+        assertFalse(JSONArray(SakerEksempelResponse).inneholderAktuelleSakerEllerVedtak(Søknadstype.PleiepengerSyktBarn))
     }
 
     @Test
@@ -39,7 +39,7 @@ internal class InfotrygdMappingTest {
     private companion object {
         @Language("JSON")
         private val SakerEksempelResponse = """
-            {
+            [{
               "saker": [
                 {
                   "behandlingstema": {
@@ -98,15 +98,15 @@ internal class InfotrygdMappingTest {
                   "vedtatt": "2020-01-01"
                 }
               ]
-            }
+            }]
         """.trimIndent()
 
         @Language("JSON")
         private fun sakerMinimalResponse(
             behandlingstemaSak: String?, temaSak: String?,
-            behandlingstemaVedtak: String?, temaVedtak: String?) = JSONObject(
+            behandlingstemaVedtak: String?, temaVedtak: String?) = JSONArray(
             """
-                {
+                [{
                   "saker": [{
                     "behandlingstema": {"kode": ${behandlingstemaSak?.let { """"$it"""" }}},
                     "tema": {"kode": ${temaSak?.let { """"$it"""" }} }
@@ -115,7 +115,7 @@ internal class InfotrygdMappingTest {
                     "behandlingstema": {"kode": ${behandlingstemaVedtak?.let { """"$it"""" }}},
                     "tema": {"kode": ${temaVedtak?.let { """"$it"""" }} }
                   }]
-                }
+                }]
             """.trimIndent()
         )
 

@@ -2,7 +2,8 @@ package no.nav.punsjbolle.infotrygd
 
 import io.ktor.client.request.*
 import io.ktor.http.*
-import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.httpGet
+import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.httpPost
+import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.jsonBody
 import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.readTextOrThrow
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.punsjbolle.AzureAwareClient
@@ -28,7 +29,8 @@ internal class InfotrygdClient(
     navn = "InfotrygdClient",
     accessTokenClient = accessTokenClient,
     scopes = scopes,
-    pingUrl = URI("$baseUrl/actuator/health")) {
+    pingUrl = URI("$baseUrl/actuator/health")
+) {
 
     private val HentSakerUrl = URI("$baseUrl/saker")
     private val HentVedtakForPleietrengende = URI("$baseUrl/vedtakForPleietrengende")
@@ -40,7 +42,7 @@ internal class InfotrygdClient(
         annenPart: Identitetsnummer?,
         søknadstype: Søknadstype,
         correlationId: CorrelationId,
-    ) : RutingGrunnlag {
+    ): RutingGrunnlag {
         if (harSakSomSøker(søker, fraOgMed, søknadstype, correlationId)) {
             return RutingGrunnlag(søker = true)
         }
@@ -58,21 +60,25 @@ internal class InfotrygdClient(
         identitetsnummer: Identitetsnummer,
         fraOgMed: LocalDate,
         søknadstype: Søknadstype,
-        correlationId: CorrelationId) : Boolean {
-        val url = URI("$HentSakerUrl?fnr=$identitetsnummer&fom=$fraOgMed")
+        correlationId: CorrelationId
+    ): Boolean {
 
-        val (httpStatusCode, response) = url.httpGet {
+        val url = URI("$HentSakerUrl")
+        val jsonPayload = jsonPayloadFraFnrOgFom(identitetsnummer, fraOgMed)
+
+        val (httpStatusCode, response) = url.httpPost {
             it.header(HttpHeaders.Authorization, authorizationHeader())
             it.header(CorrelationIdHeaderKey, "$correlationId")
             it.header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
             it.accept(ContentType.Application.Json)
+            it.jsonBody(jsonPayload)
         }.readTextOrThrow()
 
         require(httpStatusCode.isSuccess()) {
             "Feil fra Infotrygd. URL=[$HentSakerUrl], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
         }
 
-        return JSONObject(response).inneholderAktuelleSakerEllerVedtak(søknadstype).also { if (it) {
+        return JSONArray(response).inneholderAktuelleSakerEllerVedtak(søknadstype).also { if (it) {
             secureLogger.info("Fant saker/vedtak i Infotrygd som søker for Identitetsnummer=[$identitetsnummer], FraOgMed=[$fraOgMed], Response=[$response]")
         }}
     }
@@ -81,15 +87,18 @@ internal class InfotrygdClient(
         identitetsnummer: Identitetsnummer,
         fraOgMed: LocalDate,
         søknadstype: Søknadstype,
-        correlationId: CorrelationId) : Boolean {
+        correlationId: CorrelationId
+    ): Boolean {
 
-        val url = URI("$HentVedtakForPleietrengende?fnr=$identitetsnummer&fom=$fraOgMed")
+        val url = URI("$HentVedtakForPleietrengende")
+        val jsonPayload = jsonPayloadFraFnrOgFom(identitetsnummer, fraOgMed)
 
-        val (httpStatusCode, response) = url.httpGet {
+        val (httpStatusCode, response) = url.httpPost {
             it.header(HttpHeaders.Authorization, authorizationHeader())
             it.header(CorrelationIdHeaderKey, "$correlationId")
             it.header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
             it.accept(ContentType.Application.Json)
+            it.jsonBody(jsonPayload)
         }.readTextOrThrow()
 
         require(httpStatusCode.isSuccess()) {
@@ -142,21 +151,37 @@ internal class InfotrygdClient(
 
         private fun JSONObject.inneholderAktuelle(key: String, søknadstype: Søknadstype) =
             arrayOrEmptyArray(key)
-            .asSequence()
-            .map { it as JSONObject }
-            .filter { Tema.relevanteTemaer.contains(it.objectOrEmptyObject("tema").stringOrNull("kode")) }
-            .filter { søknadstype.relevanteBehandlingstemaer().contains(it.objectOrEmptyObject("behandlingstema").stringOrNull("kode")) }
-            // Om den er henlagt/bortfalt og ikke har noen opphørsdato er det aldri gjort noen utbetalinger
-            .filterNot { Resultat.HenlagtEllerBortfalt.infotrygdVerdi == it.objectOrEmptyObject("resultat").stringOrNull("kode") && it.stringOrNull("opphoerFom") == null }
-            .toList()
-            .isNotEmpty()
+                .asSequence()
+                .map { it as JSONObject }
+                .filter { Tema.relevanteTemaer.contains(it.objectOrEmptyObject("tema").stringOrNull("kode")) }
+                .filter {
+                    søknadstype.relevanteBehandlingstemaer()
+                        .contains(it.objectOrEmptyObject("behandlingstema").stringOrNull("kode"))
+                }
+                // Om den er henlagt/bortfalt og ikke har noen opphørsdato er det aldri gjort noen utbetalinger
+                .filterNot {
+                    Resultat.HenlagtEllerBortfalt.infotrygdVerdi == it.objectOrEmptyObject("resultat")
+                        .stringOrNull("kode") && it.stringOrNull("opphoerFom") == null
+                }
+                .toList()
+                .isNotEmpty()
 
-        internal fun JSONObject.inneholderAktuelleSakerEllerVedtak(søknadstype: Søknadstype) =
-            inneholderAktuelle("saker", søknadstype) || inneholderAktuelle("vedtak", søknadstype)
+        internal fun JSONArray.inneholderAktuelleSakerEllerVedtak(søknadstype: Søknadstype) =
+            map { it as JSONObject }
+                .map { it.inneholderAktuelle("saker", søknadstype) || it.inneholderAktuelle("vedtak", søknadstype) }
+                .any { it }
 
         internal fun JSONArray.inneholderAktuelleVedtak(søknadstype: Søknadstype) =
             map { it as JSONObject }
-            .map { it.inneholderAktuelle("vedtak", søknadstype) }
-            .any { it }
+                .map { it.inneholderAktuelle("vedtak", søknadstype) }
+                .any { it }
+
+        internal fun jsonPayloadFraFnrOgFom(identitetsnummer: Identitetsnummer, fraOgMed: LocalDate) =
+            """
+            {
+              "fnr": ["$identitetsnummer"],
+              "fom": "$fraOgMed"
+            }
+           """.trimIndent()
     }
 }
