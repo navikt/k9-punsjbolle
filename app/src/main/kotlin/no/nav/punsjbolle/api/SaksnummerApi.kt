@@ -26,6 +26,7 @@ import no.nav.punsjbolle.sak.SakClient
 import no.nav.punsjbolle.søknad.periode
 import no.nav.punsjbolle.søknad.søknadstype
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 
 internal fun Route.SaksnummerApi(
     rutingService: RutingService,
@@ -47,6 +48,17 @@ internal fun Route.SaksnummerApi(
         onK9Sak: suspend (request: Request, periode: Periode) -> Unit) {
         val request = call.request()
         val (periode, journalpost) = periodeOgJournalpost(request)
+
+        request.periode?.fom?.let {
+            if (it.isAfter(LocalDate.now())) {
+                secureLogger.warn("Ikke støttet journalpost. RutingRequest=${request}")
+                return call.respondConflict(
+                    feil = "ikke-støttet-journalpost",
+                    detaljer = "Fra og med i periode er etter dagens dato"
+                )
+            }
+        }
+
         val destinasjon = rutingService.destinasjon(
             søker = request.søker.identitetsnummer,
             pleietrengende = request.pleietrengende?.identitetsnummer,

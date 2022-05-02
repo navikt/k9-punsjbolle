@@ -32,7 +32,7 @@ internal data class K9Saksnummer private constructor(private val value: String) 
 }
 
 internal data class JournalpostId private constructor(private val value: String) {
-    init { require(value.matches(Regex)) { "$value er en ugylidig journalpostId" } }
+    init { require(value.matches(Regex)) { "$value er en ugyldig journalpostId" } }
     override fun toString() = value
     internal companion object {
         private val Regex = "\\d{5,40}".toRegex()

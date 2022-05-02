@@ -174,6 +174,17 @@ internal class SaksnummerApiTest(
     }
 
     @Test
+    fun `request med fra og med i framtiden er ustøttet`() {
+        mockInfotrygd()
+        mockK9Sak()
+        mockHentSaksnummer()
+        mockForsikreSakskobling()
+
+        val (httpStatus, _) = requestSaksnummer(periode = "2030-01-01/2020-01-01".somPeriode(), journalpostId = null)
+        assertEquals(HttpStatusCode.Conflict, httpStatus)
+    }
+
+    @Test
     fun `requeste med både journalpostId og periode`() {
         mockInfotrygd()
         mockK9Sak()
