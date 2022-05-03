@@ -53,9 +53,7 @@ repositories {
             password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
         }
     }
-    maven {
-        url = uri("https://jitpack.io")
-    }
+    maven("https://jitpack.io")
     mavenCentral()
 }
 
@@ -88,6 +86,6 @@ tasks {
     }
 
     withType<Wrapper> {
-        gradleVersion = "7.3.3"
+        gradleVersion = "7.4.2"
     }
 }
