@@ -1,9 +1,9 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 val junitJupiterVersion = "5.8.2"
-val k9rapidVersion = "1.20220113090933-70694df"
-val dusseldorfVersion = "3.1.6.7-8665877"
-val ktorVersion = "1.6.7"
+val k9rapidVersion = "1.20220406090141-f40e84a"
+val dusseldorfVersion = "3.1.6.8-f3930ac"
+val ktorVersion = "1.6.8"
 val jsonassertVersion = "1.5.0"
 val mockkVersion = "1.12.3"
 val assertjVersion = "3.22.0"
@@ -11,7 +11,7 @@ val assertjVersion = "3.22.0"
 val mainClass = "no.nav.punsjbolle.ApplicationKt"
 
 plugins {
-    kotlin("jvm") version "1.6.10"
+    kotlin("jvm") version "1.6.21"
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
@@ -53,9 +53,7 @@ repositories {
             password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
         }
     }
-    maven {
-        url = uri("https://jitpack.io")
-    }
+    maven("https://jitpack.io")
     mavenCentral()
 }
 
@@ -88,6 +86,6 @@ tasks {
     }
 
     withType<Wrapper> {
-        gradleVersion = "7.3.3"
+        gradleVersion = "7.4.2"
     }
 }
