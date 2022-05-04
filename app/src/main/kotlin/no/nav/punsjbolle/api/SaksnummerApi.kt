@@ -22,7 +22,6 @@ import no.nav.punsjbolle.joark.SafClient
 import no.nav.punsjbolle.k9sak.K9SakClient
 import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
 import no.nav.punsjbolle.ruting.RutingService
-import no.nav.punsjbolle.sak.SakClient
 import no.nav.punsjbolle.søknad.periode
 import no.nav.punsjbolle.søknad.søknadstype
 import org.slf4j.LoggerFactory
@@ -30,8 +29,8 @@ import org.slf4j.LoggerFactory
 internal fun Route.SaksnummerApi(
     rutingService: RutingService,
     safClient: SafClient,
-    k9SakClient: K9SakClient,
-    sakClient: SakClient) {
+    k9SakClient: K9SakClient
+) {
 
     suspend fun periodeOgJournalpost(request: Request) : Pair<Periode, Journalpost?> {
         val journalpost = request.journalpostId?.let { safClient.hentJournalpost(
@@ -99,11 +98,6 @@ internal fun Route.SaksnummerApi(
                 grunnlag = request.hentSaksnummerGrunnlag(periode)
             )
             logger.info("Hentet/Opprettet K9Saksnummer=[$saksnummer].")
-            sakClient.forsikreSakskoblingFinnes(
-                saksnummer = saksnummer,
-                søker = request.søker.aktørId,
-                correlationId = request.correlationId
-            )
             call.respondText(
                 contentType = ContentType.Application.Json,
                 text = """{"saksnummer": "$saksnummer"}""",

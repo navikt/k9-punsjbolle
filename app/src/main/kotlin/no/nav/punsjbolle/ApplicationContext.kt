@@ -12,7 +12,6 @@ import no.nav.punsjbolle.joark.SafClient
 import no.nav.punsjbolle.journalpost.PunsjbarJournalpostClient
 import no.nav.punsjbolle.k9sak.K9SakClient
 import no.nav.punsjbolle.ruting.RutingService
-import no.nav.punsjbolle.sak.SakClient
 import java.net.URI
 
 internal class ApplicationContext(
@@ -20,7 +19,6 @@ internal class ApplicationContext(
     internal val healthChecks: Set<HealthCheck>,
     internal val accessTokenClient: AccessTokenClient,
     internal val k9SakClient: K9SakClient,
-    internal val sakClient: SakClient,
     internal val safClient: SafClient,
     internal val infotrygdClient: InfotrygdClient,
     internal val punsjbarJournalpostClient: PunsjbarJournalpostClient,
@@ -36,7 +34,6 @@ internal class ApplicationContext(
         var env: Environment? = null,
         var accessTokenClient: AccessTokenClient? = null,
         var k9SakClient: K9SakClient? = null,
-        var sakClient: SakClient? = null,
         var safClient: SafClient? = null,
         var infotrygdClient: InfotrygdClient? = null,
         var punsjbarJournalpostClient: PunsjbarJournalpostClient? = null,
@@ -61,12 +58,6 @@ internal class ApplicationContext(
                 scopes = benyttetEnv.hentRequiredEnv("K9_SAK_SCOPES").csvTilSet(),
             )
 
-            val benyttetSakClient = sakClient ?: SakClient(
-                baseUrl = URI(benyttetEnv.hentRequiredEnv("SAK_BASE_URL")),
-                accessTokenClient = benyttetAccessTokenClient,
-                scopes = benyttetEnv.hentRequiredEnv("SAK_SCOPES").csvTilSet()
-            )
-
             val benyttetSafClient = safClient ?: SafClient(
                 baseUrl = URI(benyttetEnv.hentRequiredEnv("SAF_BASE_URL")),
                 accessTokenClient = benyttetAccessTokenClient,
@@ -89,7 +80,7 @@ internal class ApplicationContext(
                 k9SakClient = benyttetK9SakClient,
                 safClient = benyttetSafClient,
                 infotrygdClient = benyttetInfotrygdClient,
-                healthChecks = setOf(benyttetK9SakClient, benyttetSafClient, benyttetInfotrygdClient, benyttetSakClient),
+                healthChecks = setOf(benyttetK9SakClient, benyttetSafClient, benyttetInfotrygdClient),
                 onStart = onStart,
                 onStop = onStop,
                 rutingService = rutingService ?: RutingService(
@@ -102,7 +93,6 @@ internal class ApplicationContext(
                         ?.toSet()
                         ?: emptySet()
                 ),
-                sakClient = benyttetSakClient,
                 punsjbarJournalpostClient = benyttetPunsjbarJournalpostClient
             )
         }

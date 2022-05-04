@@ -16,10 +16,11 @@ internal data class Journalpost(
 
     private val erInngående = journalposttype == "I"
     private val erNotat = journalposttype == "N"
-    internal val erFerdigstilt = ferdigstilteStatuser.contains(journalpoststatus)
     private val erMottatt = journalpoststatus == "MOTTATT"
-    internal val kanKnyttesTilSak = erInngående && erMottatt
-    internal val kanKopieres = erInngående || erNotat
+
+    internal val erFerdigstilt = ferdigstilteStatuser.contains(journalpoststatus)
+    internal val erInngåendeEllerNotat = erInngående || erNotat
+    internal val erInngåendeOgMottatt = erInngående && erMottatt
 
     init {
         if (sak == null && erFerdigstilt) {
@@ -43,10 +44,12 @@ internal data class Journalpost(
         private val ferdigstilteStatuser = listOf("JOURNALFOERT", "FERDIGSTILT")
 
         internal suspend fun Journalpost?.kanSendesTilK9Sak(eksisterendeSaksnummer: suspend () -> K9Saksnummer?) : Boolean {
-            if (this == null || kanKnyttesTilSak) return true
+            if (this == null || erInngåendeOgMottatt) return true
+
             val saksnummer = eksisterendeSaksnummer().also {
                 logger.info("Saknummer på journalposten: {}, eksisterende saksnummer fra k9: {}", this.sak, it)
             }
+
             return saksnummer != null && erKnyttetTil(saksnummer)
         }
     }

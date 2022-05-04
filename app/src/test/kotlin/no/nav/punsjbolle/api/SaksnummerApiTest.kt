@@ -16,7 +16,6 @@ import no.nav.punsjbolle.joark.SafClient
 import no.nav.punsjbolle.k9sak.K9SakClient
 import no.nav.punsjbolle.ruting.RutingGrunnlag
 import no.nav.punsjbolle.ruting.RutingService
-import no.nav.punsjbolle.sak.SakClient
 import no.nav.punsjbolle.testutils.ApplicationContextExtension
 import org.intellij.lang.annotations.Language
 import org.json.JSONObject
@@ -36,19 +35,17 @@ internal class SaksnummerApiTest(
     private val safClientMock : SafClient = mockk()
     private val k9SakClientMock : K9SakClient = mockk()
     private val infotrygdClientMock : InfotrygdClient = mockk()
-    private val sakClientMock : SakClient = mockk()
 
     private val applicationContext = builder.also { builder ->
         builder.safClient = safClientMock
         builder.k9SakClient = k9SakClientMock
         builder.infotrygdClient = infotrygdClientMock
-        builder.sakClient = sakClientMock
     }.build()
 
 
     @BeforeEach
     fun beforeEach() {
-        clearMocks(safClientMock, k9SakClientMock, infotrygdClientMock, sakClientMock)
+        clearMocks(safClientMock, k9SakClientMock, infotrygdClientMock)
     }
 
     @Test
@@ -57,7 +54,6 @@ internal class SaksnummerApiTest(
         mockK9Sak()
         mockHentSaksnummer()
         mockHentJournalpost()
-        mockForsikreSakskobling()
 
         val (httpStatus, k9Saksnummer) = requestSaksnummer()
         assertEquals(HttpStatusCode.OK, httpStatus)
@@ -74,9 +70,8 @@ internal class SaksnummerApiTest(
         mockK9Sak()
         mockHentSaksnummer()
         mockHentJournalpost()
-        mockForsikreSakskobling()
 
-        val (httpStatus, errorType) = requestSaksnummer()
+        val (httpStatus, _) = requestSaksnummer()
         assertEquals(HttpStatusCode.OK, httpStatus)
         assertEquals(RutingService.Destinasjon.K9Sak, requestDestinasjon())
 
@@ -91,9 +86,8 @@ internal class SaksnummerApiTest(
         mockK9Sak()
         mockHentSaksnummer()
         mockHentJournalpost()
-        mockForsikreSakskobling()
 
-        val (httpStatus, errorType) = requestSaksnummer()
+        val (httpStatus, _) = requestSaksnummer()
         assertEquals(HttpStatusCode.OK, httpStatus)
         assertEquals(RutingService.Destinasjon.K9Sak, requestDestinasjon())
 
@@ -107,7 +101,6 @@ internal class SaksnummerApiTest(
         mockK9Sak(søker = true)
         mockHentSaksnummer()
         mockHentJournalpost()
-        mockForsikreSakskobling()
 
         val (httpStatus, k9Saksnummer) = requestSaksnummer()
         assertEquals(HttpStatusCode.OK, httpStatus)
@@ -138,7 +131,6 @@ internal class SaksnummerApiTest(
         mockK9Sak(søker = true)
         mockHentSaksnummer()
         mockHentJournalpost(fagsaksystem = "K9", fagsakId = "$saksnummer")
-        mockForsikreSakskobling()
 
         val (httpStatus, k9Saksnummer) = requestSaksnummer()
         assertEquals(HttpStatusCode.OK, httpStatus)
@@ -164,7 +156,6 @@ internal class SaksnummerApiTest(
         mockInfotrygd()
         mockK9Sak()
         mockHentSaksnummer()
-        mockForsikreSakskobling()
 
         val (httpStatus, k9Saksnummer) = requestSaksnummer(periode = "2021-01-01/2021-01-01".somPeriode(), journalpostId = null)
         assertEquals(HttpStatusCode.OK, httpStatus)
@@ -178,7 +169,6 @@ internal class SaksnummerApiTest(
         mockInfotrygd()
         mockK9Sak()
         mockHentSaksnummer()
-        mockForsikreSakskobling()
         mockHentJournalpost()
 
 
@@ -289,8 +279,6 @@ internal class SaksnummerApiTest(
         coEvery { k9SakClientMock.hentEllerOpprettSaksnummer(any(),any()) }.returns(saksnummer)
         coEvery { k9SakClientMock.hentEksisterendeSaksnummer(any(),any()) }.returns(saksnummer)
     }
-
-    private fun mockForsikreSakskobling() = coEvery { sakClientMock.forsikreSakskoblingFinnes(any(),any(),any()) }.returns(Unit)
 
     private fun mockHentJournalpost(fagsaksystem: String? = null, fagsakId: String? = null) {
         val sakskobling = fagsaksystem != null && fagsakId != null

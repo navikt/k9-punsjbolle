@@ -11,7 +11,6 @@ import no.nav.punsjbolle.journalpost.PunsjbarJournalpostClient
 import no.nav.punsjbolle.testutils.wiremock.infotrygdGrunnlagPaaroerendeSykdomBaseUrl
 import no.nav.punsjbolle.testutils.wiremock.k9SakBaseUrl
 import no.nav.punsjbolle.testutils.wiremock.safBaseUrl
-import no.nav.punsjbolle.testutils.wiremock.sakBaseUrl
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ParameterContext
 import org.junit.jupiter.api.extension.ParameterResolver
@@ -29,8 +28,6 @@ internal class ApplicationContextExtension : ParameterResolver {
             "AZURE_OPENID_CONFIG_JWKS_URI" to mockedEnvironment.wireMockServer.getAzureV2JwksUrl(),
             "K9_SAK_BASE_URL" to mockedEnvironment.wireMockServer.k9SakBaseUrl(),
             "K9_SAK_SCOPES" to "k9-sak/.default",
-            "SAK_BASE_URL" to mockedEnvironment.wireMockServer.sakBaseUrl(),
-            "SAK_SCOPES" to "sak/.default",
             "SAF_BASE_URL" to mockedEnvironment.wireMockServer.safBaseUrl(),
             "SAF_SCOPES" to "saf/.default",
             "INFOTRYGD_GRUNNLAG_PAAROERENDE_SYKDOM_BASE_URL" to mockedEnvironment.wireMockServer.infotrygdGrunnlagPaaroerendeSykdomBaseUrl(),

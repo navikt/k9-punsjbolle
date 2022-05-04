@@ -93,7 +93,7 @@ internal class PunsjetSøknadTilK9Sak(
                 logger.info("Allerede knyttet mot sak, men mangler ferdigstilling. K9Saksnummer=[$saksnummer], Journalposter=$it")
             }}
 
-            val erMottattInngåndeJournalpostSomMåFerdigstilles = journalposter.filter { it.kanKnyttesTilSak }.also { if (it.isNotEmpty()) {
+            val erMottattInngåndeJournalpostSomMåFerdigstilles = journalposter.filter { it.erInngåendeOgMottatt }.also { if (it.isNotEmpty()) {
                 logger.info("Mottatt inngående journalposter som må ferdigstilles. K9Saksnummer=[$saksnummer], JournalpostIder=${it.map { journalpost -> journalpost.journalpostId }}")
             }}
 

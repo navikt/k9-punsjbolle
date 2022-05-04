@@ -50,7 +50,7 @@ internal class KopierPunsjbarJournalpostSteg2River(
             logger.info("Kopierer til samme person")
         }}
 
-        check(journalpost.kanKopieres) {
+        check(journalpost.erInngåendeEllerNotat) {
             "Kan ikke kopieres. $journalpost."
         }
 
