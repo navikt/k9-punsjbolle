@@ -16,7 +16,8 @@ import java.time.LocalDate
 internal class RutingService(
     private val k9SakClient: K9SakClient,
     private val infotrygdClient: InfotrygdClient,
-    private val overstyrTilK9SakJournalpostIds: Set<JournalpostId>) {
+    private val overstyrTilK9SakJournalpostIds: Set<JournalpostId>
+) {
 
     init {
         logger.info("JournalpostIder som overstyres til K9Sak=$overstyrTilK9SakJournalpostIds")
@@ -35,7 +36,8 @@ internal class RutingService(
         søknadstype: Søknadstype,
         aktørIder: Set<AktørId>,
         journalpostIds: Set<JournalpostId>,
-        correlationId: CorrelationId) : Destinasjon {
+        correlationId: CorrelationId
+    ): Destinasjon {
 
         val input = DestinasjonInput(
             søker = søker,
@@ -60,7 +62,20 @@ internal class RutingService(
 
     private suspend fun slåOppDestinasjon(
         input: DestinasjonInput,
-        correlationId: CorrelationId) : Destinasjon {
+        correlationId: CorrelationId
+    ): Destinasjon {
+
+        if (input.søknadstype == Søknadstype.PleiepengerLivetsSluttfase) {
+            if (k9SakClient.inngårIUnntaksliste(
+                    aktørIder = input.aktørIder,
+                    søknadstype = input.søknadstype,
+                    correlationId = correlationId
+                )
+            ) {
+                logger.info("Rutes til Infotrygd ettersom minst en part er lagt til i unntakslisten i K9Sak.")
+                return Destinasjon.Infotrygd
+            }
+        }
 
         val overstyresTilK9Sak = input.journalpostIds.intersect(overstyrTilK9SakJournalpostIds)
         if (overstyresTilK9Sak.isNotEmpty()) {
@@ -87,7 +102,7 @@ internal class RutingService(
         }
 
         // Endast PPN kan rutes til Infotrygd, allt annet går direkt till K9Sak
-        if(input.søknadstype != Søknadstype.PleiepengerLivetsSluttfase) {
+        if (input.søknadstype != Søknadstype.PleiepengerLivetsSluttfase) {
             logger.info("Søknadstype ${input.søknadstype} rutes alltid til K9Sak")
             return Destinasjon.K9Sak
         }
