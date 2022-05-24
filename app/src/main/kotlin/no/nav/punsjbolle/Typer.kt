@@ -97,7 +97,7 @@ internal enum class Søknadstype(
     OmsorgspengerUtbetaling_Korrigering("OMP", "FRAVÆRSKORRIGERING_IM_OMS", "UtbetaleOmsorgspenger"),
     OmsorgspengerKroniskSyktBarn("OMP_KS", "SØKNAD_OMS_UTVIDETRETT_KS", "KroniskSyktBarn"),
     OmsorgspengerAleneOmsorg("OMP_AO", "SØKNAD_OMS_UTVIDETRETT_AO", "AleneOmsorg"),
-    OmsorgspengerMidlertidigAlene("OMS_MA", "SØKNAD_OMS_UTVIDETRETT_MA", "MidlertidigAlene");
+    OmsorgspengerMidlertidigAlene("OMP_MA", "SØKNAD_OMS_UTVIDETRETT_MA", "MidlertidigAlene");
 
     internal companion object {
         internal fun fraK9FormatYtelsetype(ytelsetype: String) = when (ytelsetype) {
