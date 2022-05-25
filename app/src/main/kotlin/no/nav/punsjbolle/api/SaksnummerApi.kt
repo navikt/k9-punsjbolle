@@ -99,11 +99,13 @@ internal fun Route.SaksnummerApi(
                 grunnlag = request.hentSaksnummerGrunnlag(periode)
             )
             logger.info("Hentet/Opprettet K9Saksnummer=[$saksnummer].")
-            sakClient.forsikreSakskoblingFinnes(
+
+            sakClient.forsikreSakskoblingFinnes( // Denne forsikrer att saken kommer opp som valg i Modia.
                 saksnummer = saksnummer,
                 søker = request.søker.aktørId,
                 correlationId = request.correlationId
             )
+
             call.respondText(
                 contentType = ContentType.Application.Json,
                 text = """{"saksnummer": "$saksnummer"}""",

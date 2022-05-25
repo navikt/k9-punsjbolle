@@ -37,6 +37,8 @@ internal class K9SakClient(
     private val HentSaksnummerUrl = URI("$baseUrl/api/fagsak/siste")
     private val SendInnSøknadUrl = URI("$baseUrl/api/fordel/journalposter")
     private val MatchFagsakUrl = URI("$baseUrl/api/fagsak/match")
+    private val PleiepengerSyktBarnUnntakslisteUrl = URI("$baseUrl/api/fordel/psb-infotrygd/finnes")
+
 
     internal suspend fun hentEllerOpprettSaksnummer(
         grunnlag: HentK9SaksnummerMelding.HentK9SaksnummerGrunnlag,
@@ -211,6 +213,32 @@ internal class K9SakClient(
         }
 
         return response.inneholderMatchendeFagsak()
+    }
+
+    internal suspend fun inngårIUnntaksliste(
+        aktørIder: Set<AktørId>,
+        søknadstype: Søknadstype,
+        correlationId: CorrelationId) : Boolean {
+
+        // https://github.com/navikt/k9-sak/tree/3.2.7/web/src/main/java/no/nav/k9/sak/web/app/tjenester/fordeling/FordelRestTjeneste.java#L164
+        // https://github.com/navikt/k9-sak/tree/3.2.7/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/Akt%C3%B8rListeDto.java#L19
+        val dto = JSONObject().also {
+            it.put("aktører", JSONArray(aktørIder.map { aktørId ->  "$aktørId" }))
+        }.toString()
+
+        val (httpStatusCode, response) = PleiepengerSyktBarnUnntakslisteUrl.httpPost {
+            it.header(HttpHeaders.Authorization, authorizationHeader())
+            it.header(CorrelationIdHeaderKey, "$correlationId")
+            it.header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+            it.accept(ContentType.Application.Json)
+            it.jsonBody(dto)
+        }.readTextOrThrow()
+
+        require(httpStatusCode.isSuccess() && (response == "true" || response == "false")) {
+            "Feil fra K9Sak. URL=[$PleiepengerSyktBarnUnntakslisteUrl], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
+        }
+
+        return (response == "true")
     }
 
     internal companion object {
