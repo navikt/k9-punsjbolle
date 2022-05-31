@@ -6,7 +6,7 @@ val dusseldorfVersion = "3.1.6.8-f3930ac"
 val ktorVersion = "1.6.8"
 val jsonassertVersion = "1.5.0"
 val mockkVersion = "1.12.3"
-val assertjVersion = "3.22.0"
+val assertjVersion = "3.23.1"
 
 val mainClass = "no.nav.punsjbolle.ApplicationKt"
 
