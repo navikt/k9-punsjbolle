@@ -44,4 +44,28 @@ internal class PunsjetPleiepengerSyktBarnTest(
         rapid.sisteMeldingHarLøsningPå("PunsjetSøknad")
         rapid.sisteMeldingErKlarForArkivering()
     }
+
+    @Test
+    fun `Håndterer en søknad med deprecated @id`() {
+        val søker = "111111111111".somIdentitetsnummer()
+        val barn = "222222222222".somIdentitetsnummer()
+
+        val behov = punsjetSøknad(pleiepengerSyktBarnSøknad(
+            barn = barn,
+            søker = søker,
+            journalpostIder = setOf("1112131415".somJournalpostId()),
+            søknadsperioder = setOf("2018-12-30/2019-10-20".somPeriode()),
+            endringsperioder = null
+        )).replace("@behovssekvensId", "@id")
+
+        rapid.sendTestMessage(behov)
+
+        rapid.mockHentAktørIder(setOf(søker, barn))
+        rapid.mockFerdigstillJournalføringForK9OgJournalførJson()
+
+        rapid.printSisteMelding()
+
+        rapid.sisteMeldingHarLøsningPå("PunsjetSøknad")
+        rapid.sisteMeldingErKlarForArkivering()
+    }
 }
