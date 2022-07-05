@@ -4,7 +4,7 @@ val junitJupiterVersion = "5.8.2"
 val k9rapidVersion = "1.20220602105039-77944ce"
 val dusseldorfVersion = "3.1.6.8-f3930ac"
 val ktorVersion = "1.6.8"
-val jsonassertVersion = "1.5.0"
+val jsonassertVersion = "1.5.1"
 val mockkVersion = "1.12.3"
 val assertjVersion = "3.22.0"
 
