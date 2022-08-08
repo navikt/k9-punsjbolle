@@ -66,7 +66,7 @@ internal class InfotrygdClient(
         val url = URI("$HentSakerUrl")
         val jsonPayload = jsonPayloadFraFnrOgFom(identitetsnummer, fraOgMed)
 
-        val (httpStatusCode, response) = url.httpPost {
+        val (httpStatusCode, response) = url.toString().httpPost {
             it.header(HttpHeaders.Authorization, authorizationHeader())
             it.header(CorrelationIdHeaderKey, "$correlationId")
             it.header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
@@ -78,9 +78,11 @@ internal class InfotrygdClient(
             "Feil fra Infotrygd. URL=[$HentSakerUrl], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
         }
 
-        return JSONArray(response).inneholderAktuelleSakerEllerVedtak(søknadstype).also { if (it) {
-            secureLogger.info("Fant saker/vedtak i Infotrygd som søker for Identitetsnummer=[$identitetsnummer], FraOgMed=[$fraOgMed], Response=[$response]")
-        }}
+        return JSONArray(response).inneholderAktuelleSakerEllerVedtak(søknadstype).also {
+            if (it) {
+                secureLogger.info("Fant saker/vedtak i Infotrygd som søker for Identitetsnummer=[$identitetsnummer], FraOgMed=[$fraOgMed], Response=[$response]")
+            }
+        }
     }
 
     private suspend fun harSakSomPleietrengende(
@@ -93,7 +95,7 @@ internal class InfotrygdClient(
         val url = URI("$HentVedtakForPleietrengende")
         val jsonPayload = jsonPayloadFraFnrOgFom(identitetsnummer, fraOgMed)
 
-        val (httpStatusCode, response) = url.httpPost {
+        val (httpStatusCode, response) = url.toString().httpPost {
             it.header(HttpHeaders.Authorization, authorizationHeader())
             it.header(CorrelationIdHeaderKey, "$correlationId")
             it.header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
@@ -105,9 +107,11 @@ internal class InfotrygdClient(
             "Feil fra Infotrygd. URL=[$HentVedtakForPleietrengende], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
         }
 
-        return JSONArray(response).inneholderAktuelleVedtak(søknadstype).also { if (it) {
-            secureLogger.info("Fant vedtak i Infotrygd som pleietrengende for Identitetsnummer=[$identitetsnummer], FraOgMed=[$fraOgMed], Response=[$response]")
-        }}
+        return JSONArray(response).inneholderAktuelleVedtak(søknadstype).also {
+            if (it) {
+                secureLogger.info("Fant vedtak i Infotrygd som pleietrengende for Identitetsnummer=[$identitetsnummer], FraOgMed=[$fraOgMed], Response=[$response]")
+            }
+        }
     }
 
     internal companion object {

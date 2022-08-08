@@ -31,7 +31,8 @@ internal class K9SakClient(
     navn = "K9SakClient",
     accessTokenClient = accessTokenClient,
     scopes = scopes,
-    pingUrl = URI("$baseUrl/internal/health/isReady")) {
+    pingUrl = URI("$baseUrl/internal/health/isReady")
+) {
 
     private val HentEllerOpprettSaksnummerUrl = URI("$baseUrl/api/fordel/fagsak/opprett")
     private val HentSaksnummerUrl = URI("$baseUrl/api/fagsak/siste")
@@ -42,7 +43,8 @@ internal class K9SakClient(
 
     internal suspend fun hentEllerOpprettSaksnummer(
         grunnlag: HentK9SaksnummerMelding.HentK9SaksnummerGrunnlag,
-        correlationId: CorrelationId) : K9Saksnummer {
+        correlationId: CorrelationId
+    ): K9Saksnummer {
 
         // https://github.com/navikt/k9-sak/blob/3.2.10/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/FinnEllerOpprettSak.java#L49
         @Language("JSON")
@@ -74,7 +76,8 @@ internal class K9SakClient(
 
     internal suspend fun hentEksisterendeSaksnummer(
         grunnlag: HentK9SaksnummerMelding.HentK9SaksnummerGrunnlag,
-        correlationId: CorrelationId) : K9Saksnummer? {
+        correlationId: CorrelationId
+    ): K9Saksnummer? {
 
         // https://github.com/navikt/k9-sak/blob/3.2.10/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/FinnSak.java#L46
         @Language("JSON")
@@ -106,9 +109,10 @@ internal class K9SakClient(
     private suspend fun post(
         uri: URI,
         dto: String,
-        correlationId: CorrelationId) : Pair<HttpStatusCode, String> {
+        correlationId: CorrelationId
+    ): Pair<HttpStatusCode, String> {
 
-        return uri.httpPost {
+        return uri.toString().httpPost {
             it.header(HttpHeaders.Authorization, authorizationHeader())
             it.header(CorrelationIdHeaderKey, "$correlationId")
             it.header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
@@ -120,7 +124,8 @@ internal class K9SakClient(
     internal suspend fun sendInnSøknad(
         søknad: PunsjetSøknadMelding.PunsjetSøknad,
         grunnlag: SendPunsjetSøknadTilK9SakMelding.SendPunsjetSøknadTilK9SakGrunnlag,
-        correlationId: CorrelationId) {
+        correlationId: CorrelationId
+    ) {
 
         val forsendelseMottattTidspunkt = søknad.mottatt.withZoneSameInstant(Oslo).toLocalDateTime()
 
@@ -142,7 +147,7 @@ internal class K9SakClient(
             }]
         """.trimIndent()
 
-        val (httpStatusCode, response) = SendInnSøknadUrl.httpPost {
+        val (httpStatusCode, response) = SendInnSøknadUrl.toString().httpPost {
             it.header(HttpHeaders.Authorization, authorizationHeader())
             it.header(CorrelationIdHeaderKey, "$correlationId")
             it.header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
@@ -162,17 +167,37 @@ internal class K9SakClient(
         fraOgMed: LocalDate,
         søknadstype: Søknadstype,
         correlationId: CorrelationId
-    ) : RutingGrunnlag {
-        if (finnesMatchendeFagsak(søker = søker, fraOgMed = fraOgMed, correlationId = correlationId, søknadstype = søknadstype)) {
+    ): RutingGrunnlag {
+        if (finnesMatchendeFagsak(
+                søker = søker,
+                fraOgMed = fraOgMed,
+                correlationId = correlationId,
+                søknadstype = søknadstype
+            )
+        ) {
             return RutingGrunnlag(søker = true)
         }
-        if (pleietrengende?.let { finnesMatchendeFagsak(pleietrengende = it, fraOgMed = fraOgMed, correlationId = correlationId, søknadstype = søknadstype) } == true) {
+        if (pleietrengende?.let {
+                finnesMatchendeFagsak(
+                    pleietrengende = it,
+                    fraOgMed = fraOgMed,
+                    correlationId = correlationId,
+                    søknadstype = søknadstype
+                )
+            } == true) {
             return RutingGrunnlag(søker = false, pleietrengende = true)
         }
         return RutingGrunnlag(
             søker = false,
             pleietrengende = false,
-            annenPart = annenPart?.let { finnesMatchendeFagsak(søker = it, fraOgMed = fraOgMed, correlationId = correlationId, søknadstype = søknadstype) } ?: false
+            annenPart = annenPart?.let {
+                finnesMatchendeFagsak(
+                    søker = it,
+                    fraOgMed = fraOgMed,
+                    correlationId = correlationId,
+                    søknadstype = søknadstype
+                )
+            } ?: false
         )
     }
 
@@ -200,7 +225,7 @@ internal class K9SakClient(
         }
         """.trimIndent()
 
-        val (httpStatusCode, response) = MatchFagsakUrl.httpPost {
+        val (httpStatusCode, response) = MatchFagsakUrl.toString().httpPost {
             it.header(HttpHeaders.Authorization, authorizationHeader())
             it.header(CorrelationIdHeaderKey, "$correlationId")
             it.header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
@@ -218,15 +243,16 @@ internal class K9SakClient(
     internal suspend fun inngårIUnntaksliste(
         aktørIder: Set<AktørId>,
         søknadstype: Søknadstype,
-        correlationId: CorrelationId) : Boolean {
+        correlationId: CorrelationId
+    ): Boolean {
 
         // https://github.com/navikt/k9-sak/tree/3.2.7/web/src/main/java/no/nav/k9/sak/web/app/tjenester/fordeling/FordelRestTjeneste.java#L164
         // https://github.com/navikt/k9-sak/tree/3.2.7/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/Akt%C3%B8rListeDto.java#L19
         val dto = JSONObject().also {
-            it.put("aktører", JSONArray(aktørIder.map { aktørId ->  "$aktørId" }))
+            it.put("aktører", JSONArray(aktørIder.map { aktørId -> "$aktørId" }))
         }.toString()
 
-        val (httpStatusCode, response) = PleiepengerSyktBarnUnntakslisteUrl.httpPost {
+        val (httpStatusCode, response) = PleiepengerSyktBarnUnntakslisteUrl.toString().httpPost {
             it.header(HttpHeaders.Authorization, authorizationHeader())
             it.header(CorrelationIdHeaderKey, "$correlationId")
             it.header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
@@ -262,9 +288,13 @@ internal class K9SakClient(
         internal fun String.inneholderMatchendeFagsak() = JSONArray(this)
             .asSequence()
             .map { it as JSONObject }
-            .filterNot { (it.getString("status") == "OPPR").also { erStatusOpprettet -> if (erStatusOpprettet) {
-                logger.info("MatchendeFagsak: Filtrerer bort Saksnummer=${it.stringOrNull("saksnummer")} i Status=OPPR")
-            }}}
+            .filterNot {
+                (it.getString("status") == "OPPR").also { erStatusOpprettet ->
+                    if (erStatusOpprettet) {
+                        logger.info("MatchendeFagsak: Filtrerer bort Saksnummer=${it.stringOrNull("saksnummer")} i Status=OPPR")
+                    }
+                }
+            }
             .toSet()
             .isNotEmpty()
     }
