@@ -31,12 +31,13 @@ import org.junit.jupiter.api.Assertions.assertNull
 
 @ExtendWith(ApplicationContextExtension::class)
 internal class SaksnummerApiTest(
-    builder: ApplicationContext.Builder) {
+    builder: ApplicationContext.Builder
+) {
 
-    private val safClientMock : SafClient = mockk()
-    private val k9SakClientMock : K9SakClient = mockk()
-    private val infotrygdClientMock : InfotrygdClient = mockk()
-    private val sakClientMock : SakClient = mockk()
+    private val safClientMock: SafClient = mockk()
+    private val k9SakClientMock: K9SakClient = mockk()
+    private val infotrygdClientMock: InfotrygdClient = mockk()
+    private val sakClientMock: SakClient = mockk()
 
     private val applicationContext = builder.also { builder ->
         builder.safClient = safClientMock
@@ -166,10 +167,16 @@ internal class SaksnummerApiTest(
         mockHentSaksnummer()
         mockForsikreSakskobling()
 
-        val (httpStatus, k9Saksnummer) = requestSaksnummer(periode = "2021-01-01/2021-01-01".somPeriode(), journalpostId = null)
+        val (httpStatus, k9Saksnummer) = requestSaksnummer(
+            periode = "2021-01-01/2021-01-01".somPeriode(),
+            journalpostId = null
+        )
         assertEquals(HttpStatusCode.OK, httpStatus)
         assertEquals(saksnummer, k9Saksnummer)
-        assertEquals(RutingService.Destinasjon.K9Sak, requestDestinasjon(periode = "2021-01-01/2021-01-01".somPeriode(), journalpostId = null))
+        assertEquals(
+            RutingService.Destinasjon.K9Sak,
+            requestDestinasjon(periode = "2021-01-01/2021-01-01".somPeriode(), journalpostId = null)
+        )
         assertSafIkkeKalt()
     }
 
@@ -182,10 +189,16 @@ internal class SaksnummerApiTest(
         mockHentJournalpost()
 
 
-        val (httpStatus, k9Saksnummer) = requestSaksnummer(periode = "2021-01-01/2025-01-01".somPeriode(), journalpostId = benyttetJournalpostId)
+        val (httpStatus, k9Saksnummer) = requestSaksnummer(
+            periode = "2021-01-01/2025-01-01".somPeriode(),
+            journalpostId = benyttetJournalpostId
+        )
         assertEquals(HttpStatusCode.OK, httpStatus)
         assertEquals(saksnummer, k9Saksnummer)
-        assertEquals(RutingService.Destinasjon.K9Sak, requestDestinasjon(periode = "2021-01-01/2025-01-01".somPeriode(), journalpostId = benyttetJournalpostId))
+        assertEquals(
+            RutingService.Destinasjon.K9Sak,
+            requestDestinasjon(periode = "2021-01-01/2025-01-01".somPeriode(), journalpostId = benyttetJournalpostId)
+        )
     }
 
     @Test
@@ -197,20 +210,24 @@ internal class SaksnummerApiTest(
 
     @Test
     fun `Feil audience`() {
-        val (httpStatus, k9Saksnummer) = requestSaksnummer(jwt = Azure.V2_0.generateJwt(
-            clientId = "foo",
-            audience = "k9-sak"
-        ))
+        val (httpStatus, k9Saksnummer) = requestSaksnummer(
+            jwt = Azure.V2_0.generateJwt(
+                clientId = "foo",
+                audience = "k9-sak"
+            )
+        )
         assertEquals(HttpStatusCode.Forbidden, httpStatus)
         assertNull(k9Saksnummer)
     }
 
     @Test
     fun `Feil issuer`() {
-        val (httpStatus, k9Saksnummer) = requestSaksnummer(jwt = Azure.V1_0.generateJwt(
-            clientId = "foo",
-            audience = "k9-punsjbolle"
-        ))
+        val (httpStatus, k9Saksnummer) = requestSaksnummer(
+            jwt = Azure.V1_0.generateJwt(
+                clientId = "foo",
+                audience = "k9-punsjbolle"
+            )
+        )
         assertEquals(HttpStatusCode.Unauthorized, httpStatus)
         assertNull(k9Saksnummer)
     }
@@ -221,7 +238,8 @@ internal class SaksnummerApiTest(
         jwt: String? = Azure.V2_0.generateJwt(
             clientId = "foo",
             audience = "k9-punsjbolle"
-        )) = withTestApplication( { punsjbolle(applicationContext)}) {
+        )
+    ) = withTestApplication({ punsjbolle(applicationContext) }) {
         handleRequest(HttpMethod.Post, "/api/saksnummer") {
             addHeader(HttpHeaders.XCorrelationId, "${UUID.randomUUID()}")
             addHeader(HttpHeaders.ContentType, "application/json")
@@ -229,7 +247,7 @@ internal class SaksnummerApiTest(
             setBody(requestBody(periode = periode, journalpostId = journalpostId))
         }.let {
             val status = it.response.status()!!
-            val saksnummerEllerErrorType : Any? = when (status) {
+            val saksnummerEllerErrorType: Any? = when (status) {
                 HttpStatusCode.OK -> JSONObject(it.response.content!!).getString("saksnummer").somK9Saksnummer()
                 HttpStatusCode.Conflict -> URI(JSONObject(it.response.content!!).getString("type"))
                 else -> null
@@ -244,15 +262,17 @@ internal class SaksnummerApiTest(
         jwt: String? = Azure.V2_0.generateJwt(
             clientId = "foo",
             audience = "k9-punsjbolle"
-        )) = withTestApplication( { punsjbolle(applicationContext)}) {
+        )
+    ) = withTestApplication({ punsjbolle(applicationContext) }) {
         handleRequest(HttpMethod.Post, "/api/ruting") {
             addHeader(HttpHeaders.XCorrelationId, "${UUID.randomUUID()}")
             addHeader(HttpHeaders.ContentType, "application/json")
             jwt?.let { addHeader(HttpHeaders.Authorization, "Bearer $it") }
             setBody(requestBody(periode = periode, journalpostId = journalpostId))
         }.let {
-            val destinasjonEllerErrorType : Any? = when (it.response.status()!!) {
-                HttpStatusCode.OK -> JSONObject(it.response.content!!).getString("destinasjon").let { RutingService.Destinasjon.valueOf(it) }
+            val destinasjonEllerErrorType: Any? = when (it.response.status()!!) {
+                HttpStatusCode.OK -> JSONObject(it.response.content!!).getString("destinasjon")
+                    .let { RutingService.Destinasjon.valueOf(it) }
                 HttpStatusCode.Conflict -> URI(JSONObject(it.response.content!!).getString("type"))
                 else -> null
             }
@@ -260,51 +280,99 @@ internal class SaksnummerApiTest(
         }
     }
 
-    private fun assertInfotrygdKalt(forventet:Boolean) = when (forventet) {
-        true -> coVerify(exactly = 1) { infotrygdClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }
-        false -> coVerify { infotrygdClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) wasNot Called }
+    private fun assertInfotrygdKalt(forventet: Boolean) = when (forventet) {
+        true -> coVerify(exactly = 1) {
+            infotrygdClientMock.harLøpendeSakSomInvolvererEnAv(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        }
+        false -> coVerify {
+            infotrygdClientMock.harLøpendeSakSomInvolvererEnAv(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            ) wasNot Called
+        }
     }
 
-    private fun assertK9SakKalt(forventet:Boolean) = when (forventet) {
-        true -> coVerify(exactly = 1) { k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }
-        false -> coVerify { k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) wasNot Called }
+    private fun assertK9SakKalt(forventet: Boolean) = when (forventet) {
+        true -> coVerify(exactly = 1) {
+            k9SakClientMock.harLøpendeSakSomInvolvererEnAv(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        }
+        false -> coVerify {
+            k9SakClientMock.harLøpendeSakSomInvolvererEnAv(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            ) wasNot Called
+        }
     }
 
     private fun assertSafIkkeKalt() =
         coVerify { safClientMock.hentJournalpost(any(), any()) wasNot Called }
 
-    private fun mockInfotrygd(søker: Boolean = false, pleietrengende: Boolean = false, annenPart: Boolean = false)  = coEvery {
-        infotrygdClientMock.harLøpendeSakSomInvolvererEnAv(any(),any(), any(), any(), any(), any()) }.returns(
+    private fun mockInfotrygd(søker: Boolean = false, pleietrengende: Boolean = false, annenPart: Boolean = false) =
+        coEvery {
+            infotrygdClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any())
+        }.returns(
             RutingGrunnlag(søker = søker, pleietrengende = pleietrengende, annenPart = annenPart)
         )
 
     private fun mockK9Sak(søker: Boolean = false, pleietrengende: Boolean = false, annenPart: Boolean = false) {
         coEvery {
-            k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(),any(), any(), any(), any(), any()) }.returns(
+            k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any())
+        }.returns(
             RutingGrunnlag(søker = søker, pleietrengende = pleietrengende, annenPart = annenPart)
         )
     }
 
     private fun mockHentSaksnummer() {
-        coEvery { k9SakClientMock.hentEllerOpprettSaksnummer(any(),any()) }.returns(saksnummer)
-        coEvery { k9SakClientMock.hentEksisterendeSaksnummer(any(),any()) }.returns(saksnummer)
+        coEvery { k9SakClientMock.hentEllerOpprettSaksnummer(any(), any()) }.returns(saksnummer)
+        coEvery { k9SakClientMock.hentEksisterendeSaksnummer(any(), any()) }.returns(saksnummer)
     }
 
-    private fun mockForsikreSakskobling() = coEvery { sakClientMock.forsikreSakskoblingFinnes(any(),any(),any()) }.returns(Unit)
+    private fun mockForsikreSakskobling() =
+        coEvery { sakClientMock.forsikreSakskoblingFinnes(any(), any(), any()) }.returns(Unit)
 
     private fun mockHentJournalpost(fagsaksystem: String? = null, fagsakId: String? = null) {
         val sakskobling = fagsaksystem != null && fagsakId != null
-        val sak =  when (sakskobling) { false -> null else -> Journalpost.Sak(fagsaksystem = fagsaksystem!!, fagsakId = fagsakId!!)}
-        val journalpoststatus = when (sakskobling) {false -> "MOTTATT" else -> "JOURNALFØRT"}
-        coEvery { safClientMock.hentJournalpost(any(), any()) }.returns(Journalpost(
-            journalpostId = benyttetJournalpostId,
-            journalposttype = "I",
-            journalpoststatus = journalpoststatus,
-            opprettet = opprettet.atStartOfDay(),
-            eksternReferanse = null,
-            brevkode = null,
-            sak = sak
-        ))
+        val sak = when (sakskobling) {
+            false -> null
+            else -> Journalpost.Sak(fagsaksystem = fagsaksystem!!, fagsakId = fagsakId!!)
+        }
+        val journalpoststatus = when (sakskobling) {
+            false -> "MOTTATT"
+            else -> "JOURNALFØRT"
+        }
+        coEvery { safClientMock.hentJournalpost(any(), any()) }.returns(
+            Journalpost(
+                journalpostId = benyttetJournalpostId,
+                journalposttype = "I",
+                journalpoststatus = journalpoststatus,
+                opprettet = opprettet.atStartOfDay(),
+                eksternReferanse = null,
+                brevkode = null,
+                sak = sak
+            )
+        )
     }
 
     private companion object {

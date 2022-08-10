@@ -30,13 +30,15 @@ internal class SafClient(
     navn = "SafClient",
     accessTokenClient = accessTokenClient,
     scopes = scopes,
-    pingUrl = URI("$baseUrl/isReady")) {
+    pingUrl = URI("$baseUrl/isReady")
+) {
 
     private val GraphQlEndpoint = "$baseUrl/graphql"
 
     internal suspend fun hentJournalposter(
         journalpostIder: Set<JournalpostId>,
-        correlationId: CorrelationId): Set<Journalpost> {
+        correlationId: CorrelationId
+    ): Set<Journalpost> {
         logger.info("Henter journalposter for JournalpostIder=$journalpostIder")
 
         val journalposter = coroutineScope {
@@ -84,7 +86,10 @@ internal class SafClient(
                 .getJSONObject("journalpost")
                 .somJournalpost(journalpostId)
         }.fold(onSuccess = { it }, onFailure = { throwable ->
-            throw IllegalStateException("Feil ved mapping av response fra SAF. Response=[$responseBody], JournalpostId=[$journalpostId]", throwable)
+            throw IllegalStateException(
+                "Feil ved mapping av response fra SAF. Response=[$responseBody], JournalpostId=[$journalpostId]",
+                throwable
+            )
         })
     }
 
@@ -124,15 +129,20 @@ internal class SafClient(
             journalposttype = getString("journalposttype"),
             journalpoststatus = getString("journalstatus"),
             eksternReferanse = stringOrNull("eksternReferanseId"),
-            brevkode = getJSONArray("dokumenter").mapNotNull { (it as JSONObject).stringOrNull("brevkode") }.firstOrNull(),
+            brevkode = getJSONArray("dokumenter").mapNotNull { (it as JSONObject).stringOrNull("brevkode") }
+                .firstOrNull(),
             opprettet = LocalDateTime.parse(getString("datoOpprettet")),
             sak = objectOrEmptyObject("sak")?.let { sak ->
                 val fagsakId = sak.stringOrNull("fagsakId")
                 val fagsaksystem = sak.stringOrNull("fagsaksystem")
                 when {
                     fagsakId == null && fagsaksystem == null -> null
-                    fagsakId != null && fagsaksystem != null -> Journalpost.Sak(fagsakId = fagsakId, fagsaksystem = fagsaksystem)
-                    else -> logger.warn("Journalpost har kun en av Fagsaksystem/FagsakId satt. SafResponse=$this").let { null }
+                    fagsakId != null && fagsaksystem != null -> Journalpost.Sak(
+                        fagsakId = fagsakId,
+                        fagsaksystem = fagsaksystem
+                    )
+                    else -> logger.warn("Journalpost har kun en av Fagsaksystem/FagsakId satt. SafResponse=$this")
+                        .let { null }
                 }
             }
         )

@@ -18,7 +18,8 @@ internal abstract class AzureAwareClient(
     private val accessTokenClient: AccessTokenClient,
     private val scopes: Set<String>,
     private val pingUrl: URI,
-    private val requireAccessAsAppliation: Boolean = true) : HealthCheck {
+    private val requireAccessAsAppliation: Boolean = true
+) : HealthCheck {
 
     private val cachedAccessTokenClient = CachedAccessTokenClient(accessTokenClient)
 
@@ -35,7 +36,8 @@ internal abstract class AzureAwareClient(
     private fun accessTokenCheck() = kotlin.runCatching {
         val accessTokenResponse = accessTokenClient.getAccessToken(scopes)
         when (requireAccessAsAppliation) {
-            true -> (SignedJWT.parse(accessTokenResponse.accessToken).jwtClaimsSet.getStringArrayClaim("roles")?.toList()
+            true -> (SignedJWT.parse(accessTokenResponse.accessToken).jwtClaimsSet.getStringArrayClaim("roles")
+                ?.toList()
                 ?: emptyList()).contains("access_as_application")
             false -> true
         }
@@ -49,13 +51,15 @@ internal abstract class AzureAwareClient(
         onFailure = { UnHealthy("AccessTokenCheck", "Feil: ${it.message}") }
     )
 
-    open suspend fun pingCheck() : Result = pingUrl.httpGet {
+    open suspend fun pingCheck(): Result = pingUrl.toString().httpGet {
         it.header(HttpHeaders.Authorization, authorizationHeader())
     }.second.fold(
-        onSuccess = { when (it.status.isSuccess()) {
-            true -> Healthy("PingCheck", "OK: ${it.readText()}")
-            false -> UnHealthy("PingCheck", "Feil: ${it.status}")
-        }},
-        onFailure = { UnHealthy("PingCheck", "Feil: ${it.message}")}
+        onSuccess = {
+            when (it.status.isSuccess()) {
+                true -> Healthy("PingCheck", "OK: ${it.bodyAsText()}")
+                false -> UnHealthy("PingCheck", "Feil: ${it.status}")
+            }
+        },
+        onFailure = { UnHealthy("PingCheck", "Feil: ${it.message}") }
     )
 }

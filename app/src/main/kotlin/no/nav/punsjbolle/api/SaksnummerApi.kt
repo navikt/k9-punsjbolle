@@ -1,17 +1,17 @@
 package no.nav.punsjbolle.api
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import io.ktor.application.ApplicationCall
-import io.ktor.application.call
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.request.ApplicationRequest
-import io.ktor.request.header
-import io.ktor.request.receive
-import io.ktor.response.respondText
-import io.ktor.routing.Route
-import io.ktor.routing.post
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.call
+import io.ktor.server.request.ApplicationRequest
+import io.ktor.server.request.header
+import io.ktor.server.request.receive
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.post
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.k9.søknad.JsonUtils
 import no.nav.k9.søknad.Søknad
@@ -44,7 +44,7 @@ internal fun Route.SaksnummerApi(
     rutingService: RutingService,
     safClient: SafClient,
     k9SakClient: K9SakClient,
-    sakClient: SakClient,
+    sakClient: SakClient
 ) {
 
     suspend fun periodeOgJournalpost(request: Request): Pair<Periode, Journalpost?> {
@@ -54,14 +54,13 @@ internal fun Route.SaksnummerApi(
                 correlationId = request.correlationId
             )
         }
-
         val periode = request.periode?.forsikreLukketPeriode() ?: journalpost!!.opprettet.toLocalDate().somPeriode()
         return periode to journalpost
     }
 
     suspend fun PipelineContext<Unit, ApplicationCall>.ruting(
         onInfotrygd: suspend () -> Unit,
-        onK9Sak: suspend (request: Request, periode: Periode) -> Unit,
+        onK9Sak: suspend (request: Request, periode: Periode) -> Unit
     ) {
         val request = call.request()
         val (periode, journalpost) = periodeOgJournalpost(request)
@@ -186,7 +185,7 @@ internal data class Request(
     internal val pleietrengende: Part?,
     internal val annenPart: Part?,
     internal val periode: Periode?,
-    internal val søknadstype: Søknadstype,
+    internal val søknadstype: Søknadstype
 ) {
     private val identitetsnumer =
         setOfNotNull(søker.identitetsnummer, pleietrengende?.identitetsnummer, annenPart?.identitetsnummer)
@@ -212,7 +211,7 @@ internal data class Request(
 
     internal data class Part(
         val aktørId: AktørId,
-        val identitetsnummer: Identitetsnummer,
+        val identitetsnummer: Identitetsnummer
     )
 
     internal companion object {
@@ -253,7 +252,7 @@ internal data class Request(
             )
         }
 
-        suspend fun ApplicationCall.fraSøknadRequest(safClient: SafClient): Request {
+        internal suspend fun ApplicationCall.fraSøknadRequest(safClient: SafClient): Request {
             val json = receive<ObjectNode>()
             val søknad = json.get("søknad") as ObjectNode
 
