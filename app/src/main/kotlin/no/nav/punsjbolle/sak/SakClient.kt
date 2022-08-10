@@ -22,14 +22,16 @@ internal class SakClient(
     navn = "SakClient",
     accessTokenClient = accessTokenClient,
     scopes = scopes,
-    pingUrl = URI("$baseUrl/internal/ready")) {
+    pingUrl = URI("$baseUrl/internal/ready")
+) {
 
     private val OpprettSakUrl = URI("$baseUrl/api/v1/saker")
 
     internal suspend fun forsikreSakskoblingFinnes(
         saksnummer: K9Saksnummer,
         søker: AktørId,
-        correlationId: CorrelationId) {
+        correlationId: CorrelationId
+    ) {
 
         @Language("JSON")
         val dto = """
@@ -41,7 +43,7 @@ internal class SakClient(
             }
         """.trimIndent()
 
-        val (httpStatusCode, response) = OpprettSakUrl.httpPost {
+        val (httpStatusCode, response) = OpprettSakUrl.toString().httpPost {
             it.header(HttpHeaders.Authorization, authorizationHeader())
             it.header(HttpHeaders.XCorrelationId, "$correlationId")
             it.accept(ContentType.Application.Json)

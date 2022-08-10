@@ -1,10 +1,13 @@
 package no.nav.punsjbolle
 
-import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.features.*
-import io.ktor.jackson.*
-import io.ktor.routing.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.serialization.jackson.*
+import io.ktor.server.routing.*
+import io.ktor.server.plugins.callid.CallId
+import io.ktor.server.plugins.callloging.CallLogging
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.statuspages.*
 import no.nav.helse.dusseldorf.ktor.auth.*
 import no.nav.helse.dusseldorf.ktor.core.*
 import no.nav.helse.dusseldorf.ktor.health.*
@@ -13,10 +16,11 @@ import no.nav.punsjbolle.api.SaksnummerApi
 import java.net.URI
 
 internal fun Application.punsjbolle(
-    applicationContext: ApplicationContext = ApplicationContext.Builder().build()) {
+    applicationContext: ApplicationContext = ApplicationContext.Builder().build()
+) {
 
     install(ContentNegotiation) {
-        jackson {}
+        jackson()
     }
     install(StatusPages) {
         AuthStatusPages()
@@ -25,7 +29,7 @@ internal fun Application.punsjbolle(
 
     val healthService = HealthService(
         healthChecks = applicationContext.healthChecks.plus(object : HealthCheck {
-            override suspend fun check() : Result {
+            override suspend fun check(): Result {
                 val currentState = applicationContext.rapidsState
                 return when (currentState.isHealthy()) {
                     true -> Healthy("RapidsConnection", currentState.asMap)
@@ -57,9 +61,11 @@ internal fun Application.punsjbolle(
         healthService = healthService
     )
 
-    preStopOnApplicationStopPreparing(preStopActions = listOf(
-        FullførAktiveRequester(this)
-    ))
+    preStopOnApplicationStopPreparing(
+        preStopActions = listOf(
+            FullførAktiveRequester(this)
+        )
+    )
 
     install(CallId) {
         fromXCorrelationIdHeader()
