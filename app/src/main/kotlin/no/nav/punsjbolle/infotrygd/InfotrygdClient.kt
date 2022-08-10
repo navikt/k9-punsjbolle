@@ -125,12 +125,14 @@ internal class InfotrygdClient(
             companion object {
                 fun Søknadstype.relevanteBehandlingstemaer() = when (this) {
                     Søknadstype.PleiepengerSyktBarn -> listOf(PleiepengerSyktBarnGammelOrdning)
-                    Søknadstype.OmsorgspengerUtbetaling_Korrigering -> listOf(Omsorgspenger)
+                    Søknadstype.PleiepengerLivetsSluttfase -> listOf(PleiepengerILivetsSluttfase)
                     Søknadstype.OmsorgspengerKroniskSyktBarn -> listOf(Omsorgspenger)
                     Søknadstype.OmsorgspengerMidlertidigAlene -> listOf(Omsorgspenger)
                     Søknadstype.OmsorgspengerAleneOmsorg -> listOf(Omsorgspenger)
                     Søknadstype.Omsorgspenger -> listOf(Omsorgspenger)
-                    Søknadstype.PleiepengerLivetsSluttfase -> listOf(PleiepengerILivetsSluttfase)
+                    Søknadstype.OmsorgspengerUtbetaling_Korrigering -> listOf(Omsorgspenger)
+                    Søknadstype.OmsorgspengerUtbetaling_Snf -> listOf(Omsorgspenger)
+                    Søknadstype.OmsorgspengerUtbetaling_Arbeidstaker -> listOf(Omsorgspenger)
                 }.map { it.infotrygdVerdi }
             }
         }

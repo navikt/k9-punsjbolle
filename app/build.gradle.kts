@@ -30,6 +30,9 @@ dependencies {
     implementation("no.nav.helse:dusseldorf-ktor-auth:$dusseldorfVersion")
     implementation("no.nav.helse:dusseldorf-oauth2-client:$dusseldorfVersion")
 
+    implementation("no.nav.k9:soknad:6.0.4")
+    implementation("no.nav.k9.sak:kontrakt:3.3.7")
+
     // Test
     testImplementation("no.nav.helse:dusseldorf-test-support:$dusseldorfVersion")
     testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
