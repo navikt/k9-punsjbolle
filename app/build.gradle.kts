@@ -8,7 +8,7 @@ val jsonassertVersion = "1.5.1"
 val mockkVersion = "1.12.4"
 val assertjVersion = "3.23.1"
 val k9FormatVersion = "6.0.4"
-val k9SakVersion = "3.3.7"
+val k9SakVersion = "3.3.9"
 
 val mainClass = "no.nav.punsjbolle.ApplicationKt"
 
