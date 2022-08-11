@@ -60,7 +60,7 @@ repositories {
     }
     maven {
         name = "K9SakPackages"
-        url = uri("https://maven.pkg.github.com/navikt/k9-sak")
+        url = uri("https://maven.pkg.github.com/navikt/k9-punsjbolle")
         credentials {
             username = project.findProperty("gpr.user") as String? ?: "x-access-token"
             password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
