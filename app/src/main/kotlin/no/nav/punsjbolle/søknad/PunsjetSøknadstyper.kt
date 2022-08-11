@@ -19,6 +19,7 @@ import java.time.ZonedDateTime
 internal val logger: Logger = LoggerFactory.getLogger("no.nav.punsjbolle.søknad.PunsjetSøknadstyperKt.søknadstype")
 internal fun ObjectNode.søknadstype(brevkode: String? = null): Søknadstype {
     val ytelsetype = (get("ytelse") as ObjectNode).get("type").asText()
+    logger.info("Debugger: ytelse=[$ytelsetype], brevkode=[$brevkode]")
     return if (ytelsetype == "OMP_UT" && !brevkode.isNullOrBlank()) {
         logger.info("Utleder søknadstype fra brevkode...")
         val gyldigBrevkode = Brevkode.registrerteKoder()
@@ -27,7 +28,7 @@ internal fun ObjectNode.søknadstype(brevkode: String? = null): Søknadstype {
             ?: throw IllegalStateException("Ikke mulig å utlede søknadstype for ytelse=[$ytelsetype] og brevkode=[$brevkode]")
         Søknadstype.fraBrevkode(gyldigBrevkode)
     } else {
-        logger.info("Utleder søknadstype fra ytelsestype...")
+        logger.info("Utleder søknadstype fra ytelsestype []...")
         return Søknadstype.fraK9FormatYtelsetype(ytelsetype)
     }
 }
