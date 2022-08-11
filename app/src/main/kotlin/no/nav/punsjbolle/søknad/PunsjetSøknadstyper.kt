@@ -11,18 +11,25 @@ import no.nav.punsjbolle.Periode
 import no.nav.punsjbolle.Periode.Companion.somPeriode
 import no.nav.punsjbolle.Periode.Companion.ÅpenPeriode
 import no.nav.punsjbolle.Søknadstype
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.time.ZonedDateTime
 
+
+internal val logger: Logger = LoggerFactory.getLogger("no.nav.punsjbolle.søknad.PunsjetSøknadstyperKt.søknadstype")
 internal fun ObjectNode.søknadstype(brevkode: String? = null): Søknadstype {
     val ytelsetype = (get("ytelse") as ObjectNode).get("type").asText()
     return if (ytelsetype == "OMP_UT" && !brevkode.isNullOrBlank()) {
+        logger.info("Utleder søknadstype fra brevkode...")
         val gyldigBrevkode = Brevkode.registrerteKoder()
             .map { it.value }
             .firstOrNull { it.offisiellKode == brevkode }
             ?: throw IllegalStateException("Ikke mulig å utlede søknadstype for ytelse=[$ytelsetype] og brevkode=[$brevkode]")
-
         Søknadstype.fraBrevkode(gyldigBrevkode)
-    } else return Søknadstype.fraK9FormatYtelsetype(ytelsetype)
+    } else {
+        logger.info("Utleder søknadstype fra ytelsestype...")
+        return Søknadstype.fraK9FormatYtelsetype(ytelsetype)
+    }
 }
 
 internal fun ObjectNode.periode(søknadstype: Søknadstype) = when (søknadstype) {
