@@ -37,7 +37,7 @@ internal object KopierPunsjbarJournalpostMelding : HentBehov<KopierPunsjbarJourn
         )
     }
 
-    override fun hentBehov(packet: JsonMessage): KopierPunsjbarJournalpost {
+    override fun hentBehov(packet: JsonMessage, brevkode: String?): KopierPunsjbarJournalpost {
         return KopierPunsjbarJournalpost(
             versjon = packet[VersjonKey].asText(),
             fra = packet[FraKey].asText().somIdentitetsnummer(),

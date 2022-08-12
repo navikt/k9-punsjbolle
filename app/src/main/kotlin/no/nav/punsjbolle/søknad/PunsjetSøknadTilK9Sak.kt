@@ -22,7 +22,7 @@ internal class PunsjetSøknadTilK9Sak(
     private val safClient: SafClient) {
 
     internal fun handlePacket(packet: JsonMessage): Boolean {
-        val søknad = PunsjetSøknadMelding.hentBehov(packet)
+        val søknad = PunsjetSøknadMelding.hentBehov(packet, null)
         val aktørIder = HentAktørIderMelding.hentLøsning(packet)
         val correlationId = packet.correlationId()
 

@@ -30,7 +30,7 @@ internal class KopierPunsjbarJournalpostSteg3River(
 
     override fun handlePacket(id: String, packet: JsonMessage): Boolean {
         val nyJournalpostId = KopierJournalpostForK9Melding.hentLøsning(packet)
-        val kopiertPunsjbarJournalpost = KopierPunsjbarJournalpostMelding.hentBehov(packet)
+        val kopiertPunsjbarJournalpost = KopierPunsjbarJournalpostMelding.hentBehov(packet, null)
         val opprinneligJournalpostId = kopiertPunsjbarJournalpost.journalpostId
         val aktørId = HentAktørIderMelding.hentLøsning(packet).getValue(kopiertPunsjbarJournalpost.til)
 

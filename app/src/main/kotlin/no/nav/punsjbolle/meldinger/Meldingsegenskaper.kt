@@ -7,7 +7,7 @@ import no.nav.k9.rapid.river.leggTilLøsning
 internal interface HentBehov<Behovet> {
     val mdcPaths: Map<String, String>
     fun validateBehov(packet: JsonMessage)
-    fun hentBehov(packet: JsonMessage) : Behovet
+    fun hentBehov(packet: JsonMessage, brevkode: String?): Behovet
 }
 
 internal interface LeggTilBehov<BehovInput> {

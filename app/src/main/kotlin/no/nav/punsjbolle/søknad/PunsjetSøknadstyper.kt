@@ -47,10 +47,11 @@ internal fun ObjectNode.periode(søknadstype: Søknadstype) = when (søknadstype
 internal fun ObjectNode.somPunsjetSøknad(
     versjon: String,
     saksbehandler: String,
-    saksnummer: K9Saksnummer?
+    saksnummer: K9Saksnummer?,
+    brevkode: String?
 ): PunsjetSøknadMelding.PunsjetSøknad {
 
-    val søknadstype = søknadstype()
+    val søknadstype = søknadstype(brevkode)
     val periode = periode(søknadstype = søknadstype)
 
     return when (søknadstype) {

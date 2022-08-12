@@ -42,12 +42,13 @@ internal object PunsjetSøknadMelding :
         )
     }
 
-    override fun hentBehov(packet: JsonMessage): PunsjetSøknad {
+    override fun hentBehov(packet: JsonMessage, brevkode: String?): PunsjetSøknad {
         val søknadJson = packet[SøknadKey] as ObjectNode
 
         return søknadJson.somPunsjetSøknad(
             versjon = packet[VersjonKey].asText(),
             saksbehandler = packet[SaksbehandlerKey].saksbehandler(),
+            brevkode = brevkode,
             saksnummer = when (packet[SaksnummerKey].isMissingOrNull()) {
                 true -> null
                 false -> packet[SaksnummerKey].asText().somK9Saksnummer()
@@ -64,7 +65,7 @@ internal object PunsjetSøknadMelding :
     private val VersjonKey = "@behov.$behovNavn.versjon"
     private val SaksnummerKey = "@behov.$behovNavn.saksnummer"
     private val SaksbehandlerKey = "@behov.$behovNavn.saksbehandler"
-    private val SøknadKey = "@behov.$behovNavn.søknad"
+    val SøknadKey = "@behov.$behovNavn.søknad"
     private val SøknadIdKey = "$SøknadKey.søknadId"
 
     override val mdcPaths = mapOf(

@@ -66,7 +66,12 @@ internal class OmsorgspengerMappingTest {
             saksbehandler = "n/a"
         )
 
-        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null, saksbehandler = "n/a"))
+        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad(
+            "1.0.0",
+            saksbehandler = "n/a",
+            saksnummer = null,
+            null
+        ))
     }
 
     @Test
@@ -107,7 +112,12 @@ internal class OmsorgspengerMappingTest {
             saksbehandler = "Saks Behandlersen"
         )
 
-        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null, saksbehandler = "Saks Behandlersen"))
+        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad(
+            "1.0.0",
+            saksbehandler = "Saks Behandlersen",
+            saksnummer = null,
+            null
+        ))
     }
 
     @Test
@@ -149,7 +159,12 @@ internal class OmsorgspengerMappingTest {
             saksbehandler = "n/a"
         )
 
-        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null, saksbehandler = "n/a"))
+        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad(
+            "1.0.0",
+            saksbehandler = "n/a",
+            saksnummer = null,
+            null
+        ))
     }
 
     private companion object {

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.punsjbolle.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
 import no.nav.punsjbolle.Periode.Companion.somPeriode
-import no.nav.punsjbolle.Periode.Companion.ÅpenPeriode
 import no.nav.punsjbolle.søknad.PunsjetSøknadMelding
 import no.nav.punsjbolle.søknad.somPunsjetSøknad
 import org.intellij.lang.annotations.Language
@@ -58,7 +57,12 @@ internal class PunsjetPleiepengerSyktBarnMappingTest {
             saksbehandler = "n/a"
         )
 
-        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null, saksbehandler = "n/a"))
+        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad(
+            "1.0.0",
+            saksbehandler = "n/a",
+            saksnummer = null,
+            null
+        ))
     }
 
     @Test
@@ -100,7 +104,12 @@ internal class PunsjetPleiepengerSyktBarnMappingTest {
             saksbehandler = "ABC123"
         )
 
-        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null, saksbehandler = "ABC123"))
+        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad(
+            "1.0.0",
+            saksbehandler = "ABC123",
+            saksnummer = null,
+            null
+        ))
     }
 
     @Test
@@ -141,7 +150,12 @@ internal class PunsjetPleiepengerSyktBarnMappingTest {
             saksbehandler = "n/a"
         )
 
-        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null, saksbehandler = "n/a"))
+        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad(
+            "1.0.0",
+            saksbehandler = "n/a",
+            saksnummer = null,
+            null
+        ))
     }
 
     @Test
@@ -181,7 +195,12 @@ internal class PunsjetPleiepengerSyktBarnMappingTest {
             saksbehandler = "ABC123"
         )
 
-        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null, saksbehandler = "ABC123"))
+        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad(
+            "1.0.0",
+            saksbehandler = "ABC123",
+            saksnummer = null,
+            null
+        ))
     }
 
     internal companion object {

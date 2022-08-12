@@ -37,7 +37,7 @@ internal class KopierPunsjbarJournalpostSteg2River(
     }
 
     override fun handlePacket(id: String, packet: JsonMessage): Boolean {
-        val kopierPunsjbarJournalpost = KopierPunsjbarJournalpostMelding.hentBehov(packet)
+        val kopierPunsjbarJournalpost = KopierPunsjbarJournalpostMelding.hentBehov(packet, null)
         val aktørIder = HentAktørIderMelding.hentLøsning(packet)
         val correlationId = packet.correlationId()
 

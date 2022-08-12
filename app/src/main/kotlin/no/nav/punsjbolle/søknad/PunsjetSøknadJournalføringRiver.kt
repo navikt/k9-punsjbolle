@@ -40,7 +40,7 @@ internal class PunsjetSøknadJournalføringRiver(
     }
 
     override fun handlePacket(id: String, packet: JsonMessage): Boolean {
-        val søknad = PunsjetSøknadMelding.hentBehov(packet)
+        val søknad = PunsjetSøknadMelding.hentBehov(packet, null)
         val aktørIder = HentAktørIderMelding.hentLøsning(packet)
 
         val destinasjon = runBlocking { rutingService.destinasjon(

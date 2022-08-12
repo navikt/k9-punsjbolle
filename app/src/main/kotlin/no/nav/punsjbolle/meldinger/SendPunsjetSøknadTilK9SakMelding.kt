@@ -32,7 +32,7 @@ internal object SendPunsjetSøknadTilK9SakMelding :
         )
     }
 
-    override fun hentBehov(packet: JsonMessage) =
+    override fun hentBehov(packet: JsonMessage, brevkode: String?): K9Saksnummer =
         packet[SaksnummerKey].asText().somK9Saksnummer()
 
     private val SaksnummerKey = "@behov.$behovNavn.saksnummer"

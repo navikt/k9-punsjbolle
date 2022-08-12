@@ -13,8 +13,6 @@ import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.util.pipeline.PipelineContext
-import no.nav.k9.søknad.JsonUtils
-import no.nav.k9.søknad.Søknad
 import no.nav.punsjbolle.AktørId
 import no.nav.punsjbolle.AktørId.Companion.somAktørId
 import no.nav.punsjbolle.CorrelationId
@@ -256,8 +254,7 @@ internal data class Request(
             val json = receive<ObjectNode>()
             val søknad = json.get("søknad") as ObjectNode
 
-            val k9FormatSøknad = JsonUtils.fromString(json.toString(), Søknad::class.java)
-            val journalpostId = k9FormatSøknad.journalposter.first().journalpostId
+            val journalpostId = søknad.get("journalposter").first().get("journalpostId").asText()
             val correlationId = request.correlationId()
             val journalpost = safClient.hentJournalpost(JournalpostId(journalpostId), correlationId)
 

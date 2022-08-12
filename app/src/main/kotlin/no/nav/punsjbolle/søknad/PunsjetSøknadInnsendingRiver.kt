@@ -32,8 +32,8 @@ internal class PunsjetSøknadInnsendingRiver(
 
     override fun handlePacket(id: String, packet: JsonMessage): Boolean {
         val correlationId = packet.correlationId()
-        val søknad = PunsjetSøknadMelding.hentBehov(packet)
-        val saksnummer = SendPunsjetSøknadTilK9SakMelding.hentBehov(packet)
+        val søknad = PunsjetSøknadMelding.hentBehov(packet, null)
+        val saksnummer = SendPunsjetSøknadTilK9SakMelding.hentBehov(packet, null)
         val journalpostId = JournalførJsonMelding.hentLøsning(packet)
 
         logger.info("Innsending fra Punsj journalført med JournalpostId=[$journalpostId]")

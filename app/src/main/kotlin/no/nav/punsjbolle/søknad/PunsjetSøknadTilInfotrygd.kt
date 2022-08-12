@@ -16,7 +16,7 @@ internal class PunsjetSøknadTilInfotrygd(
     private val safClient: SafClient) {
 
     internal fun handlePacket(packet: JsonMessage): Boolean {
-        val søknad = PunsjetSøknadMelding.hentBehov(packet)
+        val søknad = PunsjetSøknadMelding.hentBehov(packet, null)
 
         val journalpostIder = runBlocking { safClient.hentJournalposter(
             journalpostIder = søknad.journalpostIder,

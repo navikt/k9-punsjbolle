@@ -27,14 +27,14 @@ internal class KopierPunsjbarJournalpostSteg1River(
     }
 
     override fun doHandlePacket(id: String, packet: JsonMessage): Boolean {
-        val kopierPunsjbarJournalpost = KopierPunsjbarJournalpostMelding.hentBehov(packet)
+        val kopierPunsjbarJournalpost = KopierPunsjbarJournalpostMelding.hentBehov(packet, null)
         return (kopierPunsjbarJournalpost.versjon in StøttedeVersjoner).also { støttet -> if (!støttet) {
             logger.warn("Støtter ikke versjon ${kopierPunsjbarJournalpost.versjon}")
         }}
     }
 
     override fun handlePacket(id: String, packet: JsonMessage): Boolean {
-        val kopierPunsjbarJournalpost = KopierPunsjbarJournalpostMelding.hentBehov(packet)
+        val kopierPunsjbarJournalpost = KopierPunsjbarJournalpostMelding.hentBehov(packet, null)
 
         logger.info("Legger til behov for å hente aktørId på de involverte partene.")
         packet.leggTilBehov(
