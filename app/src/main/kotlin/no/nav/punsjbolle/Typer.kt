@@ -116,6 +116,7 @@ internal enum class Søknadstype(
         internal fun fraBrevkode(brevkode: Brevkode) = when (brevkode) {
             Brevkode.SØKNAD_UTBETALING_OMS -> OmsorgspengerUtbetaling_Snf
             Brevkode.SØKNAD_UTBETALING_OMS_AT -> OmsorgspengerUtbetaling_Arbeidstaker
+            Brevkode.PAPIRSØKNAD_UTBETALING_OMS_AT -> OmsorgspengerUtbetaling_Arbeidstaker
             Brevkode.FRAVÆRSKORRIGERING_IM_OMS -> OmsorgspengerUtbetaling_Korrigering
             else -> throw IllegalStateException("Ukjent brevkode $brevkode")
         }
