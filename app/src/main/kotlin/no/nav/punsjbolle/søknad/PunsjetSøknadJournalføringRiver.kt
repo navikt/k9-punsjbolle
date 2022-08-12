@@ -1,11 +1,13 @@
 package no.nav.punsjbolle.søknad
 
+import com.fasterxml.jackson.databind.node.ObjectNode
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.k9.rapid.river.*
 import no.nav.punsjbolle.CorrelationId.Companion.correlationId
+import no.nav.punsjbolle.JournalpostId
 import no.nav.punsjbolle.joark.SafClient
 import no.nav.punsjbolle.k9sak.K9SakClient
 import no.nav.punsjbolle.meldinger.HentAktørIderMelding
@@ -15,7 +17,7 @@ import org.slf4j.LoggerFactory
 internal class PunsjetSøknadJournalføringRiver(
     rapidsConnection: RapidsConnection,
     k9SakClient: K9SakClient,
-    safClient: SafClient,
+    private val safClient: SafClient,
     private val rutingService: RutingService) : BehovssekvensPacketListener(
     logger = LoggerFactory.getLogger(PunsjetSøknadJournalføringRiver::class.java),
     mdcPaths = PunsjetSøknadMelding.mdcPaths) {
@@ -39,8 +41,12 @@ internal class PunsjetSøknadJournalføringRiver(
         }.register(this)
     }
 
+
     override fun handlePacket(id: String, packet: JsonMessage): Boolean {
-        val søknad = PunsjetSøknadMelding.hentBehov(packet, null)
+        val correlationId = packet.correlationId()
+        val journalpostId = packet.hentJournalpost()
+        val journalpost = runBlocking { safClient.hentJournalpost(JournalpostId(journalpostId), correlationId) }
+        val søknad = PunsjetSøknadMelding.hentBehov(packet, journalpost.brevkode)
         val aktørIder = HentAktørIderMelding.hentLøsning(packet)
 
         val destinasjon = runBlocking { rutingService.destinasjon(
@@ -50,7 +56,7 @@ internal class PunsjetSøknadJournalføringRiver(
             annenPart = søknad.annenPart,
             søknadstype = søknad.søknadstype,
             aktørIder = aktørIder.values.toSet(),
-            correlationId = packet.correlationId(),
+            correlationId = correlationId,
             journalpostIds = søknad.journalpostIder
         )}.also { logger.info("Destinasjon=[${it.name}]") }
 
@@ -58,6 +64,11 @@ internal class PunsjetSøknadJournalføringRiver(
             RutingService.Destinasjon.Infotrygd -> punsjetSøknadTilInfotrygd.handlePacket(packet)
             RutingService.Destinasjon.K9Sak ->  punsjetSøknadTilK9Sak.handlePacket(packet)
         }
+    }
+
+    private fun JsonMessage.hentJournalpost(): String {
+        val søknadJson = this[PunsjetSøknadMelding.SøknadKey] as ObjectNode
+        return søknadJson.get("journalposter").first().get("journalpostId").asText()
     }
 
 }
