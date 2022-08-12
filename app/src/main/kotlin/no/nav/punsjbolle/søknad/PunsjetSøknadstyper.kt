@@ -28,7 +28,7 @@ internal fun ObjectNode.søknadstype(brevkode: String? = null): Søknadstype {
             ?: throw IllegalStateException("Ikke mulig å utlede søknadstype for ytelse=[$ytelsetype] og brevkode=[$brevkode]")
         Søknadstype.fraBrevkode(gyldigBrevkode)
     } else {
-        logger.info("Utleder søknadstype fra ytelsestype []...")
+        logger.info("Utleder søknadstype fra ytelsestype...")
         return Søknadstype.fraK9FormatYtelsetype(ytelsetype)
     }
 }

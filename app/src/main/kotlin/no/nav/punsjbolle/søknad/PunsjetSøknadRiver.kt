@@ -46,6 +46,7 @@ internal class PunsjetSøknadRiver(
         val correlationId = packet.correlationId()
         val journalpostId = packet.hentJournalpost()
         val journalpost = runBlocking { safClient.hentJournalpost(JournalpostId(journalpostId), correlationId) }
+        logger.info("Hentet journalpostinfo: {}", journalpost)
         val søknad = PunsjetSøknadMelding.hentBehov(packet, journalpost.brevkode)
 
         logger.info("Legger til behov for å hente aktørId på de involverte partene.")

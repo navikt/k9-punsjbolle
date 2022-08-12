@@ -46,6 +46,7 @@ internal class PunsjetSøknadJournalføringRiver(
         val correlationId = packet.correlationId()
         val journalpostId = packet.hentJournalpost()
         val journalpost = runBlocking { safClient.hentJournalpost(JournalpostId(journalpostId), correlationId) }
+        logger.info("Hentet journalpostinfo: {}", journalpost)
         val søknad = PunsjetSøknadMelding.hentBehov(packet, journalpost.brevkode)
         val aktørIder = HentAktørIderMelding.hentLøsning(packet)
 
@@ -69,6 +70,10 @@ internal class PunsjetSøknadJournalføringRiver(
     private fun JsonMessage.hentJournalpost(): String {
         val søknadJson = this[PunsjetSøknadMelding.SøknadKey] as ObjectNode
         return søknadJson.get("journalposter").first().get("journalpostId").asText()
+    }
+
+    private companion object {
+        private val logger = LoggerFactory.getLogger(PunsjetSøknadJournalføringRiver::class.java)
     }
 
 }
