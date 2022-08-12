@@ -2,6 +2,7 @@ package no.nav.punsjbolle.søknad
 
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.punsjbolle.Identitetsnummer
 import no.nav.punsjbolle.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
@@ -12,8 +13,9 @@ import no.nav.punsjbolle.Periode.Companion.ÅpenPeriode
 import no.nav.punsjbolle.Søknadstype
 import java.time.ZonedDateTime
 
-internal fun ObjectNode.søknadstype() =
-    Søknadstype.fraK9FormatYtelsetype((get("ytelse") as ObjectNode).get("type").asText())
+internal fun ObjectNode.søknadstype(brevkode: Brevkode? = null) =
+    if (brevkode != null) Søknadstype.fraBrevkode(brevkode)
+    else Søknadstype.fraK9FormatYtelsetype((get("ytelse") as ObjectNode).get("type").asText())
 
 internal fun ObjectNode.periode(søknadstype: Søknadstype) = when (søknadstype) {
     Søknadstype.PleiepengerSyktBarn -> pleiepengerSyktBarnPeriode(mottatt = mottatt())
@@ -21,16 +23,18 @@ internal fun ObjectNode.periode(søknadstype: Søknadstype) = when (søknadstype
     Søknadstype.OmsorgspengerKroniskSyktBarn -> omsorgspengerKroniskSyktBarnPeriode(mottatt = mottatt())
     Søknadstype.OmsorgspengerMidlertidigAlene -> omsorgspengerMidlertidigAlenePeriode()
     Søknadstype.OmsorgspengerAleneOmsorg -> omsorgspengerAleneOmsorgPeriode()
-    Søknadstype.OmsorgspengerUtbetaling_Korrigering -> omsorgspengerUtbetalingPeriode()
-    Søknadstype.Omsorgspenger -> ÅpenPeriode
+    Søknadstype.OmsorgspengerUtbetaling_Korrigering -> omsorgspengerUtbetalingKorrigeringIMPeriode()
+    Søknadstype.Omsorgspenger, Søknadstype.OmsorgspengerUtbetaling_Arbeidstaker, Søknadstype.OmsorgspengerUtbetaling_Papirsøknad_Arbeidstaker -> ÅpenPeriode
 }
 
 internal fun ObjectNode.somPunsjetSøknad(
     versjon: String,
     saksbehandler: String,
-    saksnummer: K9Saksnummer?) : PunsjetSøknadMelding.PunsjetSøknad {
+    saksnummer: K9Saksnummer?,
+    brevkode: Brevkode
+) : PunsjetSøknadMelding.PunsjetSøknad {
 
-    val søknadstype = søknadstype()
+    val søknadstype = søknadstype(brevkode)
     val periode = periode(søknadstype = søknadstype)
 
     return when (søknadstype) {
@@ -81,7 +85,7 @@ internal fun ObjectNode.somPunsjetSøknad(
             periode = periode,
             saksbehandler = saksbehandler
         )
-        Søknadstype.Omsorgspenger -> map(
+        Søknadstype.Omsorgspenger, Søknadstype.OmsorgspengerUtbetaling_Arbeidstaker, Søknadstype.OmsorgspengerUtbetaling_Papirsøknad_Arbeidstaker -> map(
             søknadstype = søknadstype,
             versjon = versjon,
             saksnummer = saksnummer,
@@ -146,7 +150,7 @@ private fun ObjectNode.omsorgspengerKroniskSyktBarnPeriode(mottatt: ZonedDateTim
         false -> periode
     }}
 
-private fun ObjectNode.omsorgspengerUtbetalingPeriode() =
+private fun ObjectNode.omsorgspengerUtbetalingKorrigeringIMPeriode() =
     objectPerioder("fraværsperioderKorrigeringIm").somEnPeriode()
 
 private fun ObjectNode.omsorgspengerMidlertidigAlenePeriode() =
