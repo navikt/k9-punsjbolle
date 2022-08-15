@@ -18,7 +18,7 @@ internal object PunsjetSøknadVerktøy {
             input = mapOf(
                 "versjon" to "1.0.0",
                 "søknad" to søknad.toMap(),
-                "søknadstype" to brevkode
+                "søknadtype" to brevkode
             )
         ))
     ).keyValue.second

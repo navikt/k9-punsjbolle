@@ -68,7 +68,7 @@ internal object PunsjetSøknadMelding :
     internal val behovNavn = "PunsjetSøknad"
     private val VersjonKey = "@behov.$behovNavn.versjon"
     private val SaksnummerKey = "@behov.$behovNavn.saksnummer"
-    private val SøknadstypeKey = "@behov.$behovNavn.søknadstype"
+    private val SøknadstypeKey = "@behov.$behovNavn.søknadtype"
     private val SaksbehandlerKey = "@behov.$behovNavn.saksbehandler"
     private val SøknadKey = "@behov.$behovNavn.søknad"
     private val SøknadIdKey = "$SøknadKey.søknadId"
