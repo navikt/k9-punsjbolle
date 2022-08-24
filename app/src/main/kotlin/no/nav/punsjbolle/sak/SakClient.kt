@@ -22,7 +22,7 @@ internal class SakClient(
     navn = "SakClient",
     accessTokenClient = accessTokenClient,
     scopes = scopes,
-    pingUrl = URI("$baseUrl/internal/ready")
+    pingUrl = URI("$baseUrl/isAlive")
 ) {
 
     private val OpprettSakUrl = URI("$baseUrl/api/v1/saker")
