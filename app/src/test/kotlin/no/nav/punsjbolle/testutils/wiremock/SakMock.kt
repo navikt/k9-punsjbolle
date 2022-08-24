@@ -9,7 +9,7 @@ private const val path = "/sak-mock"
 
 private fun WireMockServer.mockPingUrl(): WireMockServer {
     WireMock.stubFor(
-        WireMock.get(WireMock.urlPathMatching(".*$path/internal/ready")).withAuthorizationHeader()
+        WireMock.get(WireMock.urlPathMatching(".*$path/isAlive")).withAuthorizationHeader()
             .willReturn(WireMock.aResponse().withStatus(200)))
     return this
 }
