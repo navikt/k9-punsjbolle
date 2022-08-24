@@ -4,6 +4,7 @@ import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.punsjbolle.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
 import no.nav.punsjbolle.K9Saksnummer.Companion.somK9Saksnummer
@@ -179,7 +180,8 @@ internal class PunsjetSøknadRutingTest(
                         journalpostIder = setOf(journalpostId),
                         søknadsperioder = setOf("2018-12-30/2019-10-20".somPeriode()),
                         endringsperioder = null
-                    )
+                    ),
+                    brevkode = Brevkode.SØKNAD_PLEIEPENGER_LIVETS_SLUTTFASE
                 )
             )
         }
