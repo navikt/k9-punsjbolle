@@ -2,7 +2,6 @@ package no.nav.punsjbolle
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.punsjbolle.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
 import no.nav.punsjbolle.Periode.Companion.somPeriode
@@ -67,12 +66,7 @@ internal class OmsorgspengerMappingTest {
             saksbehandler = "n/a"
         )
 
-        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad(
-            "1.0.0",
-            saksbehandler = "n/a",
-            saksnummer = null,
-            Brevkode.FRAVÆRSKORRIGERING_IM_OMS
-        ))
+        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null, saksbehandler = "n/a"))
     }
 
     @Test
@@ -113,12 +107,7 @@ internal class OmsorgspengerMappingTest {
             saksbehandler = "Saks Behandlersen"
         )
 
-        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad(
-            "1.0.0",
-            saksbehandler = "Saks Behandlersen",
-            saksnummer = null,
-            Brevkode.SØKNAD_OMS_UTVIDETRETT_KS
-        ))
+        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null, saksbehandler = "Saks Behandlersen"))
     }
 
     @Test
@@ -160,12 +149,7 @@ internal class OmsorgspengerMappingTest {
             saksbehandler = "n/a"
         )
 
-        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad(
-            "1.0.0",
-            saksbehandler = "n/a",
-            saksnummer = null,
-            Brevkode.SØKNAD_OMS_UTVIDETRETT_MA
-        ))
+        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad("1.0.0", saksnummer = null, saksbehandler = "n/a"))
     }
 
     private companion object {

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.isMissingOrNull
-import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.punsjbolle.*
 import no.nav.punsjbolle.K9Saksnummer.Companion.somK9Saksnummer
 import java.time.ZonedDateTime
@@ -39,20 +38,16 @@ internal object PunsjetSøknadMelding :
         packet.interestedIn(
             VersjonKey,
             SøknadKey,
-            SaksbehandlerKey,
-            SøknadstypeKey
+            SaksbehandlerKey
         )
     }
 
     override fun hentBehov(packet: JsonMessage): PunsjetSøknad {
         val søknadJson = packet[SøknadKey] as ObjectNode
-        val søknadsType = packet[SøknadstypeKey].asText()
-        val brevkode = Brevkode.fraKode(søknadsType)
 
         return søknadJson.somPunsjetSøknad(
             versjon = packet[VersjonKey].asText(),
             saksbehandler = packet[SaksbehandlerKey].saksbehandler(),
-            brevkode = brevkode,
             saksnummer = when (packet[SaksnummerKey].isMissingOrNull()) {
                 true -> null
                 false -> packet[SaksnummerKey].asText().somK9Saksnummer()
@@ -68,7 +63,6 @@ internal object PunsjetSøknadMelding :
     internal val behovNavn = "PunsjetSøknad"
     private val VersjonKey = "@behov.$behovNavn.versjon"
     private val SaksnummerKey = "@behov.$behovNavn.saksnummer"
-    private val SøknadstypeKey = "@behov.$behovNavn.søknadtype"
     private val SaksbehandlerKey = "@behov.$behovNavn.saksbehandler"
     private val SøknadKey = "@behov.$behovNavn.søknad"
     private val SøknadIdKey = "$SøknadKey.søknadId"
