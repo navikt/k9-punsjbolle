@@ -30,8 +30,6 @@ dependencies {
     implementation("no.nav.helse:dusseldorf-ktor-auth:$dusseldorfVersion")
     implementation("no.nav.helse:dusseldorf-oauth2-client:$dusseldorfVersion")
 
-    implementation("no.nav.k9.sak:kontrakt:3.3.11")
-
     // Test
     testImplementation("no.nav.helse:dusseldorf-test-support:$dusseldorfVersion")
     testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
@@ -55,16 +53,6 @@ repositories {
             password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
         }
     }
-
-    maven {
-        name = "K9SakPackages"
-        url = uri("https://maven.pkg.github.com/navikt/k9-punsjbolle")
-        credentials {
-            username = project.findProperty("gpr.user") as String? ?: "x-access-token"
-            password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_READER_TOKEN")
-        }
-    }
-
     maven("https://jitpack.io")
     mavenCentral()
 }

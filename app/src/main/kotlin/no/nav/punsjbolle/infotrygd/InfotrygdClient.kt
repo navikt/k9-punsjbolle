@@ -130,8 +130,6 @@ internal class InfotrygdClient(
                 fun Søknadstype.relevanteBehandlingstemaer() = when (this) {
                     Søknadstype.PleiepengerSyktBarn -> listOf(PleiepengerSyktBarnGammelOrdning)
                     Søknadstype.OmsorgspengerUtbetaling_Korrigering -> listOf(Omsorgspenger)
-                    Søknadstype.OmsorgspengerUtbetaling_Arbeidstaker -> listOf(Omsorgspenger)
-                    Søknadstype.OmsorgspengerUtbetaling_Papirsøknad_Arbeidstaker -> listOf(Omsorgspenger)
                     Søknadstype.OmsorgspengerKroniskSyktBarn -> listOf(Omsorgspenger)
                     Søknadstype.OmsorgspengerMidlertidigAlene -> listOf(Omsorgspenger)
                     Søknadstype.OmsorgspengerAleneOmsorg -> listOf(Omsorgspenger)
