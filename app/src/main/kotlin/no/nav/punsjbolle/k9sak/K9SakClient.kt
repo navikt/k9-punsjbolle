@@ -140,7 +140,7 @@ internal class K9SakClient(
                     "kodeverk": "FAGSAK_YTELSE"
                 },
                 "kanalReferanse": "${grunnlag.referanse}",
-                "type": "${søknad.søknadstype.k9Type}",
+                "type": "${søknad.søknadstype.brevkode.kode}",
                 "forsendelseMottattTidspunkt": "$forsendelseMottattTidspunkt",
                 "forsendelseMottatt": "${forsendelseMottattTidspunkt.toLocalDate()}",
                 "payload": "${Base64.getUrlEncoder().encodeToString(søknad.søknadJson.toString().toByteArray())}"
