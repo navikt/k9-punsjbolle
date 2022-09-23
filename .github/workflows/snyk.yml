@@ -15,6 +15,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_READER_TOKEN: ${{ secrets.GITHUB_READER_TOKEN }}
         with:
           command: monitor
           args: --org=omsorgspenger --configuration-matching="^compileClasspath$|^runtimeClasspath$" --all-projects --remote-repo-url=https://github.com/${{ github.repository }}.git
