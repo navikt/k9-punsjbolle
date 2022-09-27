@@ -30,7 +30,7 @@ dependencies {
     implementation("no.nav.helse:dusseldorf-ktor-auth:$dusseldorfVersion")
     implementation("no.nav.helse:dusseldorf-oauth2-client:$dusseldorfVersion")
 
-    implementation("no.nav.k9.sak:kontrakt:3.3.16")
+    implementation("no.nav.k9.sak:kontrakt:3.3.17")
 
     // Test
     testImplementation("no.nav.helse:dusseldorf-test-support:$dusseldorfVersion")
