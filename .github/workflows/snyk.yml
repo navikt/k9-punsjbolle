@@ -19,7 +19,7 @@ jobs:
         run: >
           snyk monitor
           --org=omsorgspenger
-          --configuration-matching="^compileClasspath$|^runtimeClasspath$"
+          --configuration-matching=^compileClasspath$|^runtimeClasspath$
           --all-projects
           --remote-repo-url=https://github.com/${{ github.repository }}.git
         env:
