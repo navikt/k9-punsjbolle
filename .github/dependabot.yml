@@ -5,6 +5,11 @@ registries:
     url: https://maven.pkg.github.com/navikt/k9-rapid
     username: x-access-token
     password: ${{secrets.DEPENDABOT_ACCESS_TOKEN}}
+  k9-sak:
+    type: maven-repository
+    url: https://maven.pkg.github.com/navikt/k9-sak
+    username: x-access-token
+    password: ${{secrets.DEPENDABOT_ACCESS_TOKEN}}
 updates:
   - package-ecosystem: github-actions
     directory: "/"
@@ -18,3 +23,4 @@ updates:
     open-pull-requests-limit: 10
     registries:
       - k9-rapid
+      - k9-sak
