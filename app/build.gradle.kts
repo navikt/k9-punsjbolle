@@ -3,7 +3,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 val junitJupiterVersion = "5.9.1"
 val k9rapidVersion = "1.20220824120614-3be8319"
 val dusseldorfVersion = "3.2.1.1-18d2f2f"
-val ktorVersion = "2.1.1"
+val ktorVersion = "2.1.2"
 val jsonassertVersion = "1.5.1"
 val mockkVersion = "1.13.1"
 val assertjVersion = "3.23.1"
