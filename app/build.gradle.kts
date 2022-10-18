@@ -1,17 +1,18 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 val junitJupiterVersion = "5.9.1"
-val k9rapidVersion = "1.20220824120614-3be8319"
-val dusseldorfVersion = "3.2.1.1-18d2f2f"
-val ktorVersion = "2.1.1"
+val k9rapidVersion = "1.20221007103720-75312fe"
+val dusseldorfVersion = "3.2.1.2-ce40a5b"
+val ktorVersion = "2.1.2"
 val jsonassertVersion = "1.5.1"
-val mockkVersion = "1.13.1"
+val mockkVersion = "1.13.2"
 val assertjVersion = "3.23.1"
+val k9SakKontraktVersion = "3.3.18"
 
 val mainClass = "no.nav.punsjbolle.ApplicationKt"
 
 plugins {
-    kotlin("jvm") version "1.7.10"
+    kotlin("jvm") version "1.7.20"
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
@@ -30,7 +31,7 @@ dependencies {
     implementation("no.nav.helse:dusseldorf-ktor-auth:$dusseldorfVersion")
     implementation("no.nav.helse:dusseldorf-oauth2-client:$dusseldorfVersion")
 
-    implementation("no.nav.k9.sak:kontrakt:3.3.16")
+    implementation("no.nav.k9.sak:kontrakt:$k9SakKontraktVersion")
 
     // Test
     testImplementation("no.nav.helse:dusseldorf-test-support:$dusseldorfVersion")
@@ -58,7 +59,7 @@ repositories {
 
     maven {
         name = "K9SakPackages"
-        url = uri("https://maven.pkg.github.com/navikt/k9-punsjbolle")
+        url = uri("https://maven.pkg.github.com/navikt/k9-sak")
         credentials {
             username = project.findProperty("gpr.user") as String? ?: "x-access-token"
             password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_READER_TOKEN")

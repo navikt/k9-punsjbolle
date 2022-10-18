@@ -1,5 +1,9 @@
 name: Vulnerabilities scanning of dependencies
 on:
+  push:
+    branches: main
+    paths:
+      'build.gradle.kts'
   schedule:
     - cron:  '0 0 * * 1'
   workflow_dispatch:
