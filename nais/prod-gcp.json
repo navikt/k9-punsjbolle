@@ -12,8 +12,8 @@
     "omsorgspenger-proxy.prod-fss-pub.nais.io"
   ],
   "env": {
-    "SAF_BASE_URL": "https://omsorgspenger-proxy.prod-fss-pub.nais.io/saf",
-    "SAF_SCOPES": "e816bb42-bf62-4be9-a1cc-a9be70fe4403/.default",
+    "SAF_BASE_URL": "https://saf.prod-fss-pub.nais.io",
+    "SAF_SCOPES": "api://prod-fss.teamdokumenthandtering.saf/.default",
     "K9_SAK_BASE_URL": "https://omsorgspenger-proxy.prod-fss-pub.nais.io/k9-sak",
     "K9_SAK_SCOPES": "e816bb42-bf62-4be9-a1cc-a9be70fe4403/.default",
     "SAK_BASE_URL": "https://omsorgspenger-proxy.prod-fss-pub.nais.io/sak",
