@@ -120,7 +120,7 @@ internal class PunsjetSøknadRutingTest(
         coEvery { k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }.returns(
             k9sak
         )
-        coEvery { k9SakClientMock.inngårIUnntaksliste(any(), any()) }.returns(inngårIUnntaksliste)
+        coEvery { k9SakClientMock.inngårIUnntaksliste(any(), any(), any()) }.returns(inngårIUnntaksliste)
     }
 
     private companion object {
