@@ -2,17 +2,17 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 val junitJupiterVersion = "5.9.1"
 val k9rapidVersion = "1.20221124140732-e07f6f7"
-val dusseldorfVersion = "3.2.1.3-bd71b5a"
-val ktorVersion = "2.1.3"
+val dusseldorfVersion = "3.2.2.2-d9c7672"
+val ktorVersion = "2.2.2"
 val jsonassertVersion = "1.5.1"
-val mockkVersion = "1.13.2"
+val mockkVersion = "1.13.3"
 val assertjVersion = "3.23.1"
-val k9SakKontraktVersion = "3.3.24"
+val k9SakKontraktVersion = "3.3.29"
 
 val mainClass = "no.nav.punsjbolle.ApplicationKt"
 
 plugins {
-    kotlin("jvm") version "1.7.22"
+    kotlin("jvm") version "1.8.0"
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 

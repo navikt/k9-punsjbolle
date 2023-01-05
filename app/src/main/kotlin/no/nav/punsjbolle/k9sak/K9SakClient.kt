@@ -237,12 +237,24 @@ internal class K9SakClient(
             "Feil fra K9Sak. URL=[$MatchFagsakUrl], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
         }
 
-        return response.inneholderMatchendeFagsak()
+        val matchendeFagsak = JSONArray(response)
+            .asSequence()
+            .map { it as JSONObject }
+            .filterNot {
+                (it.getString("status") == "OPPR").also { erStatusOpprettet ->
+                    if (erStatusOpprettet) {
+                        logger.info("MatchendeFagsak: Filtrerer bort Saksnummer=${it.stringOrNull("saksnummer")} i Status=OPPR")
+                    }
+                }
+            }
+            .toSet()
+            .isNotEmpty()
+
+        return matchendeFagsak
     }
 
     internal suspend fun inngårIUnntaksliste(
         aktørIder: Set<AktørId>,
-        søknadstype: Søknadstype,
         correlationId: CorrelationId
     ): Boolean {
 
@@ -284,18 +296,5 @@ internal class K9SakClient(
         }
 
         private fun String.saksnummer() = JSONObject(this).getString("saksnummer").somK9Saksnummer()
-
-        internal fun String.inneholderMatchendeFagsak() = JSONArray(this)
-            .asSequence()
-            .map { it as JSONObject }
-            .filterNot {
-                (it.getString("status") == "OPPR").also { erStatusOpprettet ->
-                    if (erStatusOpprettet) {
-                        logger.info("MatchendeFagsak: Filtrerer bort Saksnummer=${it.stringOrNull("saksnummer")} i Status=OPPR")
-                    }
-                }
-            }
-            .toSet()
-            .isNotEmpty()
     }
 }

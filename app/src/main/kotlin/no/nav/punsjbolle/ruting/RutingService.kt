@@ -66,12 +66,7 @@ internal class RutingService(
     ): Destinasjon {
 
         if (input.søknadstype == Søknadstype.PleiepengerLivetsSluttfase) {
-            if (k9SakClient.inngårIUnntaksliste(
-                    aktørIder = input.aktørIder,
-                    søknadstype = input.søknadstype,
-                    correlationId = correlationId
-                )
-            ) {
+            if (k9SakClient.inngårIUnntaksliste(aktørIder = input.aktørIder, correlationId = correlationId)) {
                 logger.info("Rutes til Infotrygd ettersom minst en part er lagt til i unntakslisten i K9Sak.")
                 return Destinasjon.Infotrygd
             }
