@@ -38,9 +38,9 @@ internal class RutingServiceTest {
     @BeforeEach
     internal fun reset() {
         clearMocks(k9SakClientMock)
-        coEvery { k9SakClientMock.inngårIUnntaksliste(setOf(aktørIdIUnntaksliste), Søknadstype.PleiepengerLivetsSluttfase, any()) }.returns(true)
-        coEvery { k9SakClientMock.inngårIUnntaksliste(setOf(aktørIdIkkeIUnntaksliste), Søknadstype.PleiepengerLivetsSluttfase, any()) }.returns(false)
-        coEvery { k9SakClientMock.inngårIUnntaksliste(any(), not(Søknadstype.PleiepengerLivetsSluttfase), any()) }.returns(false)
+        coEvery { k9SakClientMock.inngårIUnntaksliste(setOf(aktørIdIUnntaksliste), any()) }.returns(true)
+        coEvery { k9SakClientMock.inngårIUnntaksliste(setOf(aktørIdIkkeIUnntaksliste), any()) }.returns(false)
+        coEvery { k9SakClientMock.inngårIUnntaksliste(any(), any()) }.returns(false)
         coEvery { k9SakClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }.returns(RutingGrunnlag(søker = true))
         clearMocks(infotrygdClientMock)
         coEvery { infotrygdClientMock.harLøpendeSakSomInvolvererEnAv(any(), any(), any(), any(), any(), any()) }.returns(RutingGrunnlag(søker = true))
