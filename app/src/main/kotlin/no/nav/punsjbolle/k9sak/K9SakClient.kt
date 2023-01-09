@@ -61,6 +61,9 @@ internal class K9SakClient(
             }
         """.trimIndent()
 
+        logger.info("Henter/Oppretter k9saksnummer ytelseType:[${grunnlag.søknadstype.k9YtelseType}] " +
+                "for periode:[${grunnlag.periode.fom}/${grunnlag.periode.tom}].", correlationId)
+
         val (httpStatusCode, response) = post(
             dto = dto,
             correlationId = correlationId,
@@ -114,8 +117,9 @@ internal class K9SakClient(
 
         return uri.toString().httpPost {
             it.header(HttpHeaders.Authorization, authorizationHeader())
-            it.header(CorrelationIdHeaderKey, "$correlationId")
+            it.header(CorrelationIdHeaderKey, correlationId)
             it.header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
+            it.header("callId", correlationId)
             it.accept(ContentType.Application.Json)
             it.jsonBody(dto)
         }.readTextOrThrow()
