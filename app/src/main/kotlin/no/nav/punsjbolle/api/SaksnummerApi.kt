@@ -50,7 +50,13 @@ internal fun Route.SaksnummerApi(
         onK9Sak: suspend (request: Request, periode: Periode) -> Unit
     ) {
         val request = call.request()
-        val (periode, journalpost) = periodeOgJournalpost(request)
+        var (periode, journalpost) = periodeOgJournalpost(request)
+
+        // Om vi sender in periode i requesten bruker vi den ist for dato journalpost blev opprettet
+        // Unngår feilsituation der vi vill opprette behandling for tidigare år. (F.eks. OMP_UT vid årsskifte)
+        request.periode?.let { periode = it }
+
+        logger.info("Sjekker ruting for journalpost:[$journalpost] søknadstype:[${request.søknadstype}] periode:[${periode.fom}/${periode.tom}]")
         val destinasjon = rutingService.destinasjon(
             søker = request.søker.identitetsnummer,
             pleietrengende = request.pleietrengende?.identitetsnummer,
