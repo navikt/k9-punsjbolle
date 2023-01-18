@@ -25,6 +25,7 @@ internal fun ObjectNode.periode(søknadstype: Søknadstype) = when (søknadstype
     Søknadstype.OmsorgspengerAleneOmsorg -> omsorgspengerAleneOmsorgPeriode()
     Søknadstype.OmsorgspengerUtbetaling_Korrigering -> omsorgspengerUtbetalingKorrigeringIMPeriode()
     Søknadstype.Omsorgspenger, Søknadstype.OmsorgspengerUtbetaling_Arbeidstaker, Søknadstype.OmsorgspengerUtbetaling_Papirsøknad_Arbeidstaker -> ÅpenPeriode
+    Søknadstype.Opplaeringspenger -> opplaeringspengerPeriode()
 }
 
 internal fun ObjectNode.somPunsjetSøknad(
@@ -89,6 +90,14 @@ internal fun ObjectNode.somPunsjetSøknad(
             søknadstype = søknadstype,
             versjon = versjon,
             saksnummer = saksnummer,
+            periode = periode,
+            saksbehandler = saksbehandler
+        )
+        Søknadstype.Opplaeringspenger -> map(
+            søknadstype = søknadstype,
+            versjon = versjon,
+            saksnummer = saksnummer,
+            pleietrengende = pleietrengende(),
             periode = periode,
             saksbehandler = saksbehandler
         )
@@ -157,6 +166,9 @@ private fun ObjectNode.omsorgspengerMidlertidigAlenePeriode() =
     get("ytelse").get("annenForelder").get("periode")?.asText()?.somPeriode() ?: ÅpenPeriode
 
 private fun ObjectNode.omsorgspengerAleneOmsorgPeriode() =
+    get("ytelse").get("periode")?.asText()?.somPeriode() ?: ÅpenPeriode
+
+private fun ObjectNode.opplaeringspengerPeriode() =
     get("ytelse").get("periode")?.asText()?.somPeriode() ?: ÅpenPeriode
 
 private fun List<Periode>.somEnPeriode() : Periode {
