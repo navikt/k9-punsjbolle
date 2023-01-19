@@ -100,7 +100,7 @@ internal enum class Søknadstype(
     OmsorgspengerUtbetaling_Korrigering("OMP", Brevkode.FRAVÆRSKORRIGERING_IM_OMS, "UtbetaleOmsorgspenger"),
     OmsorgspengerKroniskSyktBarn("OMP_KS", Brevkode.SØKNAD_OMS_UTVIDETRETT_KS, "KroniskSyktBarn"),
     OmsorgspengerAleneOmsorg("OMP_AO", Brevkode.SØKNAD_OMS_UTVIDETRETT_AO, "AleneOmsorg"),
-    Opplaeringspenger("OLP", Brevkode.OPPLÆRINGSPENGER_SOKNAD, "Opplaeringspenger"),
+    Opplæringspenger("OLP", Brevkode.OPPLÆRINGSPENGER_SOKNAD, "Opplæringspenger"),
     OmsorgspengerMidlertidigAlene("OMP_MA", Brevkode.SØKNAD_OMS_UTVIDETRETT_MA, "MidlertidigAlene");
 
     internal companion object {
@@ -112,7 +112,7 @@ internal enum class Søknadstype(
             "OMP_UTV_MA" -> OmsorgspengerMidlertidigAlene
             "OMP_UTV_AO" -> OmsorgspengerAleneOmsorg
             "OMP" -> Omsorgspenger
-            "OPPLÆRINGSPENGER" -> Opplaeringspenger
+            "OPPLÆRINGSPENGER" -> Opplæringspenger
             else -> throw IllegalStateException("Ukjent ytelsestype $ytelsetype")
         }
 
@@ -126,7 +126,7 @@ internal enum class Søknadstype(
             Brevkode.SØKNAD_UTBETALING_OMS_AT -> OmsorgspengerUtbetaling_Arbeidstaker
             Brevkode.PAPIRSØKNAD_UTBETALING_OMS_AT -> OmsorgspengerUtbetaling_Papirsøknad_Arbeidstaker
             Brevkode.FRAVÆRSKORRIGERING_IM_OMS -> OmsorgspengerUtbetaling_Korrigering
-            Brevkode.OPPLÆRINGSPENGER_SOKNAD -> Opplaeringspenger
+            Brevkode.OPPLÆRINGSPENGER_SOKNAD -> Opplæringspenger
             else -> throw IllegalStateException("Ikke støttet brevkoode $brevkode")
         }
     }

@@ -46,6 +46,8 @@ internal class K9SakClient(
         correlationId: CorrelationId
     ): K9Saksnummer {
 
+        secureLogger.info("DEBUG: hentEllerOpprettSaksnummer grunnlag: $grunnlag")
+
         // https://github.com/navikt/k9-sak/blob/3.2.10/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/FinnEllerOpprettSak.java#L49
         @Language("JSON")
         val dto = """
@@ -273,6 +275,7 @@ internal class K9SakClient(
 
     internal companion object {
         private val logger = LoggerFactory.getLogger(K9SakClient::class.java)
+        private val secureLogger = LoggerFactory.getLogger("tjenestekall")
         private val Oslo = ZoneId.of("Europe/Oslo")
 
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"

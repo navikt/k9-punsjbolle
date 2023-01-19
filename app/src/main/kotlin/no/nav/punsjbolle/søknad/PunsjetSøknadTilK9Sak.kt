@@ -25,7 +25,6 @@ internal class PunsjetSøknadTilK9Sak(
         val søknad = PunsjetSøknadMelding.hentBehov(packet)
         val aktørIder = HentAktørIderMelding.hentLøsning(packet)
         val correlationId = packet.correlationId()
-
         val hentK9SaksnummerGrunnlag = HentK9SaksnummerMelding.HentK9SaksnummerGrunnlag(
             søknadstype = søknad.søknadstype,
             søker = aktørIder.getValue(søknad.søker),

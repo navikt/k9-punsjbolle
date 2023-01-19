@@ -25,7 +25,7 @@ internal fun ObjectNode.periode(søknadstype: Søknadstype) = when (søknadstype
     Søknadstype.OmsorgspengerAleneOmsorg -> omsorgspengerAleneOmsorgPeriode()
     Søknadstype.OmsorgspengerUtbetaling_Korrigering -> omsorgspengerUtbetalingKorrigeringIMPeriode()
     Søknadstype.Omsorgspenger, Søknadstype.OmsorgspengerUtbetaling_Arbeidstaker, Søknadstype.OmsorgspengerUtbetaling_Papirsøknad_Arbeidstaker -> ÅpenPeriode
-    Søknadstype.Opplaeringspenger -> opplaeringspengerPeriode()
+    Søknadstype.Opplæringspenger -> opplaeringspengerPeriode()
 }
 
 internal fun ObjectNode.somPunsjetSøknad(
@@ -93,7 +93,7 @@ internal fun ObjectNode.somPunsjetSøknad(
             periode = periode,
             saksbehandler = saksbehandler
         )
-        Søknadstype.Opplaeringspenger -> map(
+        Søknadstype.Opplæringspenger -> map(
             søknadstype = søknadstype,
             versjon = versjon,
             saksnummer = saksnummer,
