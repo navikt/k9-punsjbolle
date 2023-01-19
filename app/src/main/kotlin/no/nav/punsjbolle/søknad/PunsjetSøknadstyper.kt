@@ -97,7 +97,7 @@ internal fun ObjectNode.somPunsjetSøknad(
             søknadstype = søknadstype,
             versjon = versjon,
             saksnummer = saksnummer,
-            pleietrengende = pleietrengende(),
+            pleietrengende = barn(),
             periode = periode,
             saksbehandler = saksbehandler
         )
@@ -169,7 +169,7 @@ private fun ObjectNode.omsorgspengerAleneOmsorgPeriode() =
     get("ytelse").get("periode")?.asText()?.somPeriode() ?: ÅpenPeriode
 
 private fun ObjectNode.opplaeringspengerPeriode() =
-    get("ytelse").get("periode")?.asText()?.somPeriode() ?: ÅpenPeriode
+    get("ytelse").get("søknadsperiode")?.asText()?.somPeriode() ?: ÅpenPeriode
 
 private fun List<Periode>.somEnPeriode() : Periode {
     val fraOgMedDatoer = map { it.fom }
