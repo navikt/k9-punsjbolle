@@ -169,7 +169,7 @@ private fun ObjectNode.omsorgspengerAleneOmsorgPeriode() =
     get("ytelse").get("periode")?.asText()?.somPeriode() ?: ÅpenPeriode
 
 private fun ObjectNode.opplaeringspengerPeriode() =
-    get("ytelse").get("søknadsperiode")?.asText()?.somPeriode() ?: ÅpenPeriode
+    arrayPerioder("søknadsperiode").somEnPeriode()
 
 private fun List<Periode>.somEnPeriode() : Periode {
     val fraOgMedDatoer = map { it.fom }
