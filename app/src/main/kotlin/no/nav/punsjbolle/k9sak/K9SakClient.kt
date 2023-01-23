@@ -224,11 +224,13 @@ internal class K9SakClient(
         )
 
         val søknadK9YtelseType = søknadstype.k9YtelseType
-        val periodeString = if(ytelseTyperMedPeriode.contains(søknadK9YtelseType)) {
-            """ "periode": {$ ${fraOgMed.somPeriode()} }, """
+        val periode = if(ytelseTyperMedPeriode.contains(søknadK9YtelseType)) {
+            fraOgMed.somPeriode()
         } else {
-            ""
+            null
         }
+
+        val periodeString = periode?.let { """ "periode": { $it }, """ } ?: """ "periode": {}, """
 
         // https://github.com/navikt/k9-sak/tree/3.1.30/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/fagsak/MatchFagsak.java#L26
         @Language("JSON")
