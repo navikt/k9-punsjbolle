@@ -24,7 +24,7 @@ internal fun ObjectNode.periode(søknadstype: Søknadstype) = when (søknadstype
     Søknadstype.OmsorgspengerMidlertidigAlene -> omsorgspengerMidlertidigAlenePeriode()
     Søknadstype.OmsorgspengerAleneOmsorg -> omsorgspengerAleneOmsorgPeriode()
     Søknadstype.OmsorgspengerUtbetaling_Korrigering -> omsorgspengerUtbetalingKorrigeringIMPeriode()
-    Søknadstype.Omsorgspenger, Søknadstype.OmsorgspengerUtbetaling_Arbeidstaker, Søknadstype.OmsorgspengerUtbetaling_Papirsøknad_Arbeidstaker -> ÅpenPeriode
+    Søknadstype.Omsorgspenger, Søknadstype.OmsorgspengerUtbetaling_Arbeidstaker, Søknadstype.OmsorgspengerUtbetaling_Papirsøknad_Arbeidstaker -> omsorgspengerUtbetalingKorrigeringIMPeriode()
     Søknadstype.Opplæringspenger -> opplaeringspengerPeriode()
 }
 
@@ -160,7 +160,8 @@ private fun ObjectNode.omsorgspengerKroniskSyktBarnPeriode(mottatt: ZonedDateTim
     }}
 
 private fun ObjectNode.omsorgspengerUtbetalingKorrigeringIMPeriode() =
-    objectPerioder("fraværsperioderKorrigeringIm").somEnPeriode()
+    objectPerioder("fraværsperioderKorrigeringIm")
+        .somEnPeriode()
 
 private fun ObjectNode.omsorgspengerMidlertidigAlenePeriode() =
     get("ytelse").get("annenForelder").get("periode")?.asText()?.somPeriode() ?: ÅpenPeriode
