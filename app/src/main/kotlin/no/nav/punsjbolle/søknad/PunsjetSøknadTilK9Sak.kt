@@ -21,10 +21,14 @@ internal class PunsjetSøknadTilK9Sak(
     private val k9SakClient: K9SakClient,
     private val safClient: SafClient) {
 
+    private val secureLogger = LoggerFactory.getLogger("tjenestekall")
+
     internal fun handlePacket(packet: JsonMessage): Boolean {
         val søknad = PunsjetSøknadMelding.hentBehov(packet)
         val aktørIder = HentAktørIderMelding.hentLøsning(packet)
         val correlationId = packet.correlationId()
+        secureLogger.info("DEBUG: PunsjetSøknadTilK9SAk: packet:[$packet]")
+        secureLogger.info("DEBUG: PunsjetSøknadTilK9SAk: søknad:[$søknad]")
         val hentK9SaksnummerGrunnlag = HentK9SaksnummerMelding.HentK9SaksnummerGrunnlag(
             søknadstype = søknad.søknadstype,
             søker = aktørIder.getValue(søknad.søker),
@@ -32,6 +36,7 @@ internal class PunsjetSøknadTilK9Sak(
             annenPart = søknad.annenPart?.let { aktørIder.getValue(it) },
             periode = søknad.periode
         )
+        secureLogger.info("DEBUG: hentK9SaksnummerGrunnlag: [$hentK9SaksnummerGrunnlag]")
 
         val (k9Saksnummer, k9SaksnummerKilde) = when (søknad.saksnummer) {
             null -> runBlocking { k9SakClient.hentEllerOpprettSaksnummer(
