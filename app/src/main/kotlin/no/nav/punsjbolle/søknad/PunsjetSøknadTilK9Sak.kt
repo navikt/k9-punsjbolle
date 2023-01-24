@@ -21,8 +21,6 @@ internal class PunsjetSøknadTilK9Sak(
     private val k9SakClient: K9SakClient,
     private val safClient: SafClient) {
 
-    private val secureLogger = LoggerFactory.getLogger("tjenestekall")
-
     internal fun handlePacket(packet: JsonMessage): Boolean {
         val søknad = PunsjetSøknadMelding.hentBehov(packet)
         val aktørIder = HentAktørIderMelding.hentLøsning(packet)

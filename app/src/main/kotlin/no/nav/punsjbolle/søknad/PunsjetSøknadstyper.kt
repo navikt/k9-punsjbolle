@@ -98,7 +98,6 @@ internal fun ObjectNode.somPunsjetSøknad(
             søknadstype = søknadstype,
             versjon = versjon,
             saksnummer = saksnummer,
-            pleietrengende = barn(),
             periode = periode,
             saksbehandler = saksbehandler
         )
