@@ -21,7 +21,7 @@ private fun WireMockServer.mockHentSaksnummer(): WireMockServer {
             .withNavPostHeaders()
             .withRequestBody(WireMock.matchingJsonPath("$.ytelseType"))
             .withRequestBody(WireMock.matchingJsonPath("$.aktørId"))
-            .withRequestBody(WireMock.matchingJsonPath("$.pleietrengendeAktørId"))
+            //.withRequestBody(WireMock.matchingJsonPath("$.pleietrengendeAktørId"))
             .withRequestBody(WireMock.matchingJsonPath("$.periode"))
             .willReturn(WireMock.aResponse().withJson("""{"saksnummer": "SAK123"}""")))
     return this
