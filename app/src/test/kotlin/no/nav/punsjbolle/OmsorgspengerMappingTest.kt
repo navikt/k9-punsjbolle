@@ -7,10 +7,12 @@ import no.nav.punsjbolle.Identitetsnummer.Companion.somIdentitetsnummer
 import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
 import no.nav.punsjbolle.Periode.Companion.somPeriode
 import no.nav.punsjbolle.søknad.PunsjetSøknadMelding
+import no.nav.punsjbolle.søknad.periode
 import no.nav.punsjbolle.søknad.somPunsjetSøknad
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.Period
 import java.time.ZonedDateTime
 
 internal class OmsorgspengerMappingTest {
@@ -165,6 +167,63 @@ internal class OmsorgspengerMappingTest {
             saksbehandler = "n/a",
             saksnummer = null,
             Brevkode.SØKNAD_OMS_UTVIDETRETT_MA
+        ))
+    }
+
+    @Test
+    fun `Punsjet omsorgspenger utbetaling`() {
+        @Language("JSON")
+        val json = """
+        {
+          "søknadId": "$søknadId",
+          "mottattDato": "$mottatt",
+          "søker": {
+            "norskIdentitetsnummer": "$søker"
+          },
+          "ytelse": {
+            "type": "OMP",
+            "annenForelder": {
+              "norskIdentitetsnummer": "$annenForelder",
+              "periode": "2020-01-01/2050-04-04"
+            },
+            "fraværsperioder": [
+              {
+                "periode": "2020-01-01/2020-01-12",
+                "duration": "PT4H",
+                "årsak": "ORDINÆRT_FRAVÆR"
+              }
+            ]
+          },
+          "journalposter": [{"journalpostId": "$journalpostId"}]
+        }
+        """.trimIndent()
+
+
+        val jacksonSøknad = json.jackson()
+        val periode = jacksonSøknad.periode(Søknadstype.OmsorgspengerUtbetaling_Papirsøknad_Arbeidstaker)
+
+        val forventetPunsjetSøknad = PunsjetSøknadMelding.PunsjetSøknad(
+            versjon = "1.0.0",
+            søknadId = søknadId,
+            saksnummer = null,
+            søknadstype = Søknadstype.OmsorgspengerUtbetaling_Papirsøknad_Arbeidstaker,
+            journalpostIder = setOf(journalpostId),
+            periode = periode,
+            søker = søker,
+            annenPart = null,
+            pleietrengende = null,
+            søknadJson = jacksonSøknad,
+            mottatt = ZonedDateTime.parse(mottatt),
+            saksbehandler = "n/a"
+        )
+
+        assertEquals(periode, "2020-01-01/2020-01-12".somPeriode())
+
+        assertEquals(forventetPunsjetSøknad, jacksonSøknad.somPunsjetSøknad(
+            "1.0.0",
+            saksbehandler = "n/a",
+            saksnummer = null,
+            Brevkode.PAPIRSØKNAD_UTBETALING_OMS_AT
         ))
     }
 
