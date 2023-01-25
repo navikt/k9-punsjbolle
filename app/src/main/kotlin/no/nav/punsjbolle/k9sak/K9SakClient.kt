@@ -210,7 +210,7 @@ internal class K9SakClient(
         søker: Identitetsnummer? = null,
         pleietrengende: Identitetsnummer? = null,
         annenPart: Identitetsnummer? = null,
-        @Suppress("UNUSED_PARAMETER") fraOgMed: LocalDate,
+        fraOgMed: LocalDate,
         søknadstype: Søknadstype,
         correlationId: CorrelationId
     ): Boolean {
@@ -228,7 +228,7 @@ internal class K9SakClient(
             null
         }
 
-        val periodeString = periode?.let { """ "periode": { $it }, """ } ?: """ "periode": {}, """
+        val periodeString = periode?.let { """ "periode": { "fom": "${it.tom}", "tom": "${it.tom}" }, """ } ?: """ "periode": {}, """
 
         // https://github.com/navikt/k9-sak/tree/3.1.30/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/fagsak/MatchFagsak.java#L26
         @Language("JSON")
