@@ -47,8 +47,6 @@ internal class RutingService(
             aktørIder = aktørIder,
             journalpostIds = journalpostIds
         )
-        secureLogger.info("DEBUG: RutingService.destinasjon: DestinasjonsInput: [$input]")
-
         return when (val cacheValue = cache.getIfPresent(input)) {
             null -> slåOppDestinasjon(
                 input = input,
@@ -65,7 +63,6 @@ internal class RutingService(
         correlationId: CorrelationId
     ): Destinasjon {
 
-        secureLogger.info("DEBUG: RutingService.slåOppDestinasjon: DestinasjonsInput: [$input]")
         if (input.søknadstype == Søknadstype.PleiepengerLivetsSluttfase) {
             if (k9SakClient.inngårIUnntaksliste(
                     aktørIder = input.aktørIder,
@@ -134,7 +131,6 @@ internal class RutingService(
 
     private companion object {
         private val logger = LoggerFactory.getLogger(RutingService::class.java)
-        private val secureLogger = LoggerFactory.getLogger("tjenestekall")
 
         private data class DestinasjonInput(
             val søker: Identitetsnummer,
