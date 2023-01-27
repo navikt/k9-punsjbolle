@@ -10,6 +10,7 @@ import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.punsjbolle.*
 import no.nav.punsjbolle.Json.stringOrNull
 import no.nav.punsjbolle.K9Saksnummer.Companion.somK9Saksnummer
+import no.nav.punsjbolle.Periode.Companion.somPeriode
 import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
 import no.nav.punsjbolle.meldinger.SendPunsjetSøknadTilK9SakMelding
 import no.nav.punsjbolle.ruting.RutingGrunnlag
@@ -209,20 +210,35 @@ internal class K9SakClient(
         søker: Identitetsnummer? = null,
         pleietrengende: Identitetsnummer? = null,
         annenPart: Identitetsnummer? = null,
-        @Suppress("UNUSED_PARAMETER") fraOgMed: LocalDate,
+        fraOgMed: LocalDate,
         søknadstype: Søknadstype,
         correlationId: CorrelationId
     ): Boolean {
+
+        val ytelseTyperMedPeriode = setOf(
+            Søknadstype.OmsorgspengerUtbetaling_Arbeidstaker.k9YtelseType,
+            Søknadstype.OmsorgspengerUtbetaling_Papirsøknad_Arbeidstaker,
+            Søknadstype.OmsorgspengerUtbetaling_Korrigering
+        )
+
+        val søknadK9YtelseType = søknadstype.k9YtelseType
+        val periode = if(ytelseTyperMedPeriode.contains(søknadK9YtelseType)) {
+            fraOgMed.somPeriode()
+        } else {
+            null
+        }
+
+        val periodeString = periode?.let { """ "periode": { "fom": "${it.tom}", "tom": "${it.tom}" }, """ } ?: """ "periode": {}, """
 
         // https://github.com/navikt/k9-sak/tree/3.1.30/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/fagsak/MatchFagsak.java#L26
         @Language("JSON")
         val dto = """
         {
             "ytelseType": {
-                "kode": "${søknadstype.k9YtelseType}",
+                "kode": "$søknadK9YtelseType",
                 "kodeverk": "FAGSAK_YTELSE"
             },
-            "periode": {},
+            $periodeString
             "bruker": ${søker?.let { """"$it"""" }},
             "pleietrengendeIdenter": ${pleietrengende.jsonArray()},
             "relatertPersonIdenter": ${annenPart.jsonArray()}
@@ -273,6 +289,7 @@ internal class K9SakClient(
 
     internal companion object {
         private val logger = LoggerFactory.getLogger(K9SakClient::class.java)
+        private val secureLogger = LoggerFactory.getLogger("tjenestekall")
         private val Oslo = ZoneId.of("Europe/Oslo")
 
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"

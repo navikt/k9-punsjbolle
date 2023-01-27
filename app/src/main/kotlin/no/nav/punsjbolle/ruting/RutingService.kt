@@ -38,7 +38,6 @@ internal class RutingService(
         journalpostIds: Set<JournalpostId>,
         correlationId: CorrelationId
     ): Destinasjon {
-
         val input = DestinasjonInput(
             søker = søker,
             fraOgMed = fraOgMed,
@@ -48,7 +47,6 @@ internal class RutingService(
             aktørIder = aktørIder,
             journalpostIds = journalpostIds
         )
-
         return when (val cacheValue = cache.getIfPresent(input)) {
             null -> slåOppDestinasjon(
                 input = input,

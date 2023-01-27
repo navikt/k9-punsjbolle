@@ -24,7 +24,9 @@ internal fun ObjectNode.periode(søknadstype: Søknadstype) = when (søknadstype
     Søknadstype.OmsorgspengerMidlertidigAlene -> omsorgspengerMidlertidigAlenePeriode()
     Søknadstype.OmsorgspengerAleneOmsorg -> omsorgspengerAleneOmsorgPeriode()
     Søknadstype.OmsorgspengerUtbetaling_Korrigering -> omsorgspengerUtbetalingKorrigeringIMPeriode()
-    Søknadstype.Omsorgspenger, Søknadstype.OmsorgspengerUtbetaling_Arbeidstaker, Søknadstype.OmsorgspengerUtbetaling_Papirsøknad_Arbeidstaker -> ÅpenPeriode
+    Søknadstype.OmsorgspengerUtbetaling_Arbeidstaker, Søknadstype.OmsorgspengerUtbetaling_Papirsøknad_Arbeidstaker -> omsorgspengerUtbetalingHeleAretIPeriode()
+    Søknadstype.Omsorgspenger -> ÅpenPeriode
+    Søknadstype.Opplæringspenger -> opplaeringspengerPeriode()
 }
 
 internal fun ObjectNode.somPunsjetSøknad(
@@ -92,6 +94,14 @@ internal fun ObjectNode.somPunsjetSøknad(
             periode = periode,
             saksbehandler = saksbehandler
         )
+        Søknadstype.Opplæringspenger -> map(
+            søknadstype = søknadstype,
+            versjon = versjon,
+            saksnummer = saksnummer,
+            periode = periode,
+            pleietrengende = barn(),
+            saksbehandler = saksbehandler
+        )
     }
 }
 
@@ -153,11 +163,17 @@ private fun ObjectNode.omsorgspengerKroniskSyktBarnPeriode(mottatt: ZonedDateTim
 private fun ObjectNode.omsorgspengerUtbetalingKorrigeringIMPeriode() =
     objectPerioder("fraværsperioderKorrigeringIm").somEnPeriode()
 
+private fun ObjectNode.omsorgspengerUtbetalingHeleAretIPeriode() =
+    objectPerioder("fraværsperioder").somEnPeriode()
+
 private fun ObjectNode.omsorgspengerMidlertidigAlenePeriode() =
     get("ytelse").get("annenForelder").get("periode")?.asText()?.somPeriode() ?: ÅpenPeriode
 
 private fun ObjectNode.omsorgspengerAleneOmsorgPeriode() =
     get("ytelse").get("periode")?.asText()?.somPeriode() ?: ÅpenPeriode
+
+private fun ObjectNode.opplaeringspengerPeriode() =
+    arrayPerioder("søknadsperiode").somEnPeriode()
 
 private fun List<Periode>.somEnPeriode() : Periode {
     val fraOgMedDatoer = map { it.fom }
