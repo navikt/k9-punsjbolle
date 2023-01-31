@@ -83,6 +83,21 @@ internal class K9SakClient(
         correlationId: CorrelationId
     ): K9Saksnummer? {
 
+        val ytelseTyperMedPeriode = setOf(
+            Søknadstype.OmsorgspengerUtbetaling_Arbeidstaker.k9YtelseType,
+            Søknadstype.OmsorgspengerUtbetaling_Papirsøknad_Arbeidstaker,
+            Søknadstype.OmsorgspengerUtbetaling_Korrigering
+        )
+
+        val søknadK9YtelseType = grunnlag.søknadstype.k9YtelseType
+        val periode = if(ytelseTyperMedPeriode.contains(søknadK9YtelseType)) {
+            grunnlag.periode
+        } else {
+            null
+        }
+
+        val periodeString = periode?.let { """ "periode": { "fom": "${it.tom}", "tom": "${it.tom}" }, """ } ?: """ "periode": {}, """
+
         // https://github.com/navikt/k9-sak/blob/3.2.10/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/FinnSak.java#L46
         @Language("JSON")
         val dto = """
@@ -91,7 +106,7 @@ internal class K9SakClient(
                 "aktørId": "${grunnlag.søker}",
                 "pleietrengendeAktørId": ${grunnlag.pleietrengende?.let { """"$it"""" }},
                 "relatertPersonAktørId": ${grunnlag.annenPart?.let { """"$it"""" }},
-                "periode": {}
+                $periodeString
             }
         """.trimIndent()
 
