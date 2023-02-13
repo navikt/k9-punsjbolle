@@ -28,8 +28,7 @@ internal class InfotrygdClient(
 ) : AzureAwareClient(
     navn = "InfotrygdClient",
     accessTokenClient = accessTokenClient,
-    scopes = scopes,
-    pingUrl = URI("$baseUrl/actuator/health")
+    scopes = scopes
 ) {
 
     private val HentSakerUrl = URI("$baseUrl/saker")

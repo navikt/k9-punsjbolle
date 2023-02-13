@@ -8,13 +8,6 @@ import no.nav.punsjbolle.testutils.wiremock.WireMockVerktøy.withJson
 
 private const val path = "/k9-sak-mock"
 
-private fun WireMockServer.mockPingUrl(): WireMockServer {
-    WireMock.stubFor(
-        WireMock.get(WireMock.urlPathMatching(".*$path/internal/health/isReady")).withAuthorizationHeader()
-            .willReturn(WireMock.aResponse().withStatus(200)))
-    return this
-}
-
 private fun WireMockServer.mockHentSaksnummer(): WireMockServer {
     WireMock.stubFor(
         WireMock.post(WireMock.urlPathMatching(".*$path/api/fordel/fagsak/opprett"))
@@ -65,5 +58,5 @@ private fun WireMockServer.mockMatchFagsak(): WireMockServer {
 }
 
 
-internal fun WireMockServer.mockK9Sak() = mockPingUrl().mockHentSaksnummer().mockSendInnSøknad().mockMatchFagsak().mockPleiepengerSyktBarnUnntaksliste()
+internal fun WireMockServer.mockK9Sak() = mockHentSaksnummer().mockSendInnSøknad().mockMatchFagsak().mockPleiepengerSyktBarnUnntaksliste()
 internal fun WireMockServer.k9SakBaseUrl() = baseUrl() + path

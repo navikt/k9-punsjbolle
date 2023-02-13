@@ -21,8 +21,7 @@ internal class SakClient(
 ) : AzureAwareClient(
     navn = "SakClient",
     accessTokenClient = accessTokenClient,
-    scopes = scopes,
-    pingUrl = URI("$baseUrl/isAlive")
+    scopes = scopes
 ) {
 
     private val OpprettSakUrl = URI("$baseUrl/api/v1/saker")
