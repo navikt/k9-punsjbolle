@@ -11,13 +11,6 @@ import no.nav.punsjbolle.testutils.wiremock.WireMockVerktøy.withNavPostHeaders
 
 private const val path = "/infotrygd-grunnlag-paaroerende-sykdom-mock"
 
-private fun WireMockServer.mockPingUrl(): WireMockServer {
-    WireMock.stubFor(
-        WireMock.get(WireMock.urlPathMatching(".*$path/actuator/health")).withAuthorizationHeader()
-            .willReturn(WireMock.aResponse().withStatus(200)))
-    return this
-}
-
 private fun WireMockServer.mockSaker(): WireMockServer {
     WireMock.stubFor(
         WireMock.post(WireMock.urlPathMatching(".*$path/saker.*"))
@@ -34,5 +27,5 @@ private fun WireMockServer.mockVedtakForPleietrengende(): WireMockServer {
     return this
 }
 
-internal fun WireMockServer.mockInfotrygdGrunnlagPaaroerendeSykdom() = mockPingUrl().mockSaker().mockVedtakForPleietrengende()
+internal fun WireMockServer.mockInfotrygdGrunnlagPaaroerendeSykdom() = mockSaker().mockVedtakForPleietrengende()
 internal fun WireMockServer.infotrygdGrunnlagPaaroerendeSykdomBaseUrl() = baseUrl() + path

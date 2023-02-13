@@ -23,13 +23,6 @@ private val hentJounralpostResponse = """
     }
 """.trimIndent()
 
-private fun WireMockServer.mockPingUrl(): WireMockServer {
-    WireMock.stubFor(
-        WireMock.get(WireMock.urlPathMatching(".*$path/isReady")).withAuthorizationHeader()
-            .willReturn(WireMock.aResponse().withStatus(200)))
-    return this
-}
-
 private fun WireMockServer.mockHentJournalpost(): WireMockServer {
     WireMock.stubFor(
         WireMock.post(WireMock.urlPathMatching(".*$path/graphql")).withNavPostHeaders()
@@ -38,5 +31,5 @@ private fun WireMockServer.mockHentJournalpost(): WireMockServer {
     return this
 }
 
-internal fun WireMockServer.mockSaf() = mockPingUrl().mockHentJournalpost()
+internal fun WireMockServer.mockSaf() = mockHentJournalpost()
 internal fun WireMockServer.safBaseUrl() = baseUrl() + path

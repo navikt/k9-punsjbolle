@@ -29,8 +29,7 @@ internal class SafClient(
 ) : AzureAwareClient(
     navn = "SafClient",
     accessTokenClient = accessTokenClient,
-    scopes = scopes,
-    pingUrl = URI("$baseUrl/isReady")
+    scopes = scopes
 ) {
 
     private val GraphQlEndpoint = "$baseUrl/graphql"

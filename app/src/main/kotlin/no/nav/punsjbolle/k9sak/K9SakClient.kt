@@ -31,8 +31,7 @@ internal class K9SakClient(
 ) : AzureAwareClient(
     navn = "K9SakClient",
     accessTokenClient = accessTokenClient,
-    scopes = scopes,
-    pingUrl = URI("$baseUrl/internal/health/isReady")
+    scopes = scopes
 ) {
 
     private val HentEllerOpprettSaksnummerUrl = URI("$baseUrl/api/fordel/fagsak/opprett")

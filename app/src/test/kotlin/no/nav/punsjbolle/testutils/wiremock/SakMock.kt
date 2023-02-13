@@ -7,13 +7,6 @@ import no.nav.punsjbolle.testutils.wiremock.WireMockVerktøy.withDefaultPostHead
 
 private const val path = "/sak-mock"
 
-private fun WireMockServer.mockPingUrl(): WireMockServer {
-    WireMock.stubFor(
-        WireMock.get(WireMock.urlPathMatching(".*$path/isAlive")).withAuthorizationHeader()
-            .willReturn(WireMock.aResponse().withStatus(200)))
-    return this
-}
-
 private fun WireMockServer.mockOpprettSak(): WireMockServer {
     WireMock.stubFor(
         WireMock.post(WireMock.urlPathMatching(".*$path/api/v1/saker"))
@@ -30,5 +23,5 @@ private fun WireMockServer.mockOpprettSak(): WireMockServer {
 }
 
 
-internal fun WireMockServer.mockSak() = mockPingUrl().mockOpprettSak()
+internal fun WireMockServer.mockSak() = mockOpprettSak()
 internal fun WireMockServer.sakBaseUrl() = baseUrl() + path
