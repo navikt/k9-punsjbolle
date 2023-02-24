@@ -1,18 +1,18 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
-val junitJupiterVersion = "5.9.1"
-val k9rapidVersion = "1.20221124140732-e07f6f7"
-val dusseldorfVersion = "3.2.2.2-d9c7672"
-val ktorVersion = "2.2.2"
+val junitJupiterVersion = "5.9.2"
+val k9rapidVersion = "1.20230223071927-10b4a1f"
+val dusseldorfVersion = "3.2.2.3-b1ecf04"
+val ktorVersion = "2.2.3"
 val jsonassertVersion = "1.5.1"
-val mockkVersion = "1.13.3"
-val assertjVersion = "3.23.1"
-val k9SakKontraktVersion = "3.3.33"
+val mockkVersion = "1.13.4"
+val assertjVersion = "3.24.2"
+val k9SakKontraktVersion = "3.3.35"
 
 val mainClass = "no.nav.punsjbolle.ApplicationKt"
 
 plugins {
-    kotlin("jvm") version "1.8.0"
+    kotlin("jvm") version "1.8.10"
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
@@ -99,6 +99,6 @@ tasks {
     }
 
     withType<Wrapper> {
-        gradleVersion = "7.5.1"
+        gradleVersion = "8.0.1"
     }
 }
