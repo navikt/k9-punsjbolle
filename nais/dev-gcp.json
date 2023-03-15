@@ -6,7 +6,7 @@
   "azureTenant": "trygdeetaten.no",
   "kafkaPool": "nav-dev",
   "ingresses": [
-    "https://k9-punsjbolle.dev.intern.nav.no"
+    "https://k9-punsjbolle.intern.dev.nav.no"
   ],
   "externalHosts": [
     "omsorgspenger-proxy.dev-fss-pub.nais.io"
