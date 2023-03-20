@@ -1,13 +1,13 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 val junitJupiterVersion = "5.9.2"
-val k9rapidVersion = "1.20230223071927-10b4a1f"
+val k9rapidVersion = "1.20230316100804-072b34b"
 val dusseldorfVersion = "3.2.2.4-98ccf55"
 val ktorVersion = "2.2.4"
 val jsonassertVersion = "1.5.1"
 val mockkVersion = "1.13.4"
 val assertjVersion = "3.24.2"
-val k9SakKontraktVersion = "3.3.35"
+val k9SakKontraktVersion = "3.4.3"
 
 val mainClass = "no.nav.punsjbolle.ApplicationKt"
 
@@ -54,15 +54,6 @@ repositories {
         credentials {
             username = project.findProperty("gpr.user") as String? ?: "x-access-token"
             password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
-        }
-    }
-
-    maven {
-        name = "K9SakPackages"
-        url = uri("https://maven.pkg.github.com/navikt/k9-sak")
-        credentials {
-            username = project.findProperty("gpr.user") as String? ?: "x-access-token"
-            password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_READER_TOKEN")
         }
     }
 
