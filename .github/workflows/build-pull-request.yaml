@@ -9,16 +9,9 @@ on:
       - 'LICENSE'
       - 'CODEOWNERS'
 
-env:
-  GITHUB_USERNAME: x-access-token
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  GITHUB_READER_TOKEN: ${{ secrets.READER_TOKEN }}
-
 jobs:
   Build:
-
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
@@ -28,3 +21,5 @@ jobs:
           cache: gradle
       - name: Bygge JAR
         run: ./gradlew test shadowjar
+        env:
+          GITHUB_TOKEN: ${{ secrets.READER_TOKEN }}
