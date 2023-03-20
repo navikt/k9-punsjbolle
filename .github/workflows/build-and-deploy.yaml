@@ -65,6 +65,7 @@ jobs:
           CLUSTER: dev-gcp
           RESOURCE: nais/naiserator.yaml
           VARS: nais/dev-gcp.json
+          IMAGE: ${{ steps.docker-push.outputs.image }}
 
       - name: Deploy til prod-gcp
         if: github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, 'ci skip')
@@ -74,4 +75,5 @@ jobs:
           CLUSTER: prod-gcp
           RESOURCE: nais/naiserator.yaml
           VARS: nais/prod-gcp.json
+          IMAGE: ${{ steps.docker-push.outputs.image }}
 
