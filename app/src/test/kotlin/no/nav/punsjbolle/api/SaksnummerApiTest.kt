@@ -28,6 +28,7 @@ import java.time.LocalDate
 import java.util.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Disabled
 
 @ExtendWith(ApplicationContextExtension::class)
 internal class SaksnummerApiTest(
@@ -50,73 +51,6 @@ internal class SaksnummerApiTest(
     @BeforeEach
     fun beforeEach() {
         clearMocks(safClientMock, k9SakClientMock, infotrygdClientMock, sakClientMock)
-    }
-
-    @Test
-    fun `ingen saker i hverken Infotrygd eller K9sak`() {
-        mockInfotrygd()
-        mockK9Sak()
-        mockHentSaksnummer()
-        mockHentJournalpost()
-        mockForsikreSakskobling()
-
-        val (httpStatus, k9Saksnummer) = requestSaksnummer()
-        assertEquals(HttpStatusCode.OK, httpStatus)
-        assertEquals(saksnummer, k9Saksnummer)
-        assertEquals(RutingService.Destinasjon.K9Sak, requestDestinasjon())
-
-        assertInfotrygdKalt(false)
-        assertK9SakKalt(true)
-    }
-
-    @Test
-    fun `søker har sak i infotrygd, ingenting i K9Sak`() {
-        mockInfotrygd(søker = true)
-        mockK9Sak()
-        mockHentSaksnummer()
-        mockHentJournalpost()
-        mockForsikreSakskobling()
-
-        val (httpStatus, errorType) = requestSaksnummer()
-        assertEquals(HttpStatusCode.OK, httpStatus)
-        assertEquals(RutingService.Destinasjon.K9Sak, requestDestinasjon())
-
-
-        assertInfotrygdKalt(false)
-        assertK9SakKalt(true)
-    }
-
-
-    @Test
-    fun `pleietrengende har vedtak i Infotrygd, ingenting i K9Sak`() {
-        mockK9Sak()
-        mockHentSaksnummer()
-        mockHentJournalpost()
-        mockForsikreSakskobling()
-
-        val (httpStatus, errorType) = requestSaksnummer()
-        assertEquals(HttpStatusCode.OK, httpStatus)
-        assertEquals(RutingService.Destinasjon.K9Sak, requestDestinasjon())
-
-        assertInfotrygdKalt(false)
-        assertK9SakKalt(true)
-    }
-
-    @Test
-    fun `søker har sak i K9Sak, pleietrengende i Infotrygd`() {
-        mockInfotrygd(pleietrengende = true)
-        mockK9Sak(søker = true)
-        mockHentSaksnummer()
-        mockHentJournalpost()
-        mockForsikreSakskobling()
-
-        val (httpStatus, k9Saksnummer) = requestSaksnummer()
-        assertEquals(HttpStatusCode.OK, httpStatus)
-        assertEquals(saksnummer, k9Saksnummer)
-        assertEquals(RutingService.Destinasjon.K9Sak, requestDestinasjon())
-
-        assertInfotrygdKalt(false)
-        assertK9SakKalt(true)
     }
 
     @Test

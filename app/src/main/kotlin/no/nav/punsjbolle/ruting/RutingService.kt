@@ -28,7 +28,7 @@ internal class RutingService(
         .maximumSize(100)
         .build()
 
-    internal suspend fun destinasjon(
+    internal fun destinasjon(
         søker: Identitetsnummer,
         fraOgMed: LocalDate,
         pleietrengende: Identitetsnummer? = null,
@@ -38,6 +38,11 @@ internal class RutingService(
         journalpostIds: Set<JournalpostId>,
         correlationId: CorrelationId
     ): Destinasjon {
+        /*
+        Punsjbollen skal flyttes in i k9-punsj & all håndtering av aktiva saker i infotrygd skall pr nå håndteres av k9-fordel & k9-sak
+         */
+        return Destinasjon.K9Sak
+        /*
         val input = DestinasjonInput(
             søker = søker,
             fraOgMed = fraOgMed,
@@ -56,6 +61,7 @@ internal class RutingService(
                 logger.info("Rutes til ${it.name}, oppslaget finnes i cache.")
             }
         }
+        */
     }
 
     private suspend fun slåOppDestinasjon(
