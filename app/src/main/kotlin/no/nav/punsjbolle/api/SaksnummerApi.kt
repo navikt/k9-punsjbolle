@@ -50,8 +50,9 @@ internal fun Route.SaksnummerApi(
         onK9Sak: suspend (request: Request, periode: Periode) -> Unit
     ) {
         val request = call.request()
-        var (periode, journalpost) = periodeOgJournalpost(request)
-
+        var (periode, _) = periodeOgJournalpost(request)
+        onK9Sak(request, periode)
+        /*
         // Om vi sender in periode i requesten bruker vi den ist for dato journalpost blev opprettet
         // Unngår feilsituation der vi vill opprette behandling for tidigare år. (F.eks. OMP_UT vid årsskifte)
         request.periode?.let { periode = it }
@@ -91,6 +92,7 @@ internal fun Route.SaksnummerApi(
                 }
             }
         }
+         */
     }
 
     post("/ruting") {

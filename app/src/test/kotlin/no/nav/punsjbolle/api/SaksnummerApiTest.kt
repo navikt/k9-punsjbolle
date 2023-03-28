@@ -52,21 +52,7 @@ internal class SaksnummerApiTest(
     fun beforeEach() {
         clearMocks(safClientMock, k9SakClientMock, infotrygdClientMock, sakClientMock)
     }
-
-    @Test
-    fun `journalpost knyttet til annet saksnummer i K9Sak`() {
-        mockInfotrygd(pleietrengende = true)
-        mockK9Sak(søker = true)
-        mockHentSaksnummer()
-        mockHentJournalpost(fagsaksystem = "K9", fagsakId = "EtAnnet")
-
-        val (httpStatus, errorType) = requestSaksnummer()
-        assertEquals(HttpStatusCode.Conflict, httpStatus)
-        assertEquals(URI("punsjbolle://ikke-støttet-journalpost"), errorType)
-        assertEquals(URI("punsjbolle://ikke-støttet-journalpost"), requestDestinasjon())
-
-    }
-
+    
     @Test
     fun `journalpost allerede knyttet til rett saksnummer i K9Sak`() {
         mockInfotrygd(pleietrengende = true)
@@ -79,19 +65,6 @@ internal class SaksnummerApiTest(
         assertEquals(HttpStatusCode.OK, httpStatus)
         assertEquals(saksnummer, k9Saksnummer)
         assertEquals(RutingService.Destinasjon.K9Sak, requestDestinasjon())
-    }
-
-    @Test
-    fun `journalpost allerede knyttet til annet fagsystem`() {
-        mockInfotrygd(pleietrengende = true)
-        mockK9Sak(søker = true)
-        mockHentSaksnummer()
-        mockHentJournalpost(fagsaksystem = "FOO", fagsakId = "BAR")
-
-        val (httpStatus, errorType) = requestSaksnummer()
-        assertEquals(HttpStatusCode.Conflict, httpStatus)
-        assertEquals(URI("punsjbolle://ikke-støttet-journalpost"), errorType)
-        assertEquals(URI("punsjbolle://ikke-støttet-journalpost"), requestDestinasjon())
     }
 
     @Test
