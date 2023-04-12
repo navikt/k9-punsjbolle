@@ -5,7 +5,7 @@ val k9rapidVersion = "1.20230316100804-072b34b"
 val dusseldorfVersion = "3.2.2.4-98ccf55"
 val ktorVersion = "2.2.4"
 val jsonassertVersion = "1.5.1"
-val mockkVersion = "1.13.4"
+val mockkVersion = "1.13.5"
 val assertjVersion = "3.24.2"
 val k9SakKontraktVersion = "3.4.3"
 
