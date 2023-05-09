@@ -12,4 +12,5 @@ jobs:
     uses: navikt/sif-gha-workflows/.github/workflows/gradle-dependency-submission.yml@main
     secrets: inherit
     with:
-      build-gradle-path: "app/build.gradle.kts"
+      multi-module: true
+      module-name: app
