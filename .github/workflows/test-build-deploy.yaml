@@ -21,7 +21,7 @@ jobs:
       security-events: write
     secrets: inherit
     with:
-      language: java
+      readertoken: true
       package-command: './gradlew clean build -x test'
       branch: main
 
