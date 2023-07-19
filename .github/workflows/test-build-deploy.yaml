@@ -12,15 +12,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  sonar:
-    uses: navikt/sif-gha-workflows/.github/workflows/gradle-sonar.yml@main
-    permissions:
-      contents: read
-      pull-requests: read
-    secrets: inherit
-    with:
-      readertoken: true
-
   codeql:
     uses: navikt/sif-gha-workflows/.github/workflows/gradle-codeql.yml@main
     permissions:
@@ -32,7 +23,7 @@ jobs:
     with:
       language: java
       package-command: './gradlew clean build -x test'
-      branch: master
+      branch: main
 
   test:
     uses: navikt/sif-gha-workflows/.github/workflows/gradle-test.yml@main
