@@ -7,12 +7,12 @@ val ktorVersion = "2.3.3"
 val jsonassertVersion = "1.5.1"
 val mockkVersion = "1.13.7"
 val assertjVersion = "3.24.2"
-val k9SakKontraktVersion = "4.0.0"
+val k9SakKontraktVersion = "4.1.0"
 
 val mainClass = "no.nav.punsjbolle.ApplicationKt"
 
 plugins {
-    kotlin("jvm") version "1.9.0"
+    kotlin("jvm") version "1.9.10"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
