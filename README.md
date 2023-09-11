@@ -1,5 +1,6 @@
 # k9-punsjbolle
 
+
 ## Behov som løses på rapid
 ### PunsjetSøknad
 * Henter aktørId på alle involverte parter (med behov `HentPersonopplysninger` i `k9-personopplysninger`)
