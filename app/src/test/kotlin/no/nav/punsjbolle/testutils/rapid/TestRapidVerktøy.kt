@@ -28,7 +28,7 @@ internal fun TestRapid.sisteMeldingHarLøsningPå(behov: String) {
     val key = "@løsninger.$behov.løst"
     val jsonMessage = sisteMeldingSomJsonMessage().also { it.interestedIn(key) }
     val node = jsonMessage[key]
-    require(node is TextNode && ZonedDateTime.parse(node.textValue()) != null)
+    require(node is TextNode && ZonedDateTime.parse(node.textValue()) != null) { "Feil vid parsing av tid: ${node.textValue()}" }
 }
 
 internal fun TestRapid.sisteMeldingManglerLøsningPå(behov: String) {
