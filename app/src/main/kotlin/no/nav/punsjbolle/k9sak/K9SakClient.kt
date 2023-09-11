@@ -7,20 +7,18 @@ import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.jsonBody
 import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.readTextOrThrow
 import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.stringBody
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
-import no.nav.punsjbolle.*
-import no.nav.punsjbolle.Json.stringOrNull
+import no.nav.punsjbolle.AzureAwareClient
+import no.nav.punsjbolle.CorrelationId
+import no.nav.punsjbolle.K9Saksnummer
 import no.nav.punsjbolle.K9Saksnummer.Companion.somK9Saksnummer
-import no.nav.punsjbolle.Periode.Companion.somPeriode
 import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
 import no.nav.punsjbolle.meldinger.SendPunsjetSøknadTilK9SakMelding
-import no.nav.punsjbolle.ruting.RutingGrunnlag
 import no.nav.punsjbolle.søknad.PunsjetSøknadMelding
 import org.intellij.lang.annotations.Language
 import org.json.JSONArray
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
 import java.net.URI
-import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*
 
@@ -35,10 +33,7 @@ internal class K9SakClient(
 ) {
 
     private val HentEllerOpprettSaksnummerUrl = URI("$baseUrl/api/fordel/fagsak/opprett")
-    private val HentSaksnummerUrl = URI("$baseUrl/api/fagsak/siste")
     private val SendInnSøknadUrl = URI("$baseUrl/api/fordel/journalposter")
-    private val MatchFagsakUrl = URI("$baseUrl/api/fagsak/match")
-    private val PleiepengerSyktBarnUnntakslisteUrl = URI("$baseUrl/api/fordel/psb-infotrygd/finnes")
 
 
     internal suspend fun hentEllerOpprettSaksnummer(
@@ -75,53 +70,6 @@ internal class K9SakClient(
         }
 
         return response.saksnummer()
-    }
-
-    internal suspend fun hentEksisterendeSaksnummer(
-        grunnlag: HentK9SaksnummerMelding.HentK9SaksnummerGrunnlag,
-        correlationId: CorrelationId
-    ): K9Saksnummer? {
-
-        val ytelseTyperMedPeriode = setOf(
-            Søknadstype.OmsorgspengerUtbetaling_Arbeidstaker.k9YtelseType,
-            Søknadstype.OmsorgspengerUtbetaling_Papirsøknad_Arbeidstaker,
-            Søknadstype.OmsorgspengerUtbetaling_Korrigering
-        )
-
-        val søknadK9YtelseType = grunnlag.søknadstype.k9YtelseType
-        val periode = if(ytelseTyperMedPeriode.contains(søknadK9YtelseType)) {
-            grunnlag.periode
-        } else {
-            null
-        }
-
-        val periodeString = periode?.let { """ "periode": { "fom": "${it.tom}", "tom": "${it.tom}" }, """ } ?: """ "periode": {}, """
-
-        // https://github.com/navikt/k9-sak/blob/3.2.10/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/FinnSak.java#L46
-        @Language("JSON")
-        val dto = """
-            {
-                "ytelseType": "${grunnlag.søknadstype.k9YtelseType}",
-                "aktørId": "${grunnlag.søker}",
-                "pleietrengendeAktørId": ${grunnlag.pleietrengende?.let { """"$it"""" }},
-                "relatertPersonAktørId": ${grunnlag.annenPart?.let { """"$it"""" }},
-                $periodeString
-            }
-        """.trimIndent()
-
-        val (httpStatusCode, response) = post(
-            dto = dto,
-            correlationId = correlationId,
-            uri = HentSaksnummerUrl
-        )
-
-        return when (httpStatusCode) {
-            HttpStatusCode.OK -> response.saksnummer()
-            HttpStatusCode.NoContent -> null
-            else -> throw IllegalStateException(
-                "Feil fra K9Sak. URL=[$HentSaksnummerUrl], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
-            )
-        }
     }
 
     private suspend fun post(
@@ -179,131 +127,8 @@ internal class K9SakClient(
         }
     }
 
-    internal suspend fun harLøpendeSakSomInvolvererEnAv(
-        søker: Identitetsnummer,
-        pleietrengende: Identitetsnummer?,
-        annenPart: Identitetsnummer?,
-        fraOgMed: LocalDate,
-        søknadstype: Søknadstype,
-        correlationId: CorrelationId
-    ): RutingGrunnlag {
-        if (finnesMatchendeFagsak(
-                søker = søker,
-                fraOgMed = fraOgMed,
-                correlationId = correlationId,
-                søknadstype = søknadstype
-            )
-        ) {
-            return RutingGrunnlag(søker = true)
-        }
-        if (pleietrengende?.let {
-                finnesMatchendeFagsak(
-                    pleietrengende = it,
-                    fraOgMed = fraOgMed,
-                    correlationId = correlationId,
-                    søknadstype = søknadstype
-                )
-            } == true) {
-            return RutingGrunnlag(søker = false, pleietrengende = true)
-        }
-        return RutingGrunnlag(
-            søker = false,
-            pleietrengende = false,
-            annenPart = annenPart?.let {
-                finnesMatchendeFagsak(
-                    søker = it,
-                    fraOgMed = fraOgMed,
-                    correlationId = correlationId,
-                    søknadstype = søknadstype
-                )
-            } ?: false
-        )
-    }
-
-    private suspend fun finnesMatchendeFagsak(
-        søker: Identitetsnummer? = null,
-        pleietrengende: Identitetsnummer? = null,
-        annenPart: Identitetsnummer? = null,
-        fraOgMed: LocalDate,
-        søknadstype: Søknadstype,
-        correlationId: CorrelationId
-    ): Boolean {
-
-        val ytelseTyperMedPeriode = setOf(
-            Søknadstype.OmsorgspengerUtbetaling_Arbeidstaker.k9YtelseType,
-            Søknadstype.OmsorgspengerUtbetaling_Papirsøknad_Arbeidstaker,
-            Søknadstype.OmsorgspengerUtbetaling_Korrigering
-        )
-
-        val søknadK9YtelseType = søknadstype.k9YtelseType
-        val periode = if(ytelseTyperMedPeriode.contains(søknadK9YtelseType)) {
-            fraOgMed.somPeriode()
-        } else {
-            null
-        }
-
-        val periodeString = periode?.let { """ "periode": { "fom": "${it.tom}", "tom": "${it.tom}" }, """ } ?: """ "periode": {}, """
-
-        // https://github.com/navikt/k9-sak/tree/3.1.30/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/fagsak/MatchFagsak.java#L26
-        @Language("JSON")
-        val dto = """
-        {
-            "ytelseType": {
-                "kode": "$søknadK9YtelseType",
-                "kodeverk": "FAGSAK_YTELSE"
-            },
-            $periodeString
-            "bruker": ${søker?.let { """"$it"""" }},
-            "pleietrengendeIdenter": ${pleietrengende.jsonArray()},
-            "relatertPersonIdenter": ${annenPart.jsonArray()}
-        }
-        """.trimIndent()
-
-        val (httpStatusCode, response) = MatchFagsakUrl.toString().httpPost {
-            it.header(HttpHeaders.Authorization, authorizationHeader())
-            it.header(CorrelationIdHeaderKey, "$correlationId")
-            it.header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-            it.accept(ContentType.Application.Json)
-            it.jsonBody(dto)
-        }.readTextOrThrow()
-
-        require(httpStatusCode.isSuccess()) {
-            "Feil fra K9Sak. URL=[$MatchFagsakUrl], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
-        }
-
-        return response.inneholderMatchendeFagsak()
-    }
-
-    internal suspend fun inngårIUnntaksliste(
-        aktørIder: Set<AktørId>,
-        søknadstype: Søknadstype,
-        correlationId: CorrelationId
-    ): Boolean {
-
-        // https://github.com/navikt/k9-sak/tree/3.2.7/web/src/main/java/no/nav/k9/sak/web/app/tjenester/fordeling/FordelRestTjeneste.java#L164
-        // https://github.com/navikt/k9-sak/tree/3.2.7/kontrakt/src/main/java/no/nav/k9/sak/kontrakt/mottak/Akt%C3%B8rListeDto.java#L19
-        val dto = JSONObject().also {
-            it.put("aktører", JSONArray(aktørIder.map { aktørId -> "$aktørId" }))
-        }.toString()
-
-        val (httpStatusCode, response) = PleiepengerSyktBarnUnntakslisteUrl.toString().httpPost {
-            it.header(HttpHeaders.Authorization, authorizationHeader())
-            it.header(CorrelationIdHeaderKey, "$correlationId")
-            it.header(ConsumerIdHeaderKey, ConsumerIdHeaderValue)
-            it.accept(ContentType.Application.Json)
-            it.jsonBody(dto)
-        }.readTextOrThrow()
-
-        require(httpStatusCode.isSuccess() && (response == "true" || response == "false")) {
-            "Feil fra K9Sak. URL=[$PleiepengerSyktBarnUnntakslisteUrl], HttpStatusCode=[${httpStatusCode.value}], Response=[$response]"
-        }
-
-        return (response == "true")
-    }
-
     internal companion object {
         private val logger = LoggerFactory.getLogger(K9SakClient::class.java)
-        private val secureLogger = LoggerFactory.getLogger("tjenestekall")
         private val Oslo = ZoneId.of("Europe/Oslo")
 
         private const val ConsumerIdHeaderKey = "Nav-Consumer-Id"
@@ -313,24 +138,6 @@ internal class K9SakClient(
         private fun HttpRequestBuilder.jsonArrayBody(json: String) =
             stringBody(string = JSONArray(json).toString(), contentType = ContentType.Application.Json)
 
-        private fun Identitetsnummer?.jsonArray() = when (this) {
-            null -> "[]"
-            else -> """["$this"]"""
-        }
-
         private fun String.saksnummer() = JSONObject(this).getString("saksnummer").somK9Saksnummer()
-
-        internal fun String.inneholderMatchendeFagsak() = JSONArray(this)
-            .asSequence()
-            .map { it as JSONObject }
-            .filterNot {
-                (it.getString("status") == "OPPR").also { erStatusOpprettet ->
-                    if (erStatusOpprettet) {
-                        logger.info("MatchendeFagsak: Filtrerer bort Saksnummer=${it.stringOrNull("saksnummer")} i Status=OPPR")
-                    }
-                }
-            }
-            .toSet()
-            .isNotEmpty()
     }
 }

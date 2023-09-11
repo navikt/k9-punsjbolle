@@ -3,15 +3,14 @@ package no.nav.punsjbolle
 import no.nav.helse.dusseldorf.ktor.health.HealthCheck
 import no.nav.helse.dusseldorf.oauth2.client.AccessTokenClient
 import no.nav.helse.dusseldorf.oauth2.client.ClientSecretAccessTokenClient
-import no.nav.k9.rapid.river.*
-
+import no.nav.k9.rapid.river.Environment
 import no.nav.k9.rapid.river.KafkaBuilder.kafkaProducer
-import no.nav.punsjbolle.JournalpostId.Companion.somJournalpostId
-import no.nav.punsjbolle.infotrygd.InfotrygdClient
+import no.nav.k9.rapid.river.RapidsStateListener
+import no.nav.k9.rapid.river.csvTilSet
+import no.nav.k9.rapid.river.hentRequiredEnv
 import no.nav.punsjbolle.joark.SafClient
 import no.nav.punsjbolle.journalpost.PunsjbarJournalpostClient
 import no.nav.punsjbolle.k9sak.K9SakClient
-import no.nav.punsjbolle.ruting.RutingService
 import no.nav.punsjbolle.sak.SakClient
 import java.net.URI
 
@@ -22,9 +21,7 @@ internal class ApplicationContext(
     internal val k9SakClient: K9SakClient,
     internal val sakClient: SakClient,
     internal val safClient: SafClient,
-    internal val infotrygdClient: InfotrygdClient,
     internal val punsjbarJournalpostClient: PunsjbarJournalpostClient,
-    internal val rutingService: RutingService,
     private val onStart: (applicationContext: ApplicationContext) -> Unit,
     private val onStop: (applicationContext: ApplicationContext) -> Unit) {
 
@@ -38,9 +35,7 @@ internal class ApplicationContext(
         var k9SakClient: K9SakClient? = null,
         var sakClient: SakClient? = null,
         var safClient: SafClient? = null,
-        var infotrygdClient: InfotrygdClient? = null,
         var punsjbarJournalpostClient: PunsjbarJournalpostClient? = null,
-        var rutingService: RutingService? = null,
         var onStart: (applicationContext: ApplicationContext) -> Unit = {},
         var onStop: (applicationContext: ApplicationContext) -> Unit = {
             it.punsjbarJournalpostClient.close()
@@ -73,12 +68,6 @@ internal class ApplicationContext(
                 scopes = benyttetEnv.hentRequiredEnv("SAF_SCOPES").csvTilSet(),
             )
 
-            val benyttetInfotrygdClient = infotrygdClient ?: InfotrygdClient(
-                baseUrl = URI(benyttetEnv.hentRequiredEnv("INFOTRYGD_GRUNNLAG_PAAROERENDE_SYKDOM_BASE_URL")),
-                accessTokenClient = benyttetAccessTokenClient,
-                scopes = benyttetEnv.hentRequiredEnv("INFOTRYGD_GRUNNLAG_PAAROERENDE_SYKDOM_SCOPES").csvTilSet()
-            )
-
             val benyttetPunsjbarJournalpostClient = punsjbarJournalpostClient ?: PunsjbarJournalpostClient(
                 kafkaProducer = benyttetEnv.kafkaProducer("punsjbar-journalpost")
             )
@@ -88,20 +77,9 @@ internal class ApplicationContext(
                 accessTokenClient = benyttetAccessTokenClient,
                 k9SakClient = benyttetK9SakClient,
                 safClient = benyttetSafClient,
-                infotrygdClient = benyttetInfotrygdClient,
-                healthChecks = setOf(benyttetK9SakClient, benyttetSafClient, benyttetInfotrygdClient, benyttetSakClient),
+                healthChecks = setOf(benyttetK9SakClient, benyttetSafClient, benyttetSakClient),
                 onStart = onStart,
                 onStop = onStop,
-                rutingService = rutingService ?: RutingService(
-                    k9SakClient = benyttetK9SakClient,
-                    infotrygdClient = benyttetInfotrygdClient,
-                    overstyrTilK9SakJournalpostIds = benyttetEnv.hentOptionalEnv("OVERSTYR_RUTING_TIL_K9_SAK_JOURNALPOST_IDS")
-                        ?.csvTilSet()
-                        ?.filterNot { it.isBlank()  }
-                        ?.map { it.somJournalpostId() }
-                        ?.toSet()
-                        ?: emptySet()
-                ),
                 sakClient = benyttetSakClient,
                 punsjbarJournalpostClient = benyttetPunsjbarJournalpostClient
             )

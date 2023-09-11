@@ -1,28 +1,24 @@
 package no.nav.punsjbolle.søknad
 
-import kotlinx.coroutines.runBlocking
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
-import no.nav.k9.rapid.river.*
-import no.nav.punsjbolle.CorrelationId.Companion.correlationId
+import no.nav.k9.rapid.river.BehovssekvensPacketListener
+import no.nav.k9.rapid.river.harLøsningPåBehov
+import no.nav.k9.rapid.river.skalLøseBehov
 import no.nav.punsjbolle.joark.SafClient
 import no.nav.punsjbolle.k9sak.K9SakClient
 import no.nav.punsjbolle.meldinger.HentAktørIderMelding
-import no.nav.punsjbolle.ruting.RutingService
 import org.slf4j.LoggerFactory
 
 internal class PunsjetSøknadJournalføringRiver(
     rapidsConnection: RapidsConnection,
     k9SakClient: K9SakClient,
     safClient: SafClient,
-    private val rutingService: RutingService) : BehovssekvensPacketListener(
+) : BehovssekvensPacketListener(
     logger = LoggerFactory.getLogger(PunsjetSøknadJournalføringRiver::class.java),
     mdcPaths = PunsjetSøknadMelding.mdcPaths) {
 
-    private val punsjetSøknadTilInfotrygd = PunsjetSøknadTilInfotrygd(
-        safClient = safClient
-    )
     private val punsjetSøknadTilK9Sak = PunsjetSøknadTilK9Sak(
         safClient = safClient,
         k9SakClient = k9SakClient
@@ -40,24 +36,7 @@ internal class PunsjetSøknadJournalføringRiver(
     }
 
     override fun handlePacket(id: String, packet: JsonMessage): Boolean {
-        val søknad = PunsjetSøknadMelding.hentBehov(packet)
-        val aktørIder = HentAktørIderMelding.hentLøsning(packet)
-
-        val destinasjon = runBlocking { rutingService.destinasjon(
-            søker = søknad.søker,
-            fraOgMed = søknad.periode.fom ?: søknad.mottatt.toLocalDate(),
-            pleietrengende = søknad.pleietrengende,
-            annenPart = søknad.annenPart,
-            søknadstype = søknad.søknadstype,
-            aktørIder = aktørIder.values.toSet(),
-            correlationId = packet.correlationId(),
-            journalpostIds = søknad.journalpostIder
-        )}.also { logger.info("Destinasjon=[${it.name}]") }
-
-        return when (destinasjon) {
-            RutingService.Destinasjon.Infotrygd -> punsjetSøknadTilInfotrygd.handlePacket(packet)
-            RutingService.Destinasjon.K9Sak ->  punsjetSøknadTilK9Sak.handlePacket(packet)
-        }
+        return punsjetSøknadTilK9Sak.handlePacket(packet)
     }
 
 }

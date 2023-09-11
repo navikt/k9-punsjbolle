@@ -17,18 +17,15 @@ import no.nav.punsjbolle.Periode.Companion.somPeriode
 import no.nav.punsjbolle.api.Request.Companion.fraSøknadRequest
 import no.nav.punsjbolle.api.Request.Companion.request
 import no.nav.punsjbolle.joark.Journalpost
-import no.nav.punsjbolle.joark.Journalpost.Companion.kanSendesTilK9Sak
 import no.nav.punsjbolle.joark.SafClient
 import no.nav.punsjbolle.k9sak.K9SakClient
 import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
-import no.nav.punsjbolle.ruting.RutingService
 import no.nav.punsjbolle.sak.SakClient
 import no.nav.punsjbolle.søknad.periode
 import no.nav.punsjbolle.søknad.søknadstype
 import org.slf4j.LoggerFactory
 
 internal fun Route.SaksnummerApi(
-    rutingService: RutingService,
     safClient: SafClient,
     k9SakClient: K9SakClient,
     sakClient: SakClient
@@ -46,70 +43,16 @@ internal fun Route.SaksnummerApi(
     }
 
     suspend fun PipelineContext<Unit, ApplicationCall>.ruting(
-        onInfotrygd: suspend () -> Unit,
         onK9Sak: suspend (request: Request, periode: Periode) -> Unit
     ) {
         val request = call.request()
         var (periode, _) = periodeOgJournalpost(request)
         onK9Sak(request, periode)
-        /*
-        // Om vi sender in periode i requesten bruker vi den ist for dato journalpost blev opprettet
-        // Unngår feilsituation der vi vill opprette behandling for tidigare år. (F.eks. OMP_UT vid årsskifte)
-        request.periode?.let { periode = it }
 
-        logger.info("Sjekker ruting for journalpost:[$journalpost] søknadstype:[${request.søknadstype}] periode:[${periode.fom}/${periode.tom}]")
-        val destinasjon = rutingService.destinasjon(
-            søker = request.søker.identitetsnummer,
-            pleietrengende = request.pleietrengende?.identitetsnummer,
-            annenPart = request.annenPart?.identitetsnummer,
-            fraOgMed = periode.fom!!,
-            søknadstype = request.søknadstype,
-            correlationId = request.correlationId,
-            aktørIder = request.aktørIder,
-            journalpostIds = setOfNotNull(request.journalpostId)
-        )
-        logger.info("Ruting for JournalpostId=[${request.journalpostId}], Periode=[$periode], Søknadstype=[${request.søknadstype.name}], Destinasjon=[${destinasjon.name}]")
-        when (destinasjon) {
-            RutingService.Destinasjon.Infotrygd -> onInfotrygd()
-            RutingService.Destinasjon.K9Sak -> {
-                val kanSendesTilK9Sak = journalpost.kanSendesTilK9Sak {
-                    val saksnummerGrunnlag = request.hentSaksnummerGrunnlag(periode)
-                    logger.info("Saksnummergrunnlag: {}", saksnummerGrunnlag)
-                    k9SakClient.hentEksisterendeSaksnummer(
-                        grunnlag = saksnummerGrunnlag,
-                        correlationId = request.correlationId
-                    )
-                }
-                when (kanSendesTilK9Sak) {
-                    true -> onK9Sak(request, periode)
-                    false -> {
-                        secureLogger.warn("Ikke støttet journalpost. RutingRequest=${request}")
-                        call.respondConflict(
-                            feil = "ikke-støttet-journalpost",
-                            detaljer = "$journalpost kan ikke rutes inn til K9Sak."
-                        )
-                    }
-                }
-            }
-        }
-         */
-    }
-
-    post("/ruting") {
-        ruting(
-            onInfotrygd = { call.respondDestinasjon(RutingService.Destinasjon.Infotrygd) },
-            onK9Sak = { _, _ -> call.respondDestinasjon(RutingService.Destinasjon.K9Sak) }
-        )
     }
 
     post("/saksnummer") {
         ruting(
-            onInfotrygd = {
-                call.respondConflict(
-                    feil = "må-behandles-i-infotrygd",
-                    detaljer = "Minst en part har en løpende sak i Infotrygd."
-                )
-            },
             onK9Sak = { request, periode ->
                 val saksnummer = k9SakClient.hentEllerOpprettSaksnummer(
                     correlationId = request.correlationId,
@@ -150,28 +93,6 @@ internal fun Route.SaksnummerApi(
 }
 
 private val logger = LoggerFactory.getLogger("no.nav.punsjbolle.api.SaksnummerApi")
-private val secureLogger = LoggerFactory.getLogger("tjenestekall")
-
-private suspend fun ApplicationCall.respondConflict(feil: String, detaljer: String) {
-    logger.warn("Feil=[$feil], Detaljer=[$detaljer]")
-    respondText(
-        contentType = ContentType.Application.Json,
-        text = """
-            {
-                "status": 409,
-                "type": "punsjbolle://$feil",
-                "details": "$detaljer"
-            }
-        """.trimIndent(),
-        status = HttpStatusCode.Conflict
-    )
-}
-
-private suspend fun ApplicationCall.respondDestinasjon(destinasjon: RutingService.Destinasjon) = respondText(
-    contentType = ContentType.Application.Json,
-    text = """{"destinasjon": "${destinasjon.name}"}""",
-    status = HttpStatusCode.OK
-)
 
 internal data class Request(
     internal val correlationId: CorrelationId,

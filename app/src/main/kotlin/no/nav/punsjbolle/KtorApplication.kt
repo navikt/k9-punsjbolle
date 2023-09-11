@@ -81,7 +81,6 @@ internal fun Application.punsjbolle(
         authenticate(*issuers.allIssuers()) {
             route("/api") {
                 SaksnummerApi(
-                    rutingService = applicationContext.rutingService,
                     safClient = applicationContext.safClient,
                     k9SakClient = applicationContext.k9SakClient,
                     sakClient = applicationContext.sakClient
