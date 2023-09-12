@@ -20,11 +20,6 @@ spec:
       {{#each externalHosts as |host|}}
          - host: {{host}}
       {{/each}}
-    inbound:
-      rules:
-        - application: k9-punsj
-          namespace: k9saksbehandling
-          cluster: {{clusterFss}}
   liveness:
     path: isalive
     initialDelay: 20
@@ -64,7 +59,3 @@ spec:
       value: omsorgspenger.k9-rapid-v2
     - name: KAFKA_CONSUMER_GROUP_ID
       value: k9-punsjbolle
-  {{#if overstyrRutingTilK9SakJournalpostIds}}
-    - name: OVERSTYR_RUTING_TIL_K9_SAK_JOURNALPOST_IDS
-      value: {{#each overstyrRutingTilK9SakJournalpostIds as |journalpostId|}}{{journalpostId}},{{/each}}
-  {{/if}}

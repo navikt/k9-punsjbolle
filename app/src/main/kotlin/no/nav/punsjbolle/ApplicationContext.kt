@@ -19,7 +19,6 @@ internal class ApplicationContext(
     internal val healthChecks: Set<HealthCheck>,
     internal val accessTokenClient: AccessTokenClient,
     internal val k9SakClient: K9SakClient,
-    internal val sakClient: SakClient,
     internal val safClient: SafClient,
     internal val punsjbarJournalpostClient: PunsjbarJournalpostClient,
     private val onStart: (applicationContext: ApplicationContext) -> Unit,
@@ -80,7 +79,6 @@ internal class ApplicationContext(
                 healthChecks = setOf(benyttetK9SakClient, benyttetSafClient, benyttetSakClient),
                 onStart = onStart,
                 onStop = onStop,
-                sakClient = benyttetSakClient,
                 punsjbarJournalpostClient = benyttetPunsjbarJournalpostClient
             )
         }
