@@ -5,18 +5,8 @@ import no.nav.k9.rapid.river.RapidsStateListener
 import no.nav.punsjbolle.journalpost.KopierPunsjbarJournalpostSteg1River
 import no.nav.punsjbolle.journalpost.KopierPunsjbarJournalpostSteg2River
 import no.nav.punsjbolle.journalpost.KopierPunsjbarJournalpostSteg3River
-import no.nav.punsjbolle.søknad.PunsjetSøknadJournalføringRiver
-import no.nav.punsjbolle.søknad.PunsjetSøknadRiver
 
 internal fun RapidsConnection.registerApplicationContext(applicationContext: ApplicationContext) {
-    PunsjetSøknadRiver(
-        rapidsConnection = this
-    )
-    PunsjetSøknadJournalføringRiver(
-        rapidsConnection = this,
-        k9SakClient = applicationContext.k9SakClient,
-        safClient = applicationContext.safClient,
-    )
     KopierPunsjbarJournalpostSteg1River(
         rapidsConnection = this
     )

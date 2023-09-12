@@ -1,5 +1,6 @@
 package no.nav.punsjbolle
 
+import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.k9.kodeverk.dokument.Brevkode
 import no.nav.k9.rapid.behov.Behovsformat
@@ -87,6 +88,10 @@ internal data class Periode(internal val fom: LocalDate?, internal val tom: Loca
         }
     }
 }
+
+internal fun ObjectNode.søknadstype(brevkode: Brevkode? = null) =
+    if (brevkode != null) Søknadstype.fraBrevkode(brevkode)
+    else Søknadstype.fraK9FormatYtelsetype((get("ytelse") as ObjectNode).get("type").asText())
 
 internal enum class Søknadstype(
     internal val k9YtelseType: String,

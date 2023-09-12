@@ -12,7 +12,7 @@ internal class JournalpostIderSomMåFerdigstillesTest {
 
     @Test
     fun `Kombinasjon av alle gyldige journalpostkombinasjoner`() {
-        assertEquals(alleGyldigeKombinasjonerJournalpostIderSomMåFerdigstilles, alleGyldigeKombinasjonerJournalposter.journalpostIderSomMåFerdigstilles())
+        assertEquals(alleGyldigeKombinasjonerJournalpostIderSomMåFerdigstilles, alleGyldigeKombinasjonerJournalposter)
     }
 
     @Test
@@ -23,7 +23,7 @@ internal class JournalpostIderSomMåFerdigstillesTest {
             sak = K9Sak.copy(fagsakId = "SAK456")
         )
         assertThrows<IllegalStateException> {
-            alleGyldigeKombinasjonerJournalposter.plus(knyttetTilFeilSak).journalpostIderSomMåFerdigstilles()
+            alleGyldigeKombinasjonerJournalposter.plus(knyttetTilFeilSak)
         }
     }
 
@@ -85,11 +85,5 @@ internal class JournalpostIderSomMåFerdigstillesTest {
             inngåendeKnyttetTilSakUkjentStatus.journalpostId,
             notatKnyttetTilSakUkjentStatus.journalpostId
         )
-
-        private fun Set<Journalpost>.journalpostIderSomMåFerdigstilles() =
-            PunsjetSøknadTilK9Sak.journalpostIderSomMåFerdigstilles(
-                saksnummer = K9Saksnummer,
-                journalposter = this
-            )
     }
 }
