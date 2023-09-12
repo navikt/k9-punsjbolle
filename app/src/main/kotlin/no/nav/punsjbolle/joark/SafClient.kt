@@ -3,10 +3,6 @@ package no.nav.punsjbolle.joark
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.http.HttpHeaders.Authorization
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.httpPost
 import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.jsonBody
 import no.nav.helse.dusseldorf.ktor.client.SimpleHttpClient.readTextOrThrow
@@ -33,34 +29,6 @@ internal class SafClient(
 ) {
 
     private val GraphQlEndpoint = "$baseUrl/graphql"
-
-    internal suspend fun hentJournalposter(
-        journalpostIder: Set<JournalpostId>,
-        correlationId: CorrelationId
-    ): Set<Journalpost> {
-        logger.info("Henter journalposter for JournalpostIder=$journalpostIder")
-
-        val journalposter = coroutineScope {
-            val deferred = mutableSetOf<Deferred<Journalpost>>()
-            journalpostIder.forEach { journalpostId ->
-                deferred.add(async {
-                    hentJournalpost(
-                        journalpostId = journalpostId,
-                        correlationId = correlationId
-                    )
-                })
-            }
-            deferred.awaitAll().toSet()
-        }
-
-        journalposter.map { it.journalpostId }.toSet().also { journalpostIderFunnet ->
-            require(journalpostIderFunnet == journalpostIder) {
-                "Mangler en eller fler journalposter. Etterspurt=[$journalpostIder], Funnet=[$journalpostIderFunnet]"
-            }
-        }
-
-        return journalposter
-    }
 
     internal suspend fun hentJournalpost(
         journalpostId: JournalpostId,
