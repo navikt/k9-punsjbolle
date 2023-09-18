@@ -10,6 +10,9 @@ on:
       - 'LICENSE'
       - 'CODEOWNERS'
   workflow_dispatch:
+env:
+  HEADBRANCH: main
+  NAMESPACE: omsorgspenger
 
 jobs:
   codeql:
@@ -23,7 +26,7 @@ jobs:
     with:
       readertoken: true
       package-command: './gradlew clean build -x test'
-      branch: main
+      branch: ${{ env.HEADBRANCH }}
 
   test:
     uses: navikt/sif-gha-workflows/.github/workflows/gradle-test.yml@main
@@ -40,7 +43,7 @@ jobs:
       id-token: write
     secrets: inherit
     with:
-      team: omsorgspenger
+      team: ${{ env.NAMESPACE }}
       dockercontext: .
       readertoken: true
 
@@ -55,7 +58,7 @@ jobs:
     secrets: inherit
     with:
       image: ${{ needs.build.outputs.image }}
-      team: omsorgspenger
+      team: ${{ env.NAMESPACE }}
 
   deploy:
     needs: [ test, build ]
@@ -66,4 +69,4 @@ jobs:
     with:
       image: ${{ needs.build.outputs.image }}
       environment: gcp
-      deploy-prod: true
+      deploy-prod: ${{ startsWith(github.ref, 'refs/heads/${{ env.HEADBRANCH }}') }}
