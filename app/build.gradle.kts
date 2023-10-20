@@ -57,7 +57,6 @@ repositories {
         }
     }
 
-    maven("https://jitpack.io")
     mavenCentral()
 }
 
@@ -90,6 +89,6 @@ tasks {
     }
 
     withType<Wrapper> {
-        gradleVersion = "8.3"
+        gradleVersion = "8.4"
     }
 }
