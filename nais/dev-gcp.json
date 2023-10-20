@@ -15,14 +15,6 @@
     "SAF_BASE_URL": "https://saf.dev-fss-pub.nais.io",
     "SAF_SCOPES": "api://dev-fss.teamdokumenthandtering.saf-q1/.default",
     "K9_SAK_BASE_URL": "https://omsorgspenger-proxy.dev-fss-pub.nais.io/k9-sak",
-    "K9_SAK_SCOPES": "824525c6-74df-47fc-8892-444e5f8506de/.default",
-    "SAK_BASE_URL": "https://omsorgspenger-proxy.dev-fss-pub.nais.io/sak",
-    "SAK_SCOPES": "824525c6-74df-47fc-8892-444e5f8506de/.default",
-    "INFOTRYGD_GRUNNLAG_PAAROERENDE_SYKDOM_BASE_URL": "https://omsorgspenger-proxy.dev-fss-pub.nais.io/infotrygd-grunnlag-paaroerende-sykdom",
-    "INFOTRYGD_GRUNNLAG_PAAROERENDE_SYKDOM_SCOPES": "32551525-c4dd-44ae-b906-2f8d8a00bb03/.default"
-  },
-  "overstyrRutingTilK9SakJournalpostIds": [
-    "510540830",
-    "510540827"
-  ]
+    "K9_SAK_SCOPES": "824525c6-74df-47fc-8892-444e5f8506de/.default"
+  }
 }

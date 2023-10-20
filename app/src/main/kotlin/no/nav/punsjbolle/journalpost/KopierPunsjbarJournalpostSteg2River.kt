@@ -12,12 +12,10 @@ import no.nav.punsjbolle.k9sak.K9SakClient
 import no.nav.punsjbolle.meldinger.HentAktørIderMelding
 import no.nav.punsjbolle.meldinger.HentK9SaksnummerMelding
 import no.nav.punsjbolle.meldinger.KopierJournalpostForK9Melding
-import no.nav.punsjbolle.ruting.RutingService
 import org.slf4j.LoggerFactory
 
 internal class KopierPunsjbarJournalpostSteg2River(
     rapidsConnection: RapidsConnection,
-    private val rutingService: RutingService,
     private val k9SakClient: K9SakClient,
     private val safClient: SafClient
 ) : BehovssekvensPacketListener(
@@ -55,24 +53,6 @@ internal class KopierPunsjbarJournalpostSteg2River(
         }
 
         val periode = journalpost.opprettet.toLocalDate().somPeriode()
-
-        val destinasjon = runBlocking { rutingService.destinasjon(
-            søker = kopierPunsjbarJournalpost.fra,
-            pleietrengende = kopierPunsjbarJournalpost.pleietrengende,
-            annenPart = when (kopiPåSammePerson) {
-                true -> null
-                false -> kopierPunsjbarJournalpost.til
-            },
-            søknadstype = kopierPunsjbarJournalpost.søknadstype,
-            aktørIder = aktørIder.values.toSet(),
-            fraOgMed = periode.fom!!,
-            correlationId = correlationId,
-            journalpostIds = setOf(kopierPunsjbarJournalpost.journalpostId)
-        )}
-
-        check(RutingService.Destinasjon.K9Sak == destinasjon) {
-            "Kan ikke kopiere journalpost. Partene har Destinasjon=[$destinasjon]"
-        }
 
         val fraSaksnummerGrunnlag = HentK9SaksnummerMelding.HentK9SaksnummerGrunnlag(
             søknadstype = kopierPunsjbarJournalpost.søknadstype,
