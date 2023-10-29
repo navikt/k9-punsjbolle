@@ -1,10 +1,4 @@
 version: 2
-registries:
-  k9-rapid:
-    type: maven-repository
-    url: https://maven.pkg.github.com/navikt/k9-punsjbolle
-    username: x-access-token
-    password: ${{secrets.READER_TOKEN}}
 updates:
   - package-ecosystem: github-actions
     directory: "/"
@@ -23,10 +17,6 @@ updates:
       gradle:
         patterns:
           - "*"
-        exclude-patterns:
-          - "*dusseldorf*"
-    registries:
-      - k9-rapid
 
   - package-ecosystem: docker
     directory: "/"
