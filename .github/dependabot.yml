@@ -1,4 +1,10 @@
 version: 2
+registries:
+  k9punsjbolle:
+    type: maven-repository
+    url: https://maven.pkg.github.com/navikt/k9-punsjbolle
+    username: x-access-token
+    password: ${{secrets.READER_TOKEN}}
 updates:
   - package-ecosystem: github-actions
     directory: "/"
@@ -13,6 +19,8 @@ updates:
     directory: "/app"
     schedule:
       interval: daily
+    registries:
+      - k9punsjbolle
     groups:
       gradle:
         patterns:
