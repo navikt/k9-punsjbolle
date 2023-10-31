@@ -12,7 +12,7 @@ val k9SakKontraktVersion = "4.1.2"
 val mainClass = "no.nav.punsjbolle.ApplicationKt"
 
 plugins {
-    kotlin("jvm") version "1.9.10"
+    kotlin("jvm") version "1.9.20"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
