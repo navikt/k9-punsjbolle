@@ -5,9 +5,6 @@
   "maxReplicas": "4",
   "azureTenant": "nav.no",
   "kafkaPool": "nav-prod",
-  "ingresses": [
-    "https://k9-punsjbolle.intern.nav.no"
-  ],
   "externalHosts": [
     "omsorgspenger-proxy.prod-fss-pub.nais.io"
   ],
