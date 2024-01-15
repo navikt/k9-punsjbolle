@@ -1,7 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 val junitJupiterVersion = "5.10.1"
-val k9rapidVersion = "1.20240104075208-067a863"
+val k9rapidVersion = "1.20240115061003-339d641"
 val dusseldorfVersion = "4.1.5"
 val ktorVersion = "2.3.7"
 val jsonassertVersion = "1.5.1"
@@ -18,7 +18,7 @@ plugins {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
@@ -28,7 +28,6 @@ dependencies {
     implementation("no.nav.helse:dusseldorf-ktor-health:$dusseldorfVersion")
     implementation("no.nav.helse:dusseldorf-ktor-client:$dusseldorfVersion")
     implementation("no.nav.helse:dusseldorf-ktor-jackson:$dusseldorfVersion")
-    implementation("no.nav.helse:dusseldorf-ktor-metrics:$dusseldorfVersion")
     implementation("no.nav.helse:dusseldorf-ktor-auth:$dusseldorfVersion")
     implementation("no.nav.helse:dusseldorf-oauth2-client:$dusseldorfVersion")
 
@@ -39,7 +38,6 @@ dependencies {
     testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
-    testImplementation("org.assertj:assertj-core:$assertjVersion")
     testImplementation("io.ktor:ktor-server-test-host-jvm:$ktorVersion") {
         exclude(group = "org.eclipse.jetty")
     }
@@ -82,6 +80,6 @@ tasks {
     }
 
     withType<Wrapper> {
-        gradleVersion = "8.4"
+        gradleVersion = "8.5"
     }
 }
