@@ -5,6 +5,10 @@
   "maxReplicas": "2",
   "azureTenant": "trygdeetaten.no",
   "kafkaPool": "nav-dev",
+  "externalHosts": [
+    "k9-sak.dev-fss-pub.nais.io",
+    "saf.dev-fss-pub.nais.io"
+  ],
   "env": {
     "SAF_BASE_URL": "https://saf.dev-fss-pub.nais.io",
     "SAF_SCOPES": "api://dev-fss.teamdokumenthandtering.saf-q1/.default",
