@@ -12,7 +12,7 @@
   "env": {
     "SAF_BASE_URL": "https://saf.dev-fss-pub.nais.io",
     "SAF_SCOPES": "api://dev-fss.teamdokumenthandtering.saf-q1/.default",
-    "K9_SAK_BASE_URL": "https://k9-sak.dev-fss-pub.nais.io",
+    "K9_SAK_BASE_URL": "https://k9-sak.dev-fss-pub.nais.io/k9/sak",
     "K9_SAK_SCOPES": "api://dev-fss.k9saksbehandling.k9-sak/.default"
   }
 }
