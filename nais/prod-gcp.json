@@ -5,10 +5,14 @@
   "maxReplicas": "2",
   "azureTenant": "nav.no",
   "kafkaPool": "nav-prod",
+  "externalHosts": [
+    "k9-sak.prod-fss-pub.nais.io",
+    "saf.prod-fss-pub.nais.io"
+  ],
   "env": {
     "SAF_BASE_URL": "https://saf.prod-fss-pub.nais.io",
     "SAF_SCOPES": "api://prod-fss.teamdokumenthandtering.saf/.default",
-    "K9_SAK_BASE_URL": "https://k9-sak.prod-fss-pub.nais.io",
+    "K9_SAK_BASE_URL": "https://k9-sak.prod-fss-pub.nais.io/k9/sak",
     "K9_SAK_SCOPES": "api://prod-fss.k9saksbehandling.k9-sak/.default"
   }
 }
