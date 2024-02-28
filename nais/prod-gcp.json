@@ -2,16 +2,17 @@
   "cluster": "prod-gcp",
   "clusterFss": "prod-fss",
   "minReplicas": "2",
-  "maxReplicas": "4",
+  "maxReplicas": "2",
   "azureTenant": "nav.no",
   "kafkaPool": "nav-prod",
   "externalHosts": [
-    "omsorgspenger-proxy.prod-fss-pub.nais.io"
+    "k9-sak.prod-fss-pub.nais.io",
+    "saf.prod-fss-pub.nais.io"
   ],
   "env": {
     "SAF_BASE_URL": "https://saf.prod-fss-pub.nais.io",
     "SAF_SCOPES": "api://prod-fss.teamdokumenthandtering.saf/.default",
-    "K9_SAK_BASE_URL": "https://omsorgspenger-proxy.prod-fss-pub.nais.io/k9-sak",
-    "K9_SAK_SCOPES": "e816bb42-bf62-4be9-a1cc-a9be70fe4403/.default"
+    "K9_SAK_BASE_URL": "https://k9-sak.prod-fss-pub.nais.io/k9/sak",
+    "K9_SAK_SCOPES": "api://prod-fss.k9saksbehandling.k9-sak/.default"
   }
 }
